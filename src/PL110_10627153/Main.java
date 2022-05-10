@@ -23,7 +23,11 @@ class Global {
   static final int s_V_CHAR = 4;
   static final int s_V_BOOL = 5;
 
+  static public Scanner sc = new Scanner( System.in );
+
   static public Vector<Variable> s_Variables = new Vector<Variable>();
+
+  static public Vector<Function> s_functions = new Vector<Function>();
 
   static public boolean G_IsWhitSpace( char charStr ) throws Throwable {
 
@@ -83,7 +87,7 @@ class Global {
 
   } // G_PrintRegularFloat()
 
-  public static String CompareRegularFloat( String srum ) throws Throwable {
+  public static String G_CompareRegularFloat( String srum ) throws Throwable {
 
     if ( srum.length() - srum.indexOf( "." ) == 3 ) {
       srum = srum + "0";
@@ -125,9 +129,9 @@ class Global {
 
     return srum;
 
-  } // CompareRegularFloat()
+  } // G_CompareRegularFloat()
 
-  public static int FindVarible( Vector<Variable> vList, String vName ) throws Throwable {
+  public static int G_FindVarible( Vector<Variable> vList, String vName ) throws Throwable {
 
     for ( int i = 0 ; i < vList.size() ; i++ ) {
       if ( vList.get( i ).GetName().equals( vName ) )
@@ -136,7 +140,18 @@ class Global {
     } // for
 
     return - 1;
-  } // FindVarible()
+  } // G_FindVarible()
+
+  public static int G_FindFunction( Vector<Function> fList, String fName ) throws Throwable {
+
+    for ( int i = 0 ; i < fList.size() ; i++ ) {
+      if ( fList.get( i ).GetName().equals( fName ) )
+        return i;
+
+    } // for
+
+    return - 1;
+  } // G_FindVarible()
 
 } // class Global
 
@@ -381,6 +396,10 @@ class Function {
     this.m_localVar = lVar;
     this.m_commendLine = stament;
   } // Function()
+
+  public String GetName() throws Throwable {
+    return this.m_name;
+  } // GetName()
 
 } // class Function
 
