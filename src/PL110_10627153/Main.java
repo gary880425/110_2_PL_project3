@@ -3,8 +3,6 @@ package PL110_10627153;
 import java.util.Scanner;
 import java.util.Vector;
 
-// Edit on GitHub web
-
 class Global {
 
   // Blow is Token Type
