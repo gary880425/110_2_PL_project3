@@ -5,24 +5,16 @@ import java.util.Vector;
 
 class Global {
 
-  private Global() throws Throwable {
-
-  } // Global
-
   // Blow is Token Type
   static final int s_T_LEFT_PAREN = 1;
   static final int s_T_RIGHT_PAREN = 2;
-  static final int s_T_BOOLEANOPERATOE = 3; // &&, ||, !, ==, !=
+  static final int s_T_BOOLEANOPERATOE = 3;
   static final int s_T_ID = 4;
-  static final int s_T_OPERATOR = 5; // +, -, *, /, %
+  static final int s_T_OPERATOR = 5; //
   static final int s_T_SEMICOLON = 6; // ;
-  static final int s_T_NUMVALUE = 7; // 10, 1, 2, 3, 10.1, 0.001
-  static final int s_T_CHARVALUE = 8; // 'A', 'b', 'c'
-  static final int s_T_STRINGVALUE = 9; // "abcd123"
-  static final int s_T_BOOLEANVALUE = 10; // true, flase
-  static final int s_T_ASSIGN = 11; // =, +=, -=, *=, /=, %=
-  static final int s_T_VARTYPR = 12; // int, String, float, char, bool
-  // undefined token: ?:
+  static final int s_T_NUM = 7;
+  static final int s_T_ASSIGN = 8; //
+  static final int s_T_VARTYPR = 9; // int, String, float, char, bool
 
   // Blow is Variable Type
   static final int s_V_INT = 1;
@@ -225,7 +217,6 @@ abstract class Variable {
 
   private String m_Name;
   private int m_Type;
-  protected boolean m_IsNull;
 
   public Variable( int type, String name ) throws Throwable {
     this.m_Name = new String( name );
@@ -233,12 +224,6 @@ abstract class Variable {
 
   } // Variable()
 
-  public Variable( int type, String name, boolean isNull ) throws Throwable {
-    this.m_Name = new String( name );
-    this.m_Type = type;
-    this.m_IsNull = isNull;
-
-  } // Variable()
 
   public String GetName() throws Throwable {
 
@@ -291,22 +276,12 @@ class VarINT extends Variable {
 
   } // VarINT()
 
-  public VarINT( int type, String name, boolean isNull ) throws Throwable {
-    super( type, name, isNull );
-  } // VarINT()
-
   public String GetValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return Integer.toString( m_value );
+    return Integer.toString( m_value );
   } // GetValue()
 
   public int GetINTValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return this.m_value;
+    return this.m_value;
   } // GetINTValue()
 
 } // class VarINT
@@ -333,22 +308,12 @@ class VarFLOT extends Variable {
 
   } // VarFLOT()
 
-  public VarFLOT( int type, String name, boolean isNull ) throws Throwable {
-    super( type, name, isNull );
-  } // VarFLOT()
-
   public String GetValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return Float.toString( m_value );
+    return Float.toString( m_value );
   } // GetValue()
 
   public float GetFLOATEValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return this.m_value;
+    return this.m_value;
   } // GetFLOATEValue()
 
 } // class VarFLOT
@@ -366,22 +331,12 @@ class VarSTRING extends Variable {
 
   } // VarSTRING()
 
-  public VarSTRING( int type, String name, boolean isNull ) throws Throwable {
-    super( type, name, isNull );
-  } // VarSTRING()
-
   public String GetValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return m_value;
+    return m_value;
   } // GetValue()
 
   public String GetSTRINGValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return this.m_value;
+    return this.m_value;
   } // GetSTRINGValue()
 
 } // class VarSTRING
@@ -400,52 +355,37 @@ class VarCHAR extends Variable {
 
   } // VarCHAR()
 
-  public VarCHAR( int type, String name, boolean isNull ) throws Throwable {
-    super( type, name, isNull );
-  } // VarCHAR()
-
   public String GetValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return Character.toString( m_value.charAt( 0 ) );
+    return Character.toString( m_value.charAt( 0 ) );
   } // GetValue()
 
   public String GetValue( int index ) throws Throwable {
-    if ( super.m_IsNull )
+    if ( index + 1 > m_arraySize ) {
+      System.out.println( "rErro Stack over full." );
       throw new Throwable();
+    } // if
     else {
-      if ( index + 1 > m_arraySize ) {
-        System.out.println( "needmodi Stack over full." );
-        throw new Throwable();
-      } // if
-      else {
-        if ( index + 1 > m_value.length() )
-          return Character.toString( '0' );
-        else
-          return Character.toString( m_value.charAt( index ) );
+      if ( index + 1 > m_value.length() )
+        return Character.toString( '0' );
+      else
+        return Character.toString( m_value.charAt( index ) );
 
-      } // else
-    }
+    } // else
 
   } // GetValue()
 
   public char GetCHARValue( int index ) throws Throwable {
-    if ( super.m_IsNull )
+    if ( index + 1 > m_arraySize ) {
+      System.out.println( "rErro Stack over full." );
       throw new Throwable();
+    } // if
     else {
-      if ( index + 1 > m_arraySize ) {
-        System.out.println( "needmodi Stack over full." );
-        throw new Throwable();
-      } // if
-      else {
-        if ( index + 1 > m_value.length() )
-          return '\0';
-        else
-          return m_value.charAt( index );
+      if ( index + 1 > m_value.length() )
+        return '\0';
+      else
+        return m_value.charAt( index );
 
-      } // else
-    }
+    } // else
 
   } // GetCHARValue()
 
@@ -471,22 +411,12 @@ class VarBOOL extends Variable {
 
   } // VarBOOL()
 
-  public VarBOOL( int type, String name, boolean isNull ) throws Throwable {
-    super( type, name, isNull );
-  } // VarBOOL()
-
   public String GetValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return Boolean.toString( m_value );
+    return Boolean.toString( m_value );
   } // GetValue()
 
   public boolean GetBOOLValue() throws Throwable {
-    if ( super.m_IsNull )
-      throw new Throwable();
-    else
-      return this.m_value;
+    return this.m_value;
   } // GetBOOLValue()
 
 } // class VarBOOL
@@ -1836,8 +1766,7 @@ class Paser {
       boolean haveSIGN = false;
       String signOperator = new String();
 
-      if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-           m_stament.get( m_step ).GetToken().equals( "-" ) ) {
+      if ( m_stament.get( m_step ).GetToken().equals( "+" ) || m_stament.get( m_step ).GetToken().equals( "-" ) ) {
         m_step++;
       } // if
 
@@ -1888,6 +1817,7 @@ class Main {
   public static void main( String[] args ) throws Throwable {
     // Test test = new Test();
     // test.test();
+    Global g = new Global();
 
   } // main()
 
