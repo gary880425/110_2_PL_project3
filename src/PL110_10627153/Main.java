@@ -178,26 +178,16 @@ class TOKEN {
 
 } // class ATOM
 
-Vector<TOKEN>:int
-Vector<TOKEN>: a
-Vector<TOKEN>: =, 0, ;
-
-
-int a; int b; $
 class Stament {
   public Vector<TokenList> m_Line;
-  .
-  .
- 0 m_Line[0] = Vector<TOKEN>:int
- 1 m_Line[0] = Vector<TOKEN>: a
- 2 m_Line[0] = Vector<TOKEN>: =, 0, ;
+
 
   public TOKEN GetToken( int index ) throws Throwable {
-
+    return null;
   } // GetToken()
 
-  public  int GetTokenRow( int index ) throws Throwable {
-
+  public int GetTokenRow( int index ) throws Throwable {
+    return 0;
   } // GetTokenRow()
 
   public void PushLine( Vector<TOKEN> Line ) throws Throwable {
@@ -205,12 +195,14 @@ class Stament {
   } // PushLine()
 
 } // class Stamen
+
 class TokenList {
   public Vector<TOKEN> m_token;
 
   public TOKEN GetToken( int index ) throws Throwable {
-
+    return null;
   } // GetToken()
+
 } // class TokenList
 
 abstract class Variable {
@@ -890,7 +882,7 @@ class CutToken {
 
   } // GetIDTOETokenInmNowLine()
 
-  private int FindVariable( String findVarName ) throws Throwable{
+  private int FindVariable( String findVarName ) throws Throwable {
     for ( int i = 0 ; i < mVariables.size() ; i++ ) {
       if ( mVariables.get( i ).GetName().equals( findVarName ) )
         return i;
