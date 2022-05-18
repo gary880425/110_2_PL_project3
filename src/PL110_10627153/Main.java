@@ -187,29 +187,46 @@ class TOKEN {
 } // class ATOM
 
 class Stament {
-  public Vector<TokenList> m_Line;
+  private Vector<TokenList> m_Line;
+  private int m_Sive;
 
 
   public TOKEN GetToken( int index ) throws Throwable {
-    return null;
+    for ( int i = 0 ; i < m_Line.size() ; i++ ) {
+      for ( int j = 0 ; j < m_Line.get( i ).GetSize() ; j++ ) {
+        if( index == 0)
+          return m_Line.get( i ).GetToken( j );
+        index --;
+      } // for count the amount of token
+    } // for count the amount of rows
+
+    throw new Throwable();
   } // GetToken()
 
-  public int GetTokenRow( int index ) throws Throwable {
-    return 0;
+  public TokenList GetTokenRow( int index ) throws Throwable {
+    return null;
   } // GetTokenRow()
 
   public void PushLine( Vector<TOKEN> Line ) throws Throwable {
 
   } // PushLine()
 
+  public int GetSize() throws Throwable {
+    return m_Sive;
+  } // GetSize()
+
 } // class Stamen
 
 class TokenList {
-  public Vector<TOKEN> m_token;
+  private Vector<TOKEN> m_token;
 
   public TOKEN GetToken( int index ) throws Throwable {
     return null;
   } // GetToken()
+
+  public int GetSize() throws Throwable {
+    return m_token.size();
+  } // GetSize()
 
 } // class TokenList
 

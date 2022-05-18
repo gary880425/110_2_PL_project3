@@ -4,7 +4,7 @@ import java.util.Vector;
 
 public class Test {
   public static void main( String[] args ) throws Throwable {
-    Vector<ATOM> stament;
+    Vector<TOKEN> stament;
 
   }
 }
