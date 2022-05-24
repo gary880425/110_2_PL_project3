@@ -1,5 +1,6 @@
 package PL110_10627153;
 
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -194,9 +195,9 @@ class Stament {
   public TOKEN GetToken( int index ) throws Throwable {
     for ( int i = 0 ; i < m_Line.size() ; i++ ) {
       for ( int j = 0 ; j < m_Line.get( i ).GetSize() ; j++ ) {
-        if( index == 0)
+        if ( index == 0 )
           return m_Line.get( i ).GetToken( j );
-        index --;
+        index--;
       } // for count the amount of token
     } // for count the amount of rows
 
@@ -1461,436 +1462,701 @@ class CutToken {
 
 } // class CutToken
 
-class Paser {
-  public Vector<TOKEN> m_stament;
+class Parser {
+  public Vector<TOKEN> m_statement;
   public int m_step;
 
-  public Paser( Vector<TOKEN> inputeStament ) throws Throwable {
-    m_stament = inputeStament;
-    m_step = 0;
-  } // Paser()
+  public Parser( Vector<TOKEN> inputStatement ) throws Throwable {
+    m_statement = inputStatement;
+    m_step = 0; // check which token is wrong
+  } // Parser()
 
   public boolean GrammarParser() throws Throwable {
-
     try {
-
-      if ( m_stament.get( 0 ).GetToken().equals( ";" ) ) {
+      if ( m_statement.get( 0 ).GetToken().equals( ";" ) ) {
         System.out.println( "Unexpected token : ';'" );
-        m_stament.clear();
+        m_statement.clear();
         return false;
       } // if
 
-      if ( this.Command() ) {
+      if ( this.UserInput() ) {
         return true;
       } // if ()
       else {
-        System.out.println( "Unexpected token : '" + m_stament.get( m_step ).GetToken() + "'" );
+        System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
         return false;
       } // else
 
     } // try
     catch ( Throwable throwable ) {
-      System.out.println( "Unexpected token : '" + m_stament.get( m_step ).GetToken() + "'" );
+      System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
       return false;
     } // catch
-
   } // GrammarParser()
 
-  private boolean Command() throws Throwable {
-
+  private boolean UserInput() throws Throwable {
     try {
+      int curStep = 0;
 
-      if ( m_stament.get( m_step ).GetType() == 4 ) {
-        m_step++;
-        if ( m_stament.get( m_step ).GetType() == 8 ) {
-          m_step++;
-          if ( ArithExp() ) {
-            if ( m_stament.get( m_step ).GetType() == 6 ) {
-              m_step++;
-              return true;
-            } // if ()
+      if ( Definition() ) {
+        ;
+      } //if
+      else if ( Statement() ) {
+        ;
+      } // else if
+      else {
+        return false;
+      } // else
+
+      while ( ( Definition() || Statement() ) ) {
+        ;
+      } // while
+
+      if ( m_step != m_statement.size() )
+        return false;
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // UserInput()
+
+  private boolean Definition() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "void" )
+           && m_statement.get( m_step ).GetType() == 12 ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 4 ) {
+          m_step += 1;
+          if ( Function_Definition_Without_ID() )
+            return true;
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+      else if ( Type_Specifier() ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 4 ) {
+          m_step += 1;
+          if ( Function_Definition_OR_Declarators() ) {
+            return true;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // Definition()
+
+  private boolean Type_Specifier() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetType() == 12
+           && m_statement.get( m_step ).GetToken().toLowerCase().equals( "int" )
+           && m_statement.get( m_step ).GetToken().toLowerCase().equals( "char" )
+           && m_statement.get( m_step ).GetToken().toLowerCase().equals( "float" )
+           && m_statement.get( m_step ).GetToken().toLowerCase().equals( "string" )
+           && m_statement.get( m_step ).GetToken().toLowerCase().equals( "bool" ) ) {
+        return true;
+      } // if
+      else
+        return false;
+    } // try
+    catch ( Throwable throwable ) {
+      return false ;
+    } // catch
+  } // Type_Specifier()
+
+  private boolean Function_Definition_OR_Declarators() throws Throwable {
+    try {
+      if ( Function_Definition_Without_ID() ) {
+        return true;
+      } // if
+      else if ( Rest_of_Declarators() ) {
+        return true;
+      } // else if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false ;
+    } // catch
+  } // Function_Definition_OR_Declarators()
+
+  // 未檢察[ ]的type
+  private boolean Rest_of_Declarators() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant(還未定義)
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+            m_step += 1;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+
+      while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant (尚未定義)
+              m_step += 1;
+              if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+                m_step += 1;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
             else {
-              // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-              // throw new Throwable();
               return false;
             } // else
-
-          } // if ()
-          else {
-            // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-            // throw new Throwable();
-            return false;
-          } // else
-
-        } // if ()
-        else if ( IDlessArithExpOrBexp() ) {
-          if ( m_stament.get( m_step ).GetType() == 6 ) {
-            m_step++;
-            return true;
-          } // if ()
-          else {
-            // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-            // throw new Throwable();
-            return false;
-          } // else
-
-        } // else if
-        else if ( m_stament.get( m_step ).GetType() == 6 ) {
-          // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-          // throw new Throwable();
-          return true;
-
-        } // else if
-        else {
-          return false;
-
-        } // else
-
-      } // if ()
-      else if ( NOT_IDStartArithExpOrBexp() ) {
-        if ( m_stament.get( m_step ).GetType() == 6 ) {
-          m_step++;
-          return true;
-        } // if ()
-        else {
-          return false;
-        } // else
-      } // else if ()
-      else {
-        // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-        // throw new Throwable();
-        return false;
-      } // else
-    } // try
-    catch ( Throwable throwable ) {
-      throw new Throwable();
-    } // catch
-  } // Command()
-
-  private boolean IDlessArithExpOrBexp() throws Throwable {
-
-    boolean isOnePass = false;
-
-    try {
-      while ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-              m_stament.get( m_step ).GetToken().equals( "-" ) ||
-              m_stament.get( m_step ).GetToken().equals( "*" ) ||
-              m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-             m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-          m_step++;
-
-          if ( Term() ) {
-            isOnePass = true;
-          } // if ()
-          else
-            return false;
-
+          } //if
         } // if
-        else if ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-                  m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-          m_step++;
-          if ( Factor() )
-            isOnePass = true;
-          else
-            return false;
-        } // else if
-
+        else {
+          return false;
+        } // else
       } // while
 
-      if ( BooleanOperator() ) {
-
-        if ( ArithExp() )
-          isOnePass = true;
-        else
-          return false;
-
-      } // if ()
-
-    } // try
-    catch ( Throwable throwable ) {
-      if ( ! isOnePass )
-        return false;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-    else
-      return false;
-
-  } // IDlessArithExpOrBexp()
-
-  private boolean BooleanOperator() throws Throwable {
-
-    try {
-
-      if ( m_stament.get( m_step ).GetType() == 3 ) {
-        m_step++;
+      if ( m_statement.get( m_step ).GetToken().equals( ";" )
+           && m_statement.get( m_step ).GetType() == 6 ) {
         return true;
       } // if
       else {
         return false;
       } // else
-
     } // try
     catch ( Throwable throwable ) {
       return false;
     } // catch
+  } // Rest_of_Declarators
 
+  private boolean Function_Definition_Without_ID() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetToken().equals( "(" )
+           && m_statement.get( m_step ).GetType() == 1 ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "void" )
+             && m_statement.get( m_step ).GetType() == 12 ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( ")" )
+               && m_statement.get( m_step ).GetType() == 2 ) {
+            m_step += 1;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else if ( Formal_Parameter_List() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( ")" )
+               && m_statement.get( m_step ).GetType() == 2 ) {
+            m_step += 1;
+          } // if
+          else {
+            return false;
+          } // else
+        } // else if
+        else if ( m_statement.get( m_step ).GetToken().equals( ")" )
+                  && m_statement.get( m_step ).GetType() == 2 ) {
+          m_step += 1;
+        } // else if
+        else {
+          return false;
+        } //else
+      } // if
+      else {
+        return false;
+      } // else
 
-  } // BooleanOperator()
-
-  private boolean NOT_IDStartArithExpOrBexp() throws Throwable {
-
-    boolean isOnePass = false;
-
-    if ( ! NOT_ID_StartArithExp() )
-      return false;
-
-    if ( BooleanOperator() ) {
-      if ( ArithExp() )
+      if ( Compound_Statement() ) {
         return true;
-      else
+      } // if
+      else {
         return false;
-    } // if
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false ;
+    } // catch()
+  } // Function_Definition_Without_ID()
 
-    return true;
-
-  } // NOT_IDStartArithExpOrBexp()
-
-  private boolean NOT_ID_StartArithExp() throws Throwable {
-
-    if ( ! NOT_ID_StartTerm() )
-      return false;
-
+  private boolean Formal_Parameter_List() throws Throwable {
     try {
+      if ( Type_Specifier() ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
+          m_step += 1;
 
-      while ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-              m_stament.get( m_step ).GetToken().equals( "-" ) ) {
+        if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant (尚未定義)
+              m_step += 1;
+              if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+                m_step += 1;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
 
-        if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-             m_stament.get( m_step ).GetToken().equals( "-" ) ) {
+          while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+            m_step += 1;
+            if ( Type_Specifier() ) {
+              m_step += 1;
+              if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
+                m_step += 1;
 
-          m_step++;
+              if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+                m_step += 1;
+                if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+                  m_step += 1;
+                  if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant (尚未定義)
+                    m_step += 1;
+                    if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+                      m_step += 1;
+                    } // if
+                    else {
+                      return false;
+                    } // else
+                  } // if
+                  else {
+                    return false;
+                  } // else
+                } // if
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // while
 
-          if ( ! Term() )
-            return false;
-
+          return true;
         } // if
-
-      } // while
-
+        else {
+          return false;
+        } // else
+      } // if
+      else {
+        return false;
+      } // else
     } // try
     catch ( Throwable throwable ) {
-      ;
-    } // catch
-
-    return true;
-
-  } // NOT_ID_StartArithExp()
-
-  private boolean NOT_ID_StartTerm() throws Throwable {
-
-    if ( ! NOT_ID_StartFactor() )
       return false;
+    } // catch()
+  } // Formal_Parameter_List()
 
+  private boolean Compound_Statement() throws Throwable {
     try {
-      while ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-              m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-             m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-          m_step++;
-
-          if ( ! Factor() )
-            return false;
-
+      if ( m_statement.get( m_step ).GetToken().equals( "{" ) ) {
+        m_step += 1;
+        if ( declaration() ) {
+          return true;
         } // if
-
-      } // while
-
+        else if ( Statement() ) {
+          return true;
+        } // else if
+        else if ( m_statement.get( m_step ).GetToken().equals( "}" ) ) {
+          return true;
+        } // else if
+        else {
+          return false;
+        } // else
+      } // if
+      else {
+        return false;
+      } // else
     } // try
     catch ( Throwable throwable ) {
-      ;
-    } // catch
-    return true;
+      return false;
+    } // catch()
+  } // Compound_Statement()
 
-  } // NOT_ID_StartTerm()
-
-  private boolean NOT_ID_StartFactor() throws Throwable {
-
-    boolean isOnePass = false;
+  private boolean declaration() throws Throwable {
     try {
-
-      if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-           m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-        m_step++;
-      } // if
-
-      if ( m_stament.get( m_step ).GetType() == 7 ) {
-        m_step++;
-        isOnePass = true;
-      } // if
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-
-    try {
-      if ( m_stament.get( m_step ).GetType() == 1 ) {
-        m_step++;
-        if ( ArithExp() ) {
-          if ( m_stament.get( m_step ).GetType() == 2 ) {
-            m_step++;
+      if ( Type_Specifier() ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+          m_step += 1;
+          if ( Rest_of_Declarators() ) {
             return true;
           } // if
-          else
+          else {
             return false;
+          } // else
         } // if
-        else
+        else {
           return false;
+        } // else
       } // if
-      else
+      else {
         return false;
+      } // else
     } // try
     catch ( Throwable throwable ) {
       return false;
-    } // catch
+    } // catch()
+  } // declaration()
 
-  } // NOT_ID_StartFactor()
-
-  private boolean ArithExp() throws Throwable {
-    if ( ! Term() )
-      return false;
-
+  private boolean Statement() throws Throwable {
     try {
-      while ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-              m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-             m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-          m_step++;
-          if ( ! Term() )
-            return false;
-
+      if ( m_statement.get( m_step ).GetToken().equals( ";" )
+           && m_statement.get( m_step ).GetType() == 6 ) {
+        return true;
+      } // if
+      else if ( m_statement.get( m_step ).GetToken().equals( "return" ) ) {
+        m_step += 1;
+        if ( Expression() )
+          m_step += 1;
+        if ( m_statement.get( m_step ).GetToken().equals( ";" )
+             && m_statement.get( m_step ).GetType() == 6 ) {
+          return true;
         } // if
-
-      } // while
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-    return true;
-
-  } // ArithExp()
-
-  private boolean Term() throws Throwable {
-
-    if ( ! Factor() )
-      return false;
-
-    try {
-      while ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-              m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-             m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-          m_step++;
-          if ( ! Factor() )
+        else {
+          return false;
+        } // else
+      } // else if
+      else if ( Compound_Statement() ) {
+        return true;
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "if" ) ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetToken().equals( "(" )
+             && m_statement.get( m_step ).GetType() == 1 ) {
+          m_step += 1;
+          if ( Expression() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( ")" )
+                 && m_statement.get( m_step ).GetType() == 2 ) {
+              m_step += 1;
+              if ( Statement() ) {
+                m_step += 1; // 可能會out of range
+                if ( m_statement.get( m_step ).GetToken().equals( "else" ) ) {
+                  m_step += 1;
+                  if ( Statement() ) {
+                    return true;
+                  } // if
+                  else {
+                    return false;
+                  } // else
+                } // if
+                return true;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
             return false;
-
+          } // else
         } // if
+        else {
+          return false ;
+        } // else
+      } // else if
+      else if ( m_statement.get( m_step ).equals( "while" ) ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetToken().equals( "(" )
+             && m_statement.get( m_step ).GetType() == 1 ) {
+          if ( Expression() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( ")" ) ) {
+              m_step += 1;
+              if ( Statement() ) {
+                return true;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "do" ) ) {
+        m_step += 1;
+        if ( Statement() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "while" ) ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( "(" )
+                 && m_statement.get( m_step ).GetType() == 1 ) {
+              m_step += 1;
+              if ( Expression() ) {
+                m_step += 1;
+                if ( m_statement.get( m_step ).GetToken().equals( ")" )
+                     && m_statement.get( m_step ).GetType() == 2 ) {
+                  m_step += 1;
+                  if ( m_statement.get( m_step ).GetToken().equals( ";" )
+                       && m_statement.get( m_step ).GetType() == 6 ) {
+                    return true;
+                  } // if
+                  else {
+                    return false;
+                  } // else
+                } // if
+                else {
+                  return false;
+                } // else
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Statement()
 
+  private boolean Expression() throws Throwable {
+    try {
+      boolean hasWrong = false;
+      if ( Basic_Expression() ) {
+        m_step += 1;
+      } // if
+      else {
+        hasWrong = true;
+      } // else
+
+      if ( hasWrong ) {
+        return false;
+      } // if
+
+      while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+        m_step += 1;
+        if ( Basic_Expression() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
       } // while
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-
-    return true;
-
-  } // Term()
-
-  private boolean Factor() throws Throwable {
-
-    boolean isOnePass = false;
-
-    try {
-
-      if ( m_stament.get( m_step ).GetType() == 4 ) {
-        m_step++;
-        isOnePass = true;
-      } // if
-
+      return true;
     } // try
     catch ( Throwable throwable ) {
       return false;
-    } // catch
+    } // catch()
+  } // Expression()
 
-    if ( isOnePass )
-      return true;
-
+  private boolean Basic_Expression() throws Throwable {
     try {
-      boolean haveSIGN = false;
-      String signOperator = new String();
-
-      if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-           m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-        m_step++;
+      if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+        if ( Rest_of_Identifier_Started_Basic_Exp() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
       } // if
-
-      if ( m_stament.get( m_step ).GetType() == 7 ) {
-        m_step++;
-        isOnePass = true;
-      } // if
-
-    } // try
-    catch ( Throwable throwable ) {
-      return false;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-
-    try {
-      if ( m_stament.get( m_step ).GetType() == 1 ) {
-
-        m_step++;
-        if ( ArithExp() ) {
-
-          if ( m_stament.get( m_step ).GetType() == 2 ) {
-            m_step++;
+      else if ( m_statement.get( m_step ).GetToken().equals( "++" )
+                || m_statement.get( m_step ).GetToken().equals( "--" ) ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+          m_step += 1;
+          if ( Rest_of_PPMM_Identifier_Started_Basic_Exp() ) {
             return true;
           } // if
-          else
+          else {
             return false;
-
+          } // else
         } // if
-        else
+        else {
           return false;
+        } // else
+      } // else if
+      else if ( Sign() ) {
+        m_step += 1;
+        while ( Sign() ) {
+          m_step += 1;
+        } // while
 
-      } // if
-      else
+        if ( Signed_Unary_Exp() ) {
+          m_step += 1;
+          if ( Romce_and_Romloe() ) {
+            return true;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant (尚未被定義)
+        m_step += 1;
+        if ( Romce_and_Romloe() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "(" )
+                && m_statement.get( m_step ).GetType() == 1 ) {
+        m_step += 1;
+        if ( Expression() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( ")" )
+               && m_statement.get( m_step ).GetType() == 2 ) {
+            m_step += 1;
+            if ( Romce_and_Romloe() ) {
+              return true;
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else {
         return false;
+      } // else
     } // try
     catch ( Throwable throwable ) {
       return false;
-    } // catch
+    } // catch()
+  } // Basic_Expression()
 
-  } // Factor()
+  private boolean Rest_of_Identifier_Started_Basic_Exp() throws Throwable {
+    try {
+      boolean notOverYet = false;
 
-} // class Paser
+      if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+        m_step += 1;
+        if ( Expression() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+            m_step += 1;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+
+      if ( Assignment_Operator() ) {
+        m_step += 1;
+        if ( Basic_Expression() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+      else if ( m_statement.get( m_step ).GetToken().equals( "++" )
+           || m_statement.get( m_step ).equals( "--" ) ) {
+        m_step += 1;
+        if ( Romce_and_Romloe() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+      else if ( Romce_and_Romloe() ) {
+        return true;
+      } // if
+      else if ( m_statement.get( m_step ).GetToken().equals( "(" )
+                || m_statement.get( m_step ).GetType() == 1 ) {
+        m_step += 1;
+        if ( Actual_Parameter_List() ) {
+          m_step += 1;
+        } // if
+
+        if ( m_statement.get( m_step ).GetToken().equals( ")" )
+             || m_statement.get( m_step ).GetType() == 2 ) {
+          m_step += 1 ;
+          if ( Romce_and_Romloe() ) {
+            return true ;
+          } // if
+          else {
+            return false ;
+          } // else
+        } // if
+        else {
+          return false ;
+        } // else
+      } // else if
+      else {
+        return false ;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false ;
+    } // catch()
+  } // Rest_of_Identifier_Started_Basic_Exp()
+} // class Parser
 
 class Main {
 
