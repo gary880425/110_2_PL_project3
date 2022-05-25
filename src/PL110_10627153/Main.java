@@ -1577,7 +1577,7 @@ class Parser {
         return false;
     } // try
     catch ( Throwable throwable ) {
-      return false ;
+      return false;
     } // catch
   } // Type_Specifier()
 
@@ -1594,7 +1594,7 @@ class Parser {
       } // else
     } // try
     catch ( Throwable throwable ) {
-      return false ;
+      return false;
     } // catch
   } // Function_Definition_OR_Declarators()
 
@@ -1701,7 +1701,7 @@ class Parser {
       } // else
     } // try
     catch ( Throwable throwable ) {
-      return false ;
+      return false;
     } // catch()
   } // Function_Definition_Without_ID()
 
@@ -1888,7 +1888,7 @@ class Parser {
           } // else
         } // if
         else {
-          return false ;
+          return false;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).equals( "while" ) ) {
@@ -2115,7 +2115,7 @@ class Parser {
         } // else
       } // if
       else if ( m_statement.get( m_step ).GetToken().equals( "++" )
-           || m_statement.get( m_step ).equals( "--" ) ) {
+                || m_statement.get( m_step ).equals( "--" ) ) {
         m_step += 1;
         if ( Romce_and_Romloe() ) {
           return true;
@@ -2136,26 +2136,845 @@ class Parser {
 
         if ( m_statement.get( m_step ).GetToken().equals( ")" )
              || m_statement.get( m_step ).GetType() == 2 ) {
-          m_step += 1 ;
+          m_step += 1;
           if ( Romce_and_Romloe() ) {
-            return true ;
+            return true;
           } // if
           else {
-            return false ;
+            return false;
           } // else
         } // if
         else {
-          return false ;
+          return false;
         } // else
       } // else if
       else {
-        return false ;
+        return false;
       } // else
     } // try
     catch ( Throwable throwable ) {
-      return false ;
+      return false;
     } // catch()
   } // Rest_of_Identifier_Started_Basic_Exp()
+
+  private boolean Rest_of_PPMM_Identifier_Started_Basic_Exp() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+        m_step += 1;
+        if ( Expression() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+            m_step += 1;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+
+      if ( Romce_and_Romloe() ) {
+        return true;
+      } // if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_PPMM_Identifier_Started_Basic_Exp()
+
+  private boolean Sign() throws Throwable {
+    if ( m_statement.get( m_step ).GetToken().equals( "+" )
+         || m_statement.get( m_step ).GetToken().equals( "-" )
+         || m_statement.get( m_step ).GetToken().equals( "!" ) ) {
+      return true;
+    } // if
+    else {
+      return false;
+    } // else
+  } // Sign()
+
+  private boolean Actual_Parameter_List() throws Throwable {
+    try {
+      if ( Basic_Expression() ) {
+        m_step += 1;
+
+        while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+          m_step += 1;
+          if ( Basic_Expression() ) {
+            m_step += 1;
+          } // if
+          else {
+            return false;
+          } // else
+        } // while
+
+        return true;
+      } // if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Actual_Parameter_List
+
+  private boolean Assignment_Operator() throws Throwable {
+    if ( m_statement.get( m_step ).GetToken().equals( "=" ) ) {
+      return true;
+    } // if
+    else if ( m_statement.get( m_step ).GetToken().equals( "*=" ) ) { // TE
+      return true;
+    } // else if
+    else if ( m_statement.get( m_step ).GetToken().equals( "/=" ) ) { // DE
+      return true;
+    } // else if
+    else if ( m_statement.get( m_step ).GetToken().equals( "%=" ) ) { // RE
+      return true;
+    } // else if
+    else if ( m_statement.get( m_step ).GetToken().equals( "+=" ) ) { // PE
+      return true;
+    } // else if
+    else if ( m_statement.get( m_step ).GetToken().equals( "-=" ) ) { // ME
+      return true;
+    } // else if
+    else {
+      return false;
+    } // else
+  } // Assignment_Operator()
+
+  private boolean Romce_and_Romloe() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Logical_OR_Exp() ) {
+        m_step += 1; // 可能會out of range
+
+        if ( m_statement.get( m_step ).GetToken().equals( "?" ) ) {
+          m_step += 1;
+          if ( Basic_Expression() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( ":" ) ) {
+              m_step += 1;
+              if ( Basic_Expression() ) {
+                return true;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+
+        return true;
+      } // if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // Romce_and_Romloe()
+
+  private boolean Rest_of_Maybe_Logical_OR_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Logical_AND_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "or" ) ) { // 可能會out of range
+        m_step += 1;
+        if ( Maybe_Logical_AND_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Logical_OR_Exp()
+
+  private boolean Maybe_Logical_AND_Exp() throws Throwable {
+    try {
+      if ( Maybe_Bit_OR_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().toLowerCase()
+                         .equals( "and" ) ) { // maybe will out of range
+        m_step += 1;
+        if ( Maybe_Bit_OR_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Logical_AND_Exp()
+
+  private boolean Rest_of_Maybe_Logical_AND_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Bit_OR_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().toLowerCase()
+                         .equals( "and" ) ) { // maybe will out of range
+        m_step += 1;
+
+        if ( Maybe_Bit_OR_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Logical_AND_Exp()
+
+  private boolean Maybe_Bit_OR_Exp() throws Throwable {
+    try {
+      if ( Maybe_Bit_Ex_OR_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "|" ) ) { // maybe will out of range
+        m_step += 1;
+
+        if ( Maybe_Bit_Ex_OR_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // Maybe_Bit_OR_Exp()
+
+  private boolean Rest_of_Maybe_Bit_OR_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Bit_Ex_OR_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "|" ) ) {
+        m_step += 1;
+
+        if ( Maybe_Bit_Ex_OR_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Bit_OR_Exp()
+
+  private boolean Maybe_Bit_Ex_OR_Exp() throws Throwable {
+    try {
+      if ( Maybe_Bit_AND_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "^" ) ) { // maybe will out of range
+        m_step += 1;
+        if ( Maybe_Bit_AND_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Bit_Ex_OR_Exp
+
+  private boolean Rest_of_Maybe_Bit_Ex_OR_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Bit_AND_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "^" ) ) { // maybe will out of range
+        m_step += 1;
+
+        if ( Maybe_Bit_AND_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // Rest_of_Maybe_Bit_OR_Exp
+
+  private boolean Maybe_Bit_AND_Exp() throws Throwable {
+    try {
+      if ( Maybe_Equality_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "&" ) ) { // maybe will out of range
+        m_step += 1;
+
+        if ( Maybe_Equality_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Bit_AND_Exp()
+
+  private boolean Rest_of_Maybe_Bit_AND_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Equality_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "&" ) ) { // maybe will out of range
+        m_step += 1;
+
+        if ( Maybe_Equality_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Bit_AND_Exp()
+
+  private boolean Maybe_Equality_Exp() throws Throwable {
+    try {
+      if ( Maybe_Equality_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "==" )
+              || m_statement.get( m_step ).GetToken().equals( "!=" ) ) {
+        m_step += 1;
+        if ( Maybe_Relational_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Equality_Exp()
+
+  private boolean Rest_of_Maybe_Equality_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Relational_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "==" )
+              || m_statement.get( m_step ).GetToken().equals( "!=" ) ) {
+        m_step += 1;
+        if ( Maybe_Relational_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Relational_Exp()
+
+  private boolean Maybe_Relational_Exp() throws Throwable {
+    try {
+      if ( Maybe_Shift_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "<" )
+              || m_statement.get( m_step ).GetToken().equals( ">" )
+              || m_statement.get( m_step ).GetToken().equals( "<=" )
+              || m_statement.get( m_step ).GetToken().equals( ">=" ) ) {
+        m_step += 1;
+        if ( Maybe_Shift_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // Maybe_Relational_Exp()
+
+  private boolean Rest_of_Maybe_Relational_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Shift_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "<" )
+              || m_statement.get( m_step ).GetToken().equals( ">" )
+              || m_statement.get( m_step ).GetToken().equals( "<=" )
+              || m_statement.get( m_step ).GetToken().equals( ">=" ) ) {
+        m_step += 1;
+        if ( Maybe_Shift_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Relational_Exp()
+
+  private boolean Maybe_Shift_Exp() throws Throwable {
+    try {
+      if ( Maybe_Additive_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( ">>" )
+              || m_statement.get( m_step ).GetToken().equals( "<<" ) ) {
+        m_step += 1;
+        if ( Maybe_Additive_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Shift_Exp()
+
+  private boolean Rest_of_Maybe_Shift_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Shift_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( ">>" )
+              || m_statement.get( m_step ).GetToken().equals( "<<" ) ) {
+        m_step += 1;
+        if ( Maybe_Additive_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Shift_Exp()
+
+  private boolean Maybe_Additive_Exp() throws Throwable {
+    try {
+      if ( Maybe_Mult_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "+" )
+              || m_statement.get( m_step ).GetToken().equals( "-" ) ) {
+        m_step += 1;
+        if ( Maybe_Mult_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Additive_Exp()
+
+  private boolean Rest_of_Maybe_Additive_Exp() throws Throwable {
+    try {
+      if ( Rest_of_Maybe_Mult_Exp() ) {
+        m_step += 1;
+      } // if
+      else {
+        return false;
+      } // else
+
+      while ( m_statement.get( m_step ).GetToken().equals( "+" )
+              || m_statement.get( m_step ).GetToken().equals( "-" ) ) {
+        m_step += 1;
+        if ( Maybe_Mult_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Additive_Exp()
+
+  private boolean Maybe_Mult_Exp() throws Throwable {
+    try {
+      if ( Unary_Exp() ) {
+        m_step += 1;
+        if ( Rest_of_Maybe_Mult_Exp() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Maybe_Mult_Exp()
+
+  private boolean Rest_of_Maybe_Mult_Exp() throws Throwable {
+    try {
+      while ( m_statement.get( m_step ).GetToken().equals( "*" )
+              || m_statement.get( m_step ).GetToken().equals( "/" )
+              || m_statement.get( m_step ).GetToken().equals( "%" ) ) {
+        m_step += 1;
+        if ( Unary_Exp() ) {
+          m_step += 1;
+        } // if
+        else {
+          return false;
+        } // else
+      } // while
+
+      return true;
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Rest_of_Maybe_Mult_Exp()
+
+  private boolean Unary_Exp() throws Throwable {
+    try {
+      if ( Sign() ) {
+        m_step += 1;
+
+        while ( Sign() ) {
+          m_step += 1;
+        } // while
+
+        if ( Signed_Unary_Exp() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // if
+      else if ( Unsigned_Unary_Exp() ) {
+        return true;
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "++" )
+                || m_statement.get( m_step ).GetToken().equals( "--" ) ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) { // 可能會out of range
+            m_step += 1;
+            if ( Expression() ) {
+              m_step += 1;
+              if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+                return true;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch
+  } // Unary_Exp()
+
+  private boolean Signed_Unary_Exp() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+        m_step += 1; // maybe will out of range
+        if ( m_statement.get( m_step ).GetToken().equals( "(" ) ) {
+          m_step += 1;
+          if ( Actual_Parameter_List() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( ")" ) ) {
+              return true;
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+          m_step += 1;
+          if ( Expression() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+              return true;
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // else if
+
+        return true;
+      } // if
+      else if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant
+        return true;
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "(" ) ) {
+        m_step += 1;
+        if ( Expression() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( ")" ) ) {
+            return true;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Signed_Unary_Exp()
+
+  private boolean Unsigned_Unary_Exp() throws Throwable {
+    try {
+      if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+        m_step += 1; // maybe will out of range
+        if ( m_statement.get( m_step ).GetToken().equals( "(" ) ) {
+          m_step += 1;
+          if ( Actual_Parameter_List() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( ")" ) ) {
+              return true;
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
+          m_step += 1;
+          if ( Expression() ) {
+            m_step += 1;
+            if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
+              m_step += 1; // maybe will out of range
+              if ( m_statement.get( m_step ).GetToken().equals( "++" )
+                   || m_statement.get( m_step ).GetToken().equals( "--" ) ) {
+                return true;
+              } // if
+              return true;
+            } // if
+            else {
+              return false;
+            } // else
+          } // if
+          else {
+            return false;
+          } // else
+        } // else if
+
+        return true;
+      } // if
+      else if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant
+        return true;
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "(" ) ) {
+        m_step += 1;
+        if ( Expression() ) {
+          m_step += 1;
+          if ( m_statement.get( m_step ).GetToken().equals( ")" ) ) {
+            return true;
+          } // if
+          else {
+            return false;
+          } // else
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else {
+        return false;
+      } // else
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    } // catch()
+  } // Signed_Unary_Exp()
 } // class Parser
 
 class Main {
