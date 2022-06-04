@@ -29,8 +29,6 @@ class Global {
   static final int s_T_COMMA = 22; // ,
   static final int s_T_TERNARYOPERATOR = 23; // ?:
 
-  // undefined token: ?:
-
   // Blow is Variable Type
   static final int s_V_INT = 1;
   static final int s_V_STRING = 2;
