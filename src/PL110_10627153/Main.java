@@ -4,24 +4,31 @@ import java.util.Scanner;
 import java.util.Vector;
 
 class Global {
-
-  private Global() throws Throwable {
-
-  } // Global
-
   // Blow is Token Type
-  static final int s_T_LEFT_PAREN = 1;
-  static final int s_T_RIGHT_PAREN = 2;
-  static final int s_T_BOOLEANOPERATOE = 3; // &&, ||, !, ==, !=
-  static final int s_T_ID = 4;
-  static final int s_T_OPERATOR = 5; // +, -, *, /, %
-  static final int s_T_SEMICOLON = 6; // ;
-  static final int s_T_NUMVALUE = 7; // 10, 1, 2, 3, 10.1, 0.001
-  static final int s_T_CHARVALUE = 8; // 'A', 'b', 'c'
-  static final int s_T_STRINGVALUE = 9; // "abcd123"
-  static final int s_T_BOOLEANVALUE = 10; // true, flase
-  static final int s_T_ASSIGN = 11; // =, +=, -=, *=, /=, %=
-  static final int s_T_VARTYPR = 12; // int, String, float, char, bool
+  static final int s_T_ID = 1;
+  static final int s_T_CONSTANT = 2;
+  static final int s_T_TYPE = 9; // int, String, float, char, bool
+  static final int s_T_VOID = 10; // void
+  static final int s_T_IF = 11;
+  static final int s_T_ELSE = 12;
+  static final int s_T_WHILE = 13;
+  static final int s_T_DO = 14;
+  static final int s_T_RETURN = 15;
+  static final int s_T_SMALL_LEFT_PAREN = 3; // (
+  static final int s_T_SMALL_RIGHT_PAREN = 4; // )
+  static final int s_T_MID_LEFT_PAREN = 5; // [
+  static final int s_T_MID_RIGHT_PAREN = 6; // ]
+  static final int s_T_BIG_LEFT_PAREN = 7; // {
+  static final int s_T_BIG_RIGHT_PAREN = 8; // }
+  static final int s_T_OPERATOR = 16; // +, -, *, /, %, >>, <<
+  static final int s_T_BOOLEANRELATIONAL = 17; // >, <, >=, <=, ==, !=
+  static final int s_T_ASSIGN = 18; // =
+  static final int s_T_BOOLEANCONDITION = 19; // !, &&, ||
+  static final int s_T_ASSIGN_OPERATOR = 20; // +=, -=, *=, /=, %=, ++, --
+  static final int s_T_SEMICOLON = 21; // ;
+  static final int s_T_COMMA = 22; // ,
+
+
   // undefined token: ?:
 
   // Blow is Variable Type
@@ -35,7 +42,7 @@ class Global {
 
   static public Vector<Variable> s_Variables = new Vector<Variable>();
 
-  static public Vector<Function> s_functions = new Vector<Function>();
+  static public Vector<Function> s_Functions = new Vector<Function>();
 
   static public boolean G_IsWhitSpace( char charStr ) throws Throwable {
 
@@ -186,8 +193,16 @@ class TOKEN {
 
 } // class ATOM
 
+class TokenString {
+  public Vector<TOKEN> m_tokenString;
+  public TokenString() throws Throwable {
+    m_tokenString = new Vector<TOKEN>();
+  } // TokenLine()
+
+} // class TokenList
+
 class Stament {
-  private Vector<TokenList> m_Line;
+  private Vector<TokenString> m_Line;
   private int m_Size;
 
   public Stament() throws Throwable {
@@ -196,43 +211,40 @@ class Stament {
 
   public TOKEN GetToken( int index ) throws Throwable {
     for ( int i = 0 ; i < m_Line.size() ; i++ ) {
-      for ( int j = 0 ; j < m_Line.get( i ).GetSize() ; j++ ) {
-        if( index == 0)
-          return m_Line.get( i ).GetToken( j );
-        index --;
+      for ( int j = 0 ; j < m_Line.get( i ).m_tokenString.size() ; j++ ) {
+        if ( index == 0 )
+          return m_Line.get( i ).m_tokenString.get( j );
+        index--;
       } // for count the amount of token
     } // for count the amount of rows
 
     throw new Throwable();
   } // GetToken()
 
-  public TokenList GetTokenRow( int index ) throws Throwable {
+  public TokenString GetTokenRow( int index ) throws Throwable {
     return null;
   } // GetTokenRow()
 
-  public void PushLine( TokenList line ) throws Throwable {
+  public void PushLine( TokenString line ) throws Throwable {
     m_Line.add( line );
-    m_Size = m_Size + line.GetSize();
+    m_Size = m_Size + line.m_tokenString.size();
   } // PushLine()
 
+  public void PushToken( TOKEN token ) throws Throwable {
+    if ( token != null ) {
+      m_Line.get( m_Line.size() ).m_tokenString.add( token );
+      m_Size = m_Size + 1;
+    } // if
+  } // PushToken()
+
+  public void AddLine() throws  Throwable {
+    m_Line.add( new TokenString() );
+  } // AddLine()
   public int GetSize() throws Throwable {
     return m_Size;
   } // GetSize()
 
 } // class Stamen
-
-class TokenList {
-  private Vector<TOKEN> m_token;
-
-  public TOKEN GetToken( int index ) throws Throwable {
-    return null;
-  } // GetToken()
-
-  public int GetSize() throws Throwable {
-    return m_token.size();
-  } // GetSize()
-
-} // class TokenList
 
 abstract class Variable {
 
@@ -504,15 +516,19 @@ class VarBOOL extends Variable {
 
 } // class VarBOOL
 
+class LocalVar {
+  public Vector<Variable> m_Var;
+} // class LocalVar
+
 class Function {
   private String m_name;
-  private Vector<Variable> m_localVar;
+  private Vector<LocalVar> m_localVarList;
   private Vector<Stament> m_commendLine;
 
 
-  public Function( String fName, Vector<Variable> lVar, Vector<Stament> stament ) throws Throwable {
+  public Function( String fName, Vector<LocalVar> lVar, Vector<Stament> stament ) throws Throwable {
     this.m_name = new String( fName );
-    this.m_localVar = lVar;
+    this.m_localVarList = lVar;
     this.m_commendLine = stament;
   } // Function()
 
@@ -593,7 +609,7 @@ class CutToken {
           mBuffer.add( new TOKEN( ")", 2 ) );
           IsGotTokenProcessFormNowLine( 1 );
           if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_LEFT_PAREN ) {
+            if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) {
               System.out.println( "Unexpected token : '"
                                   + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
               System.out.print( "> " );
@@ -620,9 +636,9 @@ class CutToken {
 
           int count = 0;
           for ( int i = 0 ; i < mBuffer.size() ; i++ ) {
-            if ( mBuffer.get( i ).GetType() == Global.s_T_LEFT_PAREN )
+            if ( mBuffer.get( i ).GetType() == Global.s_T_SMALL_LEFT_PAREN )
               count = count + 1;
-            else if ( mBuffer.get( i ).GetType() == Global.s_T_RIGHT_PAREN )
+            else if ( mBuffer.get( i ).GetType() == Global.s_T_SMALL_RIGHT_PAREN )
               count = count - 1;
 
           } // for
@@ -741,7 +757,7 @@ class CutToken {
           gotNUM = GetNUMTokenInmNowLine();
 
           if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_NUMVALUE ) {
+            if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_CONSTANT ) {
               System.out.println( "Unexpected token : '"
                                   + gotNUM + "'" );
               System.out.print( "> " );
@@ -806,7 +822,7 @@ class CutToken {
           gotBOOLEANOPERATOE = GetBOOLEANOPERATOETokenInmNowLine();
           mBuffer.add( new TOKEN( gotBOOLEANOPERATOE, 3 ) );
           if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_BOOLEANOPERATOE ) {
+            if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_BOOLEANRELATIONAL ) {
               System.out.println( "Unexpected token : '"
                                   + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
               System.out.print( "> " );
@@ -817,7 +833,7 @@ class CutToken {
           } // if
 
           if ( mBuffer.size() == 1 ) {
-            if ( mBuffer.get( 0 ).GetType() == Global.s_T_BOOLEANOPERATOE ) {
+            if ( mBuffer.get( 0 ).GetType() == Global.s_T_BOOLEANRELATIONAL ) {
               System.out.println( "Unexpected token : '"
                                   + mBuffer.get( 0 ).GetToken() + "'" );
               System.out.print( "> " );
@@ -923,12 +939,8 @@ class CutToken {
 
     } // if
 
-    if ( Buffer1HasFullCommend( stament ) ) {
-
+    if ( Buffer1HasFullCommend( stament ) )
       return true;
-
-    } // if
-
 
     return true;
 
@@ -1464,437 +1476,6 @@ class CutToken {
   } // IsWhitSpace()
 
 } // class CutToken
-
-class Paser {
-  public Vector<TOKEN> m_stament;
-  public int m_step;
-
-  public Paser( Vector<TOKEN> inputeStament ) throws Throwable {
-    m_stament = inputeStament;
-    m_step = 0;
-  } // Paser()
-
-  public boolean GrammarParser() throws Throwable {
-
-    try {
-
-      if ( m_stament.get( 0 ).GetToken().equals( ";" ) ) {
-        System.out.println( "Unexpected token : ';'" );
-        m_stament.clear();
-        return false;
-      } // if
-
-      if ( this.Command() ) {
-        return true;
-      } // if ()
-      else {
-        System.out.println( "Unexpected token : '" + m_stament.get( m_step ).GetToken() + "'" );
-        return false;
-      } // else
-
-    } // try
-    catch ( Throwable throwable ) {
-      System.out.println( "Unexpected token : '" + m_stament.get( m_step ).GetToken() + "'" );
-      return false;
-    } // catch
-
-  } // GrammarParser()
-
-  private boolean Command() throws Throwable {
-
-    try {
-
-      if ( m_stament.get( m_step ).GetType() == 4 ) {
-        m_step++;
-        if ( m_stament.get( m_step ).GetType() == 8 ) {
-          m_step++;
-          if ( ArithExp() ) {
-            if ( m_stament.get( m_step ).GetType() == 6 ) {
-              m_step++;
-              return true;
-            } // if ()
-            else {
-              // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-              // throw new Throwable();
-              return false;
-            } // else
-
-          } // if ()
-          else {
-            // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-            // throw new Throwable();
-            return false;
-          } // else
-
-        } // if ()
-        else if ( IDlessArithExpOrBexp() ) {
-          if ( m_stament.get( m_step ).GetType() == 6 ) {
-            m_step++;
-            return true;
-          } // if ()
-          else {
-            // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-            // throw new Throwable();
-            return false;
-          } // else
-
-        } // else if
-        else if ( m_stament.get( m_step ).GetType() == 6 ) {
-          // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-          // throw new Throwable();
-          return true;
-
-        } // else if
-        else {
-          return false;
-
-        } // else
-
-      } // if ()
-      else if ( NOT_IDStartArithExpOrBexp() ) {
-        if ( m_stament.get( m_step ).GetType() == 6 ) {
-          m_step++;
-          return true;
-        } // if ()
-        else {
-          return false;
-        } // else
-      } // else if ()
-      else {
-        // System.out.println("Undefined identifier : '" + stament.get(index).GetToken() + "'" );
-        // throw new Throwable();
-        return false;
-      } // else
-    } // try
-    catch ( Throwable throwable ) {
-      throw new Throwable();
-    } // catch
-  } // Command()
-
-  private boolean IDlessArithExpOrBexp() throws Throwable {
-
-    boolean isOnePass = false;
-
-    try {
-      while ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-              m_stament.get( m_step ).GetToken().equals( "-" ) ||
-              m_stament.get( m_step ).GetToken().equals( "*" ) ||
-              m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-             m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-          m_step++;
-
-          if ( Term() ) {
-            isOnePass = true;
-          } // if ()
-          else
-            return false;
-
-        } // if
-        else if ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-                  m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-          m_step++;
-          if ( Factor() )
-            isOnePass = true;
-          else
-            return false;
-        } // else if
-
-      } // while
-
-      if ( BooleanOperator() ) {
-
-        if ( ArithExp() )
-          isOnePass = true;
-        else
-          return false;
-
-      } // if ()
-
-    } // try
-    catch ( Throwable throwable ) {
-      if ( ! isOnePass )
-        return false;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-    else
-      return false;
-
-  } // IDlessArithExpOrBexp()
-
-  private boolean BooleanOperator() throws Throwable {
-
-    try {
-
-      if ( m_stament.get( m_step ).GetType() == 3 ) {
-        m_step++;
-        return true;
-      } // if
-      else {
-        return false;
-      } // else
-
-    } // try
-    catch ( Throwable throwable ) {
-      return false;
-    } // catch
-
-
-  } // BooleanOperator()
-
-  private boolean NOT_IDStartArithExpOrBexp() throws Throwable {
-
-    boolean isOnePass = false;
-
-    if ( ! NOT_ID_StartArithExp() )
-      return false;
-
-    if ( BooleanOperator() ) {
-      if ( ArithExp() )
-        return true;
-      else
-        return false;
-    } // if
-
-    return true;
-
-  } // NOT_IDStartArithExpOrBexp()
-
-  private boolean NOT_ID_StartArithExp() throws Throwable {
-
-    if ( ! NOT_ID_StartTerm() )
-      return false;
-
-    try {
-
-      while ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-              m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-             m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-          m_step++;
-
-          if ( ! Term() )
-            return false;
-
-        } // if
-
-      } // while
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-
-    return true;
-
-  } // NOT_ID_StartArithExp()
-
-  private boolean NOT_ID_StartTerm() throws Throwable {
-
-    if ( ! NOT_ID_StartFactor() )
-      return false;
-
-    try {
-      while ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-              m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-             m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-          m_step++;
-
-          if ( ! Factor() )
-            return false;
-
-        } // if
-
-      } // while
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-    return true;
-
-  } // NOT_ID_StartTerm()
-
-  private boolean NOT_ID_StartFactor() throws Throwable {
-
-    boolean isOnePass = false;
-    try {
-
-      if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-           m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-        m_step++;
-      } // if
-
-      if ( m_stament.get( m_step ).GetType() == 7 ) {
-        m_step++;
-        isOnePass = true;
-      } // if
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-
-    try {
-      if ( m_stament.get( m_step ).GetType() == 1 ) {
-        m_step++;
-        if ( ArithExp() ) {
-          if ( m_stament.get( m_step ).GetType() == 2 ) {
-            m_step++;
-            return true;
-          } // if
-          else
-            return false;
-        } // if
-        else
-          return false;
-      } // if
-      else
-        return false;
-    } // try
-    catch ( Throwable throwable ) {
-      return false;
-    } // catch
-
-  } // NOT_ID_StartFactor()
-
-  private boolean ArithExp() throws Throwable {
-    if ( ! Term() )
-      return false;
-
-    try {
-      while ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-              m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-             m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-
-          m_step++;
-          if ( ! Term() )
-            return false;
-
-        } // if
-
-      } // while
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-    return true;
-
-  } // ArithExp()
-
-  private boolean Term() throws Throwable {
-
-    if ( ! Factor() )
-      return false;
-
-    try {
-      while ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-              m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-        if ( m_stament.get( m_step ).GetToken().equals( "*" ) ||
-             m_stament.get( m_step ).GetToken().equals( "/" ) ) {
-
-          m_step++;
-          if ( ! Factor() )
-            return false;
-
-        } // if
-
-      } // while
-
-    } // try
-    catch ( Throwable throwable ) {
-      ;
-    } // catch
-
-    return true;
-
-  } // Term()
-
-  private boolean Factor() throws Throwable {
-
-    boolean isOnePass = false;
-
-    try {
-
-      if ( m_stament.get( m_step ).GetType() == 4 ) {
-        m_step++;
-        isOnePass = true;
-      } // if
-
-    } // try
-    catch ( Throwable throwable ) {
-      return false;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-
-    try {
-      boolean haveSIGN = false;
-      String signOperator = new String();
-
-      if ( m_stament.get( m_step ).GetToken().equals( "+" ) ||
-           m_stament.get( m_step ).GetToken().equals( "-" ) ) {
-        m_step++;
-      } // if
-
-      if ( m_stament.get( m_step ).GetType() == 7 ) {
-        m_step++;
-        isOnePass = true;
-      } // if
-
-    } // try
-    catch ( Throwable throwable ) {
-      return false;
-    } // catch
-
-    if ( isOnePass )
-      return true;
-
-    try {
-      if ( m_stament.get( m_step ).GetType() == 1 ) {
-
-        m_step++;
-        if ( ArithExp() ) {
-
-          if ( m_stament.get( m_step ).GetType() == 2 ) {
-            m_step++;
-            return true;
-          } // if
-          else
-            return false;
-
-        } // if
-        else
-          return false;
-
-      } // if
-      else
-        return false;
-    } // try
-    catch ( Throwable throwable ) {
-      return false;
-    } // catch
-
-  } // Factor()
-
-} // class Paser
 
 class Main {
 
