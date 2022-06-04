@@ -27,7 +27,7 @@ class Global {
   static final int s_T_ASSIGN_OPERATOR = 20; // +=, -=, *=, /=, %=, ++, --
   static final int s_T_SEMICOLON = 21; // ;
   static final int s_T_COMMA = 22; // ,
-
+  static final int s_T_TERNARYOPERATOR = 23; // ?:
 
   // undefined token: ?:
 
