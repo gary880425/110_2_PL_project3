@@ -193,7 +193,7 @@ class TOKEN {
     m_token = new String( token );
   } // SetToken()
 
-} // class ATOM
+} // class TOKEN
 
 class TokenString {
   public Vector<TOKEN> m_tokenString;
@@ -545,16 +545,16 @@ class Function {
 class CutToken {
 
   private Vector<TOKEN> mBuffer;
-  private Vector<Variable> mVariables;
+  // private Vector<Variable> mVariables;
   private int mLineCount;
   private String mnowLine;
   private Scanner msc;
 
-  public CutToken( Scanner inputSc, Vector<Variable> iV ) throws Throwable {
+  public CutToken() throws Throwable {
 
     mBuffer = new Vector<TOKEN>();
-    msc = inputSc;
-    mVariables = iV;
+    msc = Global.sc;
+    // mVariables = iV;
     mnowLine = new String();
     mLineCount = 0;
 
@@ -563,22 +563,10 @@ class CutToken {
   public boolean Cutting( Vector<TOKEN> stament ) throws Throwable {
 
     boolean notGetSEMICOLON = true;
-    boolean gettingRun = true;
-
-    if ( mBuffer.size() > 0 ) {
-      if ( mBuffer.get( 0 ).GetToken().equals( "quit" ) ) {
-        System.out.print( "> " );
-        return false;
-      } // if
-
-    } // if
-
 
     if ( Buffer1HasFullCommend( stament ) ) {
       System.out.print( "> " );
-
       return true;
-
     } // if
     else {
       System.out.print( "> " );
@@ -594,17 +582,19 @@ class CutToken {
         if ( mnowLine.charAt( 0 ) == '(' ) {
           mBuffer.add( new TOKEN( "(", Global.s_T_SMALL_LEFT_PAREN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
-          SMALLLEFTPARENFINDERROR();
+          // SMALLLEFTPARENFINDERROR();
         } // if
         else if ( mnowLine.charAt( 0 ) == ')' ) {
           mBuffer.add( new TOKEN( ")", Global.s_T_SMALL_RIGHT_PAREN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
           SMALLRIGHTPARENFINDERROR();
+          if ( ISFUNDEFORIFWHILEEND() )
+            return Buffer1HasFullCommend( stament );
         } // else if
         else if ( mnowLine.charAt( 0 ) == '[' ) {
           mBuffer.add( new TOKEN( "[", Global.s_T_MID_LEFT_PAREN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
-          MIDLEFTPARENFINDERROR();
+          // MIDLEFTPARENFINDERROR();
         } // else if
         else if ( mnowLine.charAt( 0 ) == ']' ) {
           mBuffer.add( new TOKEN( "]", Global.s_T_MID_RIGHT_PAREN, mLineCount ) );
@@ -614,10 +604,18 @@ class CutToken {
         else if ( mnowLine.charAt( 0 ) == '{' ) {
           mBuffer.add( new TOKEN( "{", Global.s_T_BIG_LEFT_PAREN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
+          HASOTHERTOKENISERROR();
+          stament.add( mBuffer.get( 0 ) );
+          mBuffer.clear();
+          return true;
         } // else if
         else if ( mnowLine.charAt( 0 ) == '}' ) {
           mBuffer.add( new TOKEN( "}", Global.s_T_BIG_RIGHT_PAREN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
+          HASOTHERTOKENISERROR();
+          stament.add( mBuffer.get( 0 ) );
+          mBuffer.clear();
+          return true;
         } // else if
         else if ( mnowLine.charAt( 0 ) == ',' ) {
           mBuffer.add( new TOKEN( ",", Global.s_T_COMMA, mLineCount ) );
@@ -635,185 +633,70 @@ class CutToken {
           if ( Buffer1HasFullCommend( stament ) )
             return true;
         } // else if
-        else if ( mnowLine.charAt( 0 ) == '=' ) {
-          mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_ASSIGN, mLineCount ) );
-          IsGotTokenProcessFormNowLine( 1 );
+        else if ( IsBOOLEANCONDITION1InmNowLineFirst() ) {
+          String gotBOOLEANCONDITION;
+          gotBOOLEANCONDITION = mnowLine.substring( 0, 2 );
+          mBuffer.add( new TOKEN( gotBOOLEANCONDITION, Global.s_T_BOOLEANCONDITION, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotBOOLEANCONDITION.length() );
         } // else if
         else if ( IsASSISNOPERATORInmNowLineFirst() ) {
-          String gotOPERATOR = GetOPERATORToken();
-          mBuffer.add( new TOKEN( gotOPERATOR, 5, mLineCount ) );
-          IsGotTokenProcessFormNowLine( gotOPERATOR.length() );
-          OPERATORFINDERROR( gotOPERATOR );
+          String gotASSISNOPERATOR = mnowLine.substring( 0, 2 );
+          mBuffer.add( new TOKEN( gotASSISNOPERATOR, Global.s_T_ASSIGNOPERATOR, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotASSISNOPERATOR.length() );
         } // else if
         else if ( IsOPERATORInmNowLineFirst() ) {
           String gotOPERATOR = GetOPERATORToken();
-          mBuffer.add( new TOKEN( gotOPERATOR, 5, mLineCount ) );
+          mBuffer.add( new TOKEN( gotOPERATOR, Global.s_T_OPERATOR, mLineCount ) );
           IsGotTokenProcessFormNowLine( gotOPERATOR.length() );
           OPERATORFINDERROR( gotOPERATOR );
+        } // else if
+        else if ( IsBOOLEANRELATIONALInmNowLineFirst() ) {
+          String gotBOOLEANRELATIONAL = GetBOOLEANRELATIONALToken();
+          mBuffer.add( new TOKEN( gotBOOLEANRELATIONAL, Global.s_T_BOOLEANRELATIONAL, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotBOOLEANRELATIONAL.length() );
+          OPERATORFINDERROR( gotBOOLEANRELATIONAL );
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '!' ) {
+          mBuffer.add(
+                  new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_BOOLEANCONDITION, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '=' ) {
+          mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_ASSIGN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
         } // else if
         else if ( IsNUMInmNowLineFirst() ) {
           String gotNUM;
           gotNUM = GetNUMTokenInmNowLine();
 
-          if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_CONSTANT ) {
-              System.out.println( "Unexpected token : '"
-                                  + gotNUM + "'" );
-              System.out.print( "> " );
-              ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-              throw new Throwable();
-            } // if
-
-          } // if
-
           if ( gotNUM.charAt( 0 ) == '.' ) {
-            mBuffer.add( new TOKEN( "0" + gotNUM, 7 ) );
+            mBuffer.add( new TOKEN( "0" + gotNUM, Global.s_T_CONSTANT, mLineCount ) );
             gotNUM = "0" + gotNUM;
           } // if
           else {
-            mBuffer.add( new TOKEN( gotNUM, 7 ) );
-
+            mBuffer.add( new TOKEN( gotNUM, Global.s_T_CONSTANT, mLineCount ) );
           } // else
 
-          int nowIndex = mBuffer.size() - 1;
-
-          try {
-
-            if ( mBuffer.get( nowIndex ).GetToken().contains( "." ) ) {
-              Double rv = Double.parseDouble( gotNUM );
-              gotNUM = String.format( "%.10f", rv );
-
-            } // if
-
-            int rv = Integer.valueOf( mBuffer.get( nowIndex ).GetToken() ).intValue();
-            mBuffer.get( nowIndex ).SetToken( Integer.toString( rv ) );
-
-          } // try
-          catch ( Throwable throwable ) {
-
-          } // catch
-
-          if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( "/" ) ) {
-              boolean isnnotAll0orp = false;
-              int nowtheIndex = mBuffer.size() - 1;
-              for ( int i = 0 ; i < mBuffer.get( nowtheIndex ).GetToken().length() ; i++ ) {
-
-                if ( gotNUM.charAt( i ) >= '1' && gotNUM.charAt( i ) <= '9' )
-                  isnnotAll0orp = true;
-
-              } // for
-
-              if ( ! isnnotAll0orp ) {
-                System.out.println( "Error" );
-                System.out.print( "> " );
-                ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-                throw new Throwable();
-              } // if
-
-            } // if
-
-          } // if
-
-        } // else if
-        else if ( IsBOOLEANInmNowLineFirst() ) {
-          String gotBOOLEANOPERATOE;
-          gotBOOLEANOPERATOE = GetBOOLEANOPERATOETokenInmNowLine();
-          mBuffer.add( new TOKEN( gotBOOLEANOPERATOE, 3 ) );
-          if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_BOOLEANRELATIONAL ) {
-              System.out.println( "Unexpected token : '"
-                                  + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-              System.out.print( "> " );
-              ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-              throw new Throwable();
-            } // if
-
-          } // if
-
-          if ( mBuffer.size() == 1 ) {
-            if ( mBuffer.get( 0 ).GetType() == Global.s_T_BOOLEANRELATIONAL ) {
-              System.out.println( "Unexpected token : '"
-                                  + mBuffer.get( 0 ).GetToken() + "'" );
-              System.out.print( "> " );
-              ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-              throw new Throwable();
-            } // if
-
-          } // if
-
+          NUMFINDERROR( gotNUM );
         } // else if
         else if ( IsIDInmNowLineFirst() ) {
           String gotID;
           gotID = GetIDTOETokenInmNowLine();
-          mBuffer.add( new TOKEN( gotID, 4 ) );
-
-          if ( mBuffer.size() > 1 ) {
-            if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
-              System.out.println( "Unexpected token : '"
-                                  + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-              System.out.print( "> " );
-              ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-              throw new Throwable();
-            } // if
-
-          } // if
-
-          if ( mBuffer.size() > 1 ) {
-
-            if ( FindVariable( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) == - 1 ) {
-              System.out.println( "Undefined identifier : '"
-                                  + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-              System.out.print( "> " );
-              ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-              throw new Throwable();
-            } // if
-
-          } // if
-
-          try {
-            int nowIndex = mBuffer.size();
-
-            if ( nowIndex > 2 ) {
-              if ( mBuffer.get( nowIndex - 2 ).GetType() == Global.s_T_OPERATOR &&
-                   mBuffer.get( nowIndex - 1 ).GetType() == Global.s_T_OPERATOR ) {
-                System.out.println( "Unexpected token : '"
-                                    + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-                System.out.print( "> " );
-                ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-                throw new Throwable();
-              } // if
-
-            } // if
-
-
-          } // try
-          catch ( Throwable throwable2 ) {
-            throw new Throwable();
-          } // catch
-
-          if ( gotID.equals( "quit" ) ) {
-            if ( mBuffer.size() > 1 ) {
-              if ( mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( ";" ) ) {
-                mnowLine = new String(); // throw new Throwable();
-              } // if
-
-            } // if
-
-            if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "quit" ) )
-              return false;
-
-            if ( mBuffer.get( 0 ).GetToken().equals( "quit" ) )
-              throw new Throwable();
-
-          } // if
+          DISTINGUISHANDPUSHTOKEN( gotID );
+          IDFINDERROR();
+          if( gotID.equals( "do" ) || gotID.equals( "else" ) ){
+            HASOTHERTOKENISERROR();
+            stament.add( mBuffer.get( 0 ) );
+            mBuffer.clear();
+            return true;
+          }// if
 
         } // else if
         else {
           if ( ! mnowLine.isEmpty() ) {
             System.out.println( "Unrecognized token with first char : '" + mnowLine.charAt( 0 ) + "'" );
             System.out.print( "> " );
-            ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+            mBuffer.clear();
             throw new Throwable();
           } // if
 
@@ -829,14 +712,6 @@ class CutToken {
       } // catch
 
     } // while
-
-    if ( mBuffer.size() > 0 ) {
-      if ( mBuffer.get( 0 ).GetToken().equals( "quit" ) ) {
-        System.out.print( "> " );
-        return false;
-      } // if
-
-    } // if
 
     if ( Buffer1HasFullCommend( stament ) )
       return true;
@@ -855,7 +730,7 @@ class CutToken {
           System.out.println( "Unexpected token : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
           System.out.print( "> " );
-          ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+          mBuffer.clear();
           throw new Throwable();
         } // if
 
@@ -871,14 +746,14 @@ class CutToken {
         System.out.println( "Unexpected token : '"
                             + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
         System.out.print( "> " );
-        ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+        mBuffer.clear();
         throw new Throwable();
 
       } // if
 
     } // if
 
-    if ( mBuffer.size() > 1 ) {
+    /* if ( mBuffer.size() > 1 ) {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
 
         if ( Global.G_FindVariable( Global.s_Variables,
@@ -886,15 +761,44 @@ class CutToken {
           System.out.println( "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           System.out.print( "> " );
-          ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+          mBuffer.clear() ;
           throw new Throwable();
         } // if
 
       } // if
 
-    } // if
+    } // if */
 
   } // OPERATORFINDERROR()
+
+  private void DISTINGUISHANDPUSHTOKEN( String gotID ) throws Throwable {
+    if ( gotID.equals( "int" ) || gotID.equals( "string" ) || gotID.equals( "float" ) ||
+         gotID.equals( "char" ) || gotID.equals( "bool" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_TYPE, mLineCount ) );
+    } // if
+    else if ( gotID.equals( "void" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_VOID, mLineCount ) );
+    } // else if
+    else if ( gotID.equals( "if" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_IF, mLineCount ) );
+    } // else if
+    else if ( gotID.equals( "else" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_ELSE, mLineCount ) );
+    } // else if
+    else if ( gotID.equals( "while" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_WHILE, mLineCount ) );
+    } // else if
+    else if ( gotID.equals( "do" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_DO, mLineCount ) );
+    } // else if
+    else if ( gotID.equals( "return" ) ) {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_RETURN, mLineCount ) );
+    } // else if
+    else {
+      mBuffer.add( new TOKEN( gotID, Global.s_T_ID, mLineCount ) );
+    }
+
+  } // DISTINGUISHANDPUSHTOKEN()
 
   private void TERNARYOPERATORFINDERROR() throws Throwable {
     int count = 0;
@@ -910,11 +814,44 @@ class CutToken {
       System.out.println( "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       System.out.print( "> " );
-      ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+      mBuffer.clear();
       throw new Throwable();
     } // if
 
   } // TERNARYOPERATORFINDERROR()
+
+  private void IDFINDERROR() throws Throwable {
+    if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_ID ) {
+      if ( mBuffer.size() > 1 ) {
+        if ( ! ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_TYPE ||
+                 mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_VOID ) ) {
+          if ( Global.G_FindVariable( Global.s_Variables,
+                                      mBuffer.get( mBuffer.size() - 1 ).GetToken() ) == null ) {
+            System.out.println( "Undefined identifier : '"
+                                + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+            System.out.print( "> " );
+            mBuffer.clear();
+            throw new Throwable();
+          } // if
+
+        } // if
+
+      } // if
+      else {
+        if ( Global.G_FindVariable( Global.s_Variables,
+                                    mBuffer.get( mBuffer.size() - 1 ).GetToken() ) == null ) {
+          System.out.println( "Undefined identifier : '"
+                              + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+          System.out.print( "> " );
+          mBuffer.clear();
+          throw new Throwable();
+        } // if
+
+      } // else
+
+    } // if
+
+  } // IDFINDERROR()
 
   private void SMALLLEFTPARENFINDERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -925,7 +862,7 @@ class CutToken {
           System.out.println( "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           System.out.print( "> " );
-          ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+          mBuffer.clear();
           throw new Throwable();
         } // if
 
@@ -935,24 +872,19 @@ class CutToken {
 
   } // SMALLLEFTPARENFINDERROR()
 
-  private void SMALLRIGHTPARENFINDERROR() throws Throwable {
-
+  private void HASOTHERTOKENISERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
-      if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
-
-        if ( Global.G_FindVariable( Global.s_Variables, mBuffer.get( mBuffer.size() - 2 ).GetToken() )
-             == null ) {
-          System.out.println( "Undefined identifier : '"
-                              + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
-          System.out.print( "> " );
-          ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-          throw new Throwable();
-        } // if
-
-      } // if
+      System.out.println( "Undefined identifier : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
 
     } // if
 
+  } // HASOTHERTOKENISERROR()
+
+  private void SMALLRIGHTPARENFINDERROR() throws Throwable {
     int count = 0;
     for ( int i = 0 ; i < mBuffer.size() ; i++ ) {
       if ( mBuffer.get( i ).GetType() == Global.s_T_SMALL_LEFT_PAREN )
@@ -966,11 +898,86 @@ class CutToken {
       System.out.println( "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       System.out.print( "> " );
-      ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+      mBuffer.clear();
       throw new Throwable();
     } // if
 
   } // SMALLRIGHTPARENFINDERROR()
+
+  private boolean ISFUNDEFORIFWHILEEND() throws Throwable {
+    int count = 0;
+    for ( int i = 0 ; i < mBuffer.size() ; i++ ) {
+      if ( mBuffer.get( i ).GetType() == Global.s_T_SMALL_LEFT_PAREN )
+        count = count + 1;
+      else if ( mBuffer.get( i ).GetType() == Global.s_T_SMALL_RIGHT_PAREN )
+        count = count - 1;
+
+    } // for
+
+    if ( count == 0 ) {
+      if ( mBuffer.get( 0 ).GetType() == Global.s_T_IF ||
+           mBuffer.get( 0 ).GetType() == Global.s_T_WHILE ) {
+        return true;
+      } // if
+      else if ( mBuffer.get( 0 ).GetType() == Global.s_T_TYPE ||
+                mBuffer.get( 0 ).GetType() == Global.s_T_VOID ) {
+        return true;
+      } // else if
+    } // if
+
+    return false;
+  }// ISFUNDEFORIFWHILEEND()
+
+  private void NUMFINDERROR( String gotNUM ) throws Throwable {
+    if ( mBuffer.size() > 1 ) {
+      if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_CONSTANT ) {
+        System.out.println( "Unexpected token : '"
+                            + gotNUM + "'" );
+        System.out.print( "> " );
+        mBuffer.clear();
+        throw new Throwable();
+      } // if
+
+    } // if
+
+    int nowIndex = mBuffer.size() - 1;
+    try {
+      if ( mBuffer.get( nowIndex ).GetToken().contains( "." ) ) {
+        Double rv = Double.parseDouble( gotNUM );
+        gotNUM = String.format( "%.10f", rv );
+
+      } // if
+
+      int rv = Integer.valueOf( mBuffer.get( nowIndex ).GetToken() ).intValue();
+      mBuffer.get( nowIndex ).SetToken( Integer.toString( rv ) );
+    } // try
+    catch ( Throwable throwable ) {
+
+    } // catch
+
+    if ( mBuffer.size() > 1 ) {
+      if ( mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( "/" ) ) {
+        boolean isnnotAll0orp = false;
+        int nowtheIndex = mBuffer.size() - 1;
+        for ( int i = 0 ; i < mBuffer.get( nowtheIndex ).GetToken().length() ; i++ ) {
+
+          if ( gotNUM.charAt( i ) >= '1' && gotNUM.charAt( i ) <= '9' )
+            isnnotAll0orp = true;
+
+        } // for
+
+        if ( ! isnnotAll0orp ) {
+          System.out.println( "Error" );
+          System.out.print( "> " );
+          mBuffer.clear();
+          throw new Throwable();
+        } // if
+
+      } // if
+
+    } // if
+
+  } // NUMFINDERROR()
 
   private void MIDLEFTPARENFINDERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -981,7 +988,7 @@ class CutToken {
           System.out.println( "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           System.out.print( "> " );
-          ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+          mBuffer.clear();
           throw new Throwable();
         } // if
 
@@ -992,23 +999,6 @@ class CutToken {
   } // MIDLEFTPARENFINDERROR()
 
   private void MIDRIGHTPARENFINDERROR() throws Throwable {
-
-    if ( mBuffer.size() > 1 ) {
-      if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
-
-        if ( Global.G_FindVariable( Global.s_Variables, mBuffer.get( mBuffer.size() - 2 ).GetToken() )
-             == null ) {
-          System.out.println( "Undefined identifier : '"
-                              + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
-          System.out.print( "> " );
-          ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
-          throw new Throwable();
-        } // if
-
-      } // if
-
-    } // if
-
     int count = 0;
     for ( int i = 0 ; i < mBuffer.size() ; i++ ) {
       if ( mBuffer.get( i ).GetType() == Global.s_T_MID_LEFT_PAREN )
@@ -1022,31 +1012,11 @@ class CutToken {
       System.out.println( "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       System.out.print( "> " );
-      ProcessBeforSEMICOLONFormNowLine(); // mBuffer.clear() ;
+      mBuffer.clear();
       throw new Throwable();
     } // if
 
   } // MIDRIGHTPARENFINDERROR()
-
-  private void ProcessBeforSEMICOLONFormNowLine() throws Throwable {
-
-    int lestSEMICOLONIndex = - 1;
-    for ( int i = 0 ; i < mBuffer.size() ; i++ ) {
-      if ( mBuffer.get( i ).GetType() == Global.s_T_SEMICOLON )
-        lestSEMICOLONIndex = i;
-    } // for
-
-    if ( lestSEMICOLONIndex < mBuffer.size() - 1 ) {
-      for ( int i = lestSEMICOLONIndex + 1 ; mBuffer.size() > lestSEMICOLONIndex - 1 ; )
-        mBuffer.remove( i );
-
-    } // if
-
-    if ( lestSEMICOLONIndex == - 1 )
-      mBuffer.clear();
-
-
-  } // ProcessBeforSEMICOLONFormNowLine()
 
   private String GetIDTOETokenInmNowLine() throws Throwable {
     String gotID = new String();
@@ -1067,13 +1037,35 @@ class CutToken {
 
   } // GetIDTOETokenInmNowLine()
 
+  private String GetBOOLEANRELATIONALToken() throws Throwable {
+    char charStr = mnowLine.charAt( 0 );
+
+    if ( charStr == '>' || charStr == '<' || charStr == '=' || charStr == '!' ) {
+      try {
+        char secCharStr = mnowLine.charAt( 1 );
+        if ( secCharStr == '=' )
+          return new String() + charStr + secCharStr;
+        else if ( charStr == '>' || charStr == '<' )
+          return new String() + charStr;
+      } // try
+      catch ( Throwable throwable ) {
+        if ( charStr == '>' || charStr == '<' )
+          return new String() + charStr;
+      } // catch
+
+    } // if
+
+    return new String();
+  } // GetBOOLEANRELATIONALToken()
+
   private String GetOPERATORToken() throws Throwable {
     char charStr = mnowLine.charAt( 0 );
-    if ( charStr == '+' || charStr == '-' || charStr == '*' || charStr == '/' || charStr == '%' )
-      return mnowLine.substring( 0,1 );
+    if ( charStr == '+' || charStr == '-' || charStr == '*' || charStr == '|' || charStr == '&' ||
+         charStr == '/' || charStr == '%' )
+      return mnowLine.substring( 0, 1 );
 
-    if ( charStr == '>' || charStr == '<')
-      return mnowLine.substring( 0,1 );
+    if ( charStr == '>' || charStr == '<' )
+      return mnowLine.substring( 0, 2 );
 
     return new String();
   } // GetOPERATORToken()
@@ -1141,28 +1133,6 @@ class CutToken {
 
   } // GetNUMTokenInmNowLine()
 
-  private String GetBOOLEANOPERATOETokenInmNowLine() throws Throwable {
-
-    String gotBOOLEANOPERATOE = new String();
-    int findIndxe = - 1;
-    if ( FindStrStarIndex( ">=" ) > - 1 )
-      findIndxe = FindStrStarIndex( ">=" );
-    else if ( FindStrStarIndex( "<=" ) > - 1 )
-      findIndxe = FindStrStarIndex( "<=" );
-
-    if ( findIndxe > - 1 ) {
-      gotBOOLEANOPERATOE = mnowLine.substring( 0, 2 );
-      IsGotTokenProcessFormNowLine( 2 );
-    } // if
-    else {
-      gotBOOLEANOPERATOE = mnowLine.substring( 0, 1 );
-      IsGotTokenProcessFormNowLine( 1 );
-    } // else
-
-    return gotBOOLEANOPERATOE;
-
-  } // GetBOOLEANOPERATOETokenInmNowLine()
-
   private boolean IsIDInmNowLineFirst() throws Throwable {
     try {
 
@@ -1182,66 +1152,36 @@ class CutToken {
 
   } // IsIDInmNowLineFirst()
 
-  private boolean IsBOOLEANInmNowLineFirst() throws Throwable {
-    try {
+  private boolean IsBOOLEANCONDITION1InmNowLineFirst() throws Throwable {
+    char charStr = mnowLine.charAt( 0 );
 
-      char charStr = mnowLine.charAt( 0 );
-
-      if ( IsBOOLEANOPERATOE( charStr ) )
-        return true;
-      else
+    if ( charStr == '&' || charStr == '|' ) {
+      try {
+        char secCharStr = mnowLine.charAt( 1 );
+        if ( charStr == secCharStr )
+          return true;
+        else
+          return false;
+      } // try
+      catch ( Throwable throwable ) {
         return false;
+      } // catch
 
-    } // try
-    catch ( Throwable throwable ) {
+    } // if
 
-      return false;
-
-    } // catch
-
-  } // IsBOOLEANInmNowLineFirst()
-
-  private boolean IsBOOLEANOPERATOE( char theWord ) throws Throwable {
-
-    if ( theWord == '>' || theWord == '<' || theWord == '=' )
-      return true;
-    else
-      return false;
-
-  } // IsBOOLEANOPERATOE()
+    return false;
+  } // IsBOOLEANCONDITION1InmNowLineFirst()
 
   private boolean Buffer1HasFullCommend( Vector<TOKEN> buffer ) throws Throwable {
 
-    int semicolonindex = - 1;
-    boolean isHas = false;
+    if( mBuffer.size() > 1 ) {
+      for( int i = 0 ; i < mBuffer.size() ; i ++ )
+        buffer.add( mBuffer.get( i ) );
+      mBuffer.clear();
+      return true;
+    }
 
-    for ( int i = 0 ; i < mBuffer.size() ; i++ ) {
-      if ( mBuffer.get( i ).GetType() == Global.s_T_SEMICOLON ) {
-        semicolonindex = i;
-        isHas = true;
-        i = mBuffer.size();
-      } // if
-    } // for
-
-    if ( ! isHas ) {
-      return false;
-    } // if
-
-    for ( int i = 0 ; i < mBuffer.size() ; i++ )
-      buffer.add( mBuffer.get( i ) );
-
-    if ( ( buffer.size() - 1 ) != semicolonindex ) {
-      int count = buffer.size() - 1 - semicolonindex;
-
-      for ( int i = 0 ; i < count ; i++ )
-        buffer.remove( semicolonindex + 1 );
-
-    } // if
-
-    for ( int i = 0 ; i <= semicolonindex ; i++ )
-      mBuffer.remove( 0 );
-
-    return isHas;
+    return false;
 
   } // Buffer1HasFullCommend()
 
@@ -1341,9 +1281,12 @@ class CutToken {
     if ( charStr == '*' || charStr == '/' || charStr == '%' )
       return true;
 
+    if ( charStr == '|' || charStr == '&' )
+      return true;
+
     if ( charStr == '>' ) {
       try {
-        char secCharStr = mnowLine.charAt( 0 );
+        char secCharStr = mnowLine.charAt( 1 );
         if ( secCharStr == '>' )
           return true;
         else
@@ -1357,7 +1300,7 @@ class CutToken {
 
     if ( charStr == '<' ) {
       try {
-        char secCharStr = mnowLine.charAt( 0 );
+        char secCharStr = mnowLine.charAt( 1 );
         if ( secCharStr == '<' )
           return true;
         else
@@ -1373,13 +1316,39 @@ class CutToken {
 
   } // IsOPERATORInmNowLineFirst()
 
+  private boolean IsBOOLEANRELATIONALInmNowLineFirst() throws Throwable {
+    char charStr = mnowLine.charAt( 0 );
+
+    if ( charStr == '>' || charStr == '<' || charStr == '=' || charStr == '!' ) {
+      try {
+        char secCharStr = mnowLine.charAt( 1 );
+        if ( secCharStr == '=' )
+          return true;
+        else if ( charStr == '>' || charStr == '<' )
+          return true;
+        else
+          return false;
+      } // try
+      catch ( Throwable throwable ) {
+        if ( charStr == '>' || charStr == '<' )
+          return true;
+        else
+          return false;
+      } // catch
+
+    } // if
+
+    return false;
+
+  } // IsBOOLEANRELATIONALInmNowLineFirst()
+
   private boolean IsASSISNOPERATORInmNowLineFirst() throws Throwable {
     char charStr = mnowLine.charAt( 0 );
 
-    if ( charStr == '>' ) {
+    if ( charStr == '+' || charStr == '-' ) {
       try {
-        char secCharStr = mnowLine.charAt( 0 );
-        if ( secCharStr == '>' )
+        char secCharStr = mnowLine.charAt( 1 );
+        if ( secCharStr == '=' || charStr == secCharStr )
           return true;
         else
           return false;
@@ -1390,10 +1359,10 @@ class CutToken {
 
     } // if
 
-    if ( charStr == '<' ) {
+    if ( charStr == '*' || charStr == '/' || charStr == '%' ) {
       try {
-        char secCharStr = mnowLine.charAt( 0 );
-        if ( secCharStr == '<' )
+        char secCharStr = mnowLine.charAt( 1 );
+        if ( secCharStr == '=' )
           return true;
         else
           return false;
@@ -1605,8 +1574,13 @@ class CutToken {
 class Main {
 
   public static void main( String[] args ) throws Throwable {
-    // Test test = new Test();
-    // test.test();
+    Vector<TOKEN> stament = new Vector<TOKEN>();
+    CutToken cutToken = new CutToken();
+    while ( cutToken.Cutting( stament ) ) {
+      for ( int i = 0 ; i < stament.size() ; i++ )
+        System.out.println( stament.get( i ).GetToken() + " T:" + stament.get( i ).GetType() );
+      stament = new Vector<TOKEN>();
+    }
 
   } // main()
 
