@@ -3373,7 +3373,7 @@ class Main {
         else
           System.out.println( "Gramer unsucess! ");
         Excute excute = new Excute( stament );
-        excute.Excute();
+        // excute.Excute();
       } // try
       catch ( Throwable throwable ) {
 
