@@ -180,6 +180,8 @@ class Global {
 
   public static void G_OurCInitialize() throws Throwable {
     s_Functions.add( new Function( "Done", new Vector<VarList>(), new Vector<Stament>() ) );
+    s_Variables.add( new VarList() );
+    s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "i" ) );
   } // G_OurCInitialize()
 
 } // class Global
@@ -300,7 +302,7 @@ class VarINT extends Variable {
 
   private Integer m_value = null;
 
-  public VarINT( int type, String name, boolean isNull ) throws Throwable {
+  public VarINT( int type, String name ) throws Throwable {
     super( type, name );
   } // VarINT()
 
@@ -447,7 +449,7 @@ class VarBOOL extends Variable {
 } // class VarBOOL
 
 class VarList {
-  public Vector<Variable> m_Var;
+  public Vector<Variable> m_Var = new Vector<Variable>();
 } // class VarList
 
 class Function {
@@ -1587,7 +1589,7 @@ class Parser {
 
   private boolean isStepEnd() throws Throwable {
     try {
-      if ( m_step + 1 > m_statement.size() ) {
+      if ( m_step + 1 >= m_statement.size() ) {
         m_step = m_statement.size() - 1;
         return true;
       } // if
@@ -1614,7 +1616,7 @@ class Parser {
       } // else
 
       while ( ( Definition() || Statement() ) ) {
-        ;
+        m_step += 1 ;
       } // while
 
       if ( m_step != m_statement.size() )
@@ -1958,6 +1960,17 @@ class Parser {
            m_statement.get( m_step ).GetType() == 21 ) {
         return true;
       } // if
+      else if ( Expression() ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
+             m_statement.get( m_step ).GetType() == 21 ) {
+          m_step += 1 ;
+          return true ;
+        } // if
+        else {
+          return false ;
+        } // else
+      } // else if
       else if ( m_statement.get( m_step ).GetToken().equals( "return" ) ) {
         m_step += 1;
         if ( Expression() )
@@ -2138,6 +2151,7 @@ class Parser {
   private boolean Basic_Expression() throws Throwable {
     try {
       if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
+        m_step += 1 ;
         if ( Rest_of_Identifier_Started_Basic_Exp() ) {
           return true;
         } // if
@@ -3170,31 +3184,34 @@ class Parser {
   private boolean Signed_Unary_Exp() throws Throwable {
     try {
       if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
-        m_step += 1 ;
+        m_step += 1;
 
         if ( isStepEnd() ) {
-          return true ;
+          return true;
         } // if
 
-        if ( m_statement.get( m_step ).GetToken().equals( "(" ) && m_statement.get( m_step ).GetType() == 3 ) {
-          m_step += 1 ;
+        if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
+             m_statement.get( m_step ).GetType() == 3 ) {
+          m_step += 1;
 
           if ( Actual_Parameter_List() ) {
-            m_step += 1 ;
+            m_step += 1;
           } // if
 
-          if ( m_statement.get( m_step ).GetToken().equals( ")" ) && m_statement.get( m_step ).GetType() == 4 ) {
-            return true ;
+          if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
+               m_statement.get( m_step ).GetType() == 4 ) {
+            return true;
           } // if
           else {
-            return false ;
+            return false;
           } // else
         } // if
-        else if ( m_statement.get( m_step ).GetToken().equals( "[" ) && m_statement.get( m_step ).GetType() == 5 ) {
+        else if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
+                  m_statement.get( m_step ).GetType() == 5 ) {
 
         } // else if
 
-        return false ;
+        return false;
       } // if
       else if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant
         return true;
@@ -3271,7 +3288,7 @@ class Parser {
                 return true;
               } // if
 
-              return false ;
+              return false;
             } // if
             else {
               return false;
@@ -3287,7 +3304,7 @@ class Parser {
           return true;
         } // else if
         else {
-          return true ;
+          return true;
         } // else
       } // if
       else if ( m_statement.get( m_step ).GetType() == 2 ) {
@@ -3364,16 +3381,17 @@ class Main {
     while ( true ) {
       Vector<TOKEN> stament = new Vector<TOKEN>();
       try {
-        System.out.println( "CutToken Part! ");
+        System.out.println( "CutToken Part! " );
         cutToken.Cutting( stament );
         Parser parser = new Parser( stament );
-        System.out.println( "Parser Part! ");
-        if (parser.GrammarParser())
-          System.out.println( "Parser sucess! ");
+        System.out.println( "Parser Part! " );
+        if ( parser.GrammarParser() )
+          System.out.println( "Parser sucess! " );
         else
-          System.out.println( "Gramer unsucess! ");
+          System.out.println( "Gramer unsucess! " );
         Excute excute = new Excute( stament );
         // excute.Excute();
+        stament = new Vector<TOKEN>();
       } // try
       catch ( Throwable throwable ) {
 
