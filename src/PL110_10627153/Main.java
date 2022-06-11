@@ -1588,6 +1588,7 @@ class Parser {
   } // GrammarParser()
 
   private boolean isStepEnd() throws Throwable {
+    /*
     try {
       if ( m_step + 1 >= m_statement.size() ) {
         m_step = m_statement.size() - 1;
@@ -1599,6 +1600,8 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch
+     */
+    return false;
   } // isStepEnd
 
   private boolean UserInput() throws Throwable {
@@ -2130,7 +2133,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+      while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
         m_step += 1;
         if ( Basic_Expression() ) {
           // m_step += 1;
@@ -2394,26 +2397,32 @@ class Parser {
   private boolean Assignment_Operator() throws Throwable {
     if ( m_statement.get( m_step ).GetToken().equals( "=" )
          && m_statement.get( m_step ).GetType() == 18 ) {
+      m_step += 1;
       return true;
     } // if
     else if ( m_statement.get( m_step ).GetToken().equals( "*=" )
               && m_statement.get( m_step ).GetType() == 20 ) { // TE
+      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "/=" )
               && m_statement.get( m_step ).GetType() == 20 ) { // DE
+      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "%=" ) &&
               m_statement.get( m_step ).GetType() == 20 ) { // RE
+      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "+=" ) &&
               m_statement.get( m_step ).GetType() == 20 ) { // PE
+      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "-=" ) &&
               m_statement.get( m_step ).GetType() == 20 ) { // ME
+      m_step += 1;
       return true;
     } // else if
     else {
@@ -2966,7 +2975,7 @@ class Parser {
 
   private boolean Rest_of_Maybe_Shift_Exp() throws Throwable {
     try {
-      if ( Rest_of_Maybe_Shift_Exp() ) {
+      if ( Rest_of_Maybe_Additive_Exp() ) {
         // m_step += 1;
       } // if
       else {
