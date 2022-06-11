@@ -1588,7 +1588,6 @@ class Parser {
   } // GrammarParser()
 
   private boolean isStepEnd() throws Throwable {
-    /*
     try {
       if ( m_step + 1 >= m_statement.size() ) {
         m_step = m_statement.size() - 1;
@@ -1600,8 +1599,6 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch
-     */
-    return false;
   } // isStepEnd
 
   private boolean UserInput() throws Throwable {
@@ -1618,7 +1615,15 @@ class Parser {
         return false;
       } // else
 
+      if ( isStepEnd() ) {
+        return true ;
+      } // if
+
       while ( ( Definition() || Statement() ) ) {
+        m_step += 1;
+        if ( isStepEnd() ) {
+          return true ;
+        } // if
       } // while
 
       if ( m_step != m_statement.size() )
@@ -1709,12 +1714,12 @@ class Parser {
 
   private boolean Rest_of_Declarators() throws Throwable {
     try {
-      if ( m_statement.get( m_step ).GetToken().equals( "[" ) && m_statement.get( 0 ).GetType() == 5 ) {
+      if ( m_statement.get( m_step ).GetToken().equals( "[" ) && m_statement.get( m_step ).GetType() == 5 ) {
         m_step += 1;
         if ( m_statement.get( m_step ).GetType() == 2 ) { // Constant
           m_step += 1;
           if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
-               m_statement.get( 0 ).GetType() == 6 ) {
+               m_statement.get( m_step ).GetType() == 6 ) {
             m_step += 1;
           } // if
           else {
@@ -1726,7 +1731,7 @@ class Parser {
         } // else
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+      while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
         m_step += 1;
         if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
           m_step += 1;
@@ -1820,6 +1825,7 @@ class Parser {
     try {
       if ( Type_Specifier() ) {
         m_step += 1;
+
         if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
           m_step += 1;
 
@@ -1833,8 +1839,10 @@ class Parser {
           if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
                m_statement.get( m_step ).GetType() == 5 ) {
             m_step += 1;
+
             if ( m_statement.get( m_step ).GetType() == 2 ) { // Constant
               m_step += 1;
+
               if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
                    m_statement.get( m_step ).GetType() == 6 ) {
                 m_step += 1;
@@ -1848,7 +1856,9 @@ class Parser {
             } // else
           } // if
 
-          while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
+          boolean isIn = false ;
+          while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
+            isIn = true ;
             m_step += 1;
             if ( Type_Specifier() ) {
               m_step += 1;
@@ -1881,14 +1891,14 @@ class Parser {
             } // if
             else {
               return false;
-            } //
-
-            if ( isStepEnd() ) {
-              return true;
-            } // if
+            } // else
           } // while
 
-          return true;
+          if ( isIn ) {
+            m_step -= 1 ;
+          } // if
+
+          return true ;
         } // if
         else {
           return false;
@@ -1960,27 +1970,24 @@ class Parser {
     try {
       if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
            m_statement.get( m_step ).GetType() == 21 ) {
-        m_step += 1 ;
         return true;
       } // if
       else if ( Expression() ) {
-        // m_step += 1;
+        m_step += 1;
         if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
              m_statement.get( m_step ).GetType() == 21 ) {
-          m_step += 1 ;
-          return true ;
+          return true;
         } // if
         else {
-          return false ;
+          return false;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).GetToken().equals( "return" ) ) {
         m_step += 1;
         if ( Expression() )
-          // m_step += 1;
+          m_step += 1;
         if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
              m_statement.get( m_step ).GetType() == 21 ) {
-          m_step += 1 ;
           return true;
         } // if
         else {
@@ -2002,7 +2009,7 @@ class Parser {
                  m_statement.get( m_step ).GetType() == 4 ) {
               m_step += 1;
               if ( Statement() ) {
-                // m_step += 1; // 可能會out of range
+                m_step += 1; // 可能會out of range
 
                 if ( isStepEnd() ) {
                   return true;
@@ -2018,7 +2025,8 @@ class Parser {
                     return false;
                   } // else
                 } // if
-                return true;
+
+                return true; // ?_?
               } // if
               else {
                 return false;
@@ -2116,14 +2124,12 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch()
-    return false;
-
   } // Statement()
 
   private boolean Expression() throws Throwable {
     try {
       if ( Basic_Expression() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2136,7 +2142,7 @@ class Parser {
       while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
         m_step += 1;
         if ( Basic_Expression() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2157,7 +2163,7 @@ class Parser {
   private boolean Basic_Expression() throws Throwable {
     try {
       if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
-        m_step += 1 ;
+        m_step += 1;
         if ( Rest_of_Identifier_Started_Basic_Exp() ) {
           return true;
         } // if
@@ -2184,13 +2190,13 @@ class Parser {
         } // else
       } // else if
       else if ( Sign() ) {
-        // m_step += 1;
+        m_step += 1;
         while ( Sign() ) {
-          // m_step += 1;
+          m_step += 1;
         } // while
 
         if ( Signed_Unary_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
           if ( Romce_and_Romloe() ) {
             return true;
           } // if
@@ -2215,7 +2221,7 @@ class Parser {
                 m_statement.get( m_step ).GetType() == 3 ) {
         m_step += 1;
         if ( Expression() ) {
-          // m_step += 1;
+          m_step += 1;
           if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                m_statement.get( m_step ).GetType() == 4 ) {
             m_step += 1;
@@ -2245,16 +2251,41 @@ class Parser {
 
   private boolean Rest_of_Identifier_Started_Basic_Exp() throws Throwable {
     try {
-      boolean notOverYet = false;
-
       if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
            m_statement.get( m_step ).GetType() == 5 ) {
         m_step += 1;
         if ( Expression() ) {
-          // m_step += 1;
+          m_step += 1;
           if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
                m_statement.get( m_step ).GetType() == 6 ) {
             m_step += 1;
+
+            if ( Assignment_Operator() ) {
+              m_step += 1;
+              if ( Basic_Expression() ) {
+                return true;
+              } // if
+              else {
+                return false;
+              } // else
+            } // if
+            else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
+                        m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
+                      m_statement.get( m_step ).GetType() == 20 ) {
+              m_step += 1;
+              if ( Romce_and_Romloe() ) {
+                return true;
+              } // if
+              else {
+                return false;
+              } // else
+            } // else if
+            else if ( Romce_and_Romloe() ) {
+              return true;
+            } // else if
+            else {
+              return false;
+            } // else
           } // if
           else {
             return false;
@@ -2265,8 +2296,8 @@ class Parser {
         } // else
       } // if
 
-      if ( Assignment_Operator() ) {
-        // m_step += 1;
+      else if ( Assignment_Operator() ) {
+        m_step += 1;
         if ( Basic_Expression() ) {
           return true;
         } // if
@@ -2275,7 +2306,7 @@ class Parser {
         } // else
       } // if
       else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
-                  m_statement.get( m_step ).equals( "--" ) ) &&
+                  m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
                 m_statement.get( m_step ).GetType() == 20 ) {
         m_step += 1;
         if ( Romce_and_Romloe() ) {
@@ -2284,18 +2315,42 @@ class Parser {
         else {
           return false;
         } // else
-      } // if
+      } // else if
       else if ( Romce_and_Romloe() ) {
         return true;
+      } // else if
+      else if ( Assignment_Operator() ) {
+        m_step += 1;
+        if ( Basic_Expression() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
       } // if
-      else if ( m_statement.get( m_step ).GetToken().equals( "(" ) ||
+      else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
+                  m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
+                m_statement.get( m_step ).GetType() == 20 ) {
+        m_step += 1;
+        if ( Romce_and_Romloe() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
+      } // else if
+      else if ( Romce_and_Romloe() ) {
+        return true;
+      } // else if
+      else if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
                 m_statement.get( m_step ).GetType() == 3 ) {
         m_step += 1;
+
         if ( Actual_Parameter_List() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
 
-        if ( m_statement.get( m_step ).GetToken().equals( ")" ) ||
+        if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
              m_statement.get( m_step ).GetType() == 4 ) {
           m_step += 1;
           if ( Romce_and_Romloe() ) {
@@ -2310,7 +2365,7 @@ class Parser {
         } // else
       } // else if
       else {
-        return false;
+        return false ;
       } // else
     } // try
     catch ( Throwable throwable ) {
@@ -2324,7 +2379,7 @@ class Parser {
            m_statement.get( m_step ).GetType() == 5 ) {
         m_step += 1;
         if ( Expression() ) {
-          // m_step += 1;
+          m_step += 1;
           if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
                m_statement.get( m_step ).GetType() == 6 ) {
             m_step += 1;
@@ -2367,12 +2422,12 @@ class Parser {
   private boolean Actual_Parameter_List() throws Throwable {
     try {
       if ( Basic_Expression() ) {
-        // m_step += 1;
+        m_step += 1;
 
-        while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
+        while ( m_statement.get( m_step ).GetToken().equals( ", " ) ) {
           m_step += 1;
           if ( Basic_Expression() ) {
-            // m_step += 1;
+            m_step += 1;
           } // if
           else {
             return false;
@@ -2397,32 +2452,26 @@ class Parser {
   private boolean Assignment_Operator() throws Throwable {
     if ( m_statement.get( m_step ).GetToken().equals( "=" )
          && m_statement.get( m_step ).GetType() == 18 ) {
-      m_step += 1;
       return true;
     } // if
     else if ( m_statement.get( m_step ).GetToken().equals( "*=" )
               && m_statement.get( m_step ).GetType() == 20 ) { // TE
-      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "/=" )
               && m_statement.get( m_step ).GetType() == 20 ) { // DE
-      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "%=" ) &&
               m_statement.get( m_step ).GetType() == 20 ) { // RE
-      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "+=" ) &&
               m_statement.get( m_step ).GetType() == 20 ) { // PE
-      m_step += 1;
       return true;
     } // else if
     else if ( m_statement.get( m_step ).GetToken().equals( "-=" ) &&
               m_statement.get( m_step ).GetType() == 20 ) { // ME
-      m_step += 1;
       return true;
     } // else if
     else {
@@ -2433,7 +2482,7 @@ class Parser {
   private boolean Romce_and_Romloe() throws Throwable {
     try {
       if ( Rest_of_Maybe_Logical_OR_Exp() ) {
-        // m_step += 1; // 可能會out of range
+        m_step += 1; // 可能會out of range
 
         if ( isStepEnd() ) {
           return true;
@@ -2443,7 +2492,7 @@ class Parser {
              m_statement.get( m_step ).GetType() == 23 ) {
           m_step += 1;
           if ( Basic_Expression() ) {
-            // m_step += 1;
+            m_step += 1;
             if ( m_statement.get( m_step ).GetToken().equals( ":" ) &&
                  m_statement.get( m_step ).GetType() == 23 ) {
               m_step += 1;
@@ -2477,7 +2526,7 @@ class Parser {
   private boolean Rest_of_Maybe_Logical_OR_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Logical_AND_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2491,7 +2540,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 19 ) { // 可能會out of range
         m_step += 1;
         if ( Maybe_Logical_AND_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2512,7 +2561,7 @@ class Parser {
   private boolean Maybe_Logical_AND_Exp() throws Throwable {
     try {
       if ( Maybe_Bit_OR_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2526,7 +2575,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 19 ) { // maybe will out of range
         m_step += 1;
         if ( Maybe_Bit_OR_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2547,7 +2596,7 @@ class Parser {
   private boolean Rest_of_Maybe_Logical_AND_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Bit_OR_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2562,7 +2611,7 @@ class Parser {
         m_step += 1;
 
         if ( Maybe_Bit_OR_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2583,7 +2632,7 @@ class Parser {
   private boolean Maybe_Bit_OR_Exp() throws Throwable {
     try {
       if ( Maybe_Bit_Ex_OR_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2597,7 +2646,7 @@ class Parser {
         m_step += 1;
 
         if ( Maybe_Bit_Ex_OR_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2618,7 +2667,7 @@ class Parser {
   private boolean Rest_of_Maybe_Bit_OR_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Bit_Ex_OR_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2632,7 +2681,7 @@ class Parser {
         m_step += 1;
 
         if ( Maybe_Bit_Ex_OR_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2653,7 +2702,7 @@ class Parser {
   private boolean Maybe_Bit_Ex_OR_Exp() throws Throwable {
     try {
       if ( Maybe_Bit_AND_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2666,7 +2715,7 @@ class Parser {
       while ( m_statement.get( m_step ).GetToken().equals( "^" ) ) { // maybe will out of range
         m_step += 1;
         if ( Maybe_Bit_AND_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2687,7 +2736,7 @@ class Parser {
   private boolean Rest_of_Maybe_Bit_Ex_OR_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Bit_AND_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2701,7 +2750,7 @@ class Parser {
         m_step += 1;
 
         if ( Maybe_Bit_AND_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2722,7 +2771,7 @@ class Parser {
   private boolean Maybe_Bit_AND_Exp() throws Throwable {
     try {
       if ( Maybe_Equality_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2736,7 +2785,7 @@ class Parser {
         m_step += 1;
 
         if ( Maybe_Equality_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2757,7 +2806,7 @@ class Parser {
   private boolean Rest_of_Maybe_Bit_AND_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Equality_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2771,7 +2820,7 @@ class Parser {
         m_step += 1;
 
         if ( Maybe_Equality_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2792,7 +2841,7 @@ class Parser {
   private boolean Maybe_Equality_Exp() throws Throwable {
     try {
       if ( Maybe_Equality_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2807,7 +2856,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 17 ) {
         m_step += 1;
         if ( Maybe_Relational_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2828,7 +2877,7 @@ class Parser {
   private boolean Rest_of_Maybe_Equality_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Relational_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2843,7 +2892,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 17 ) {
         m_step += 1;
         if ( Maybe_Relational_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2864,7 +2913,7 @@ class Parser {
   private boolean Maybe_Relational_Exp() throws Throwable {
     try {
       if ( Maybe_Shift_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2881,7 +2930,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 17 ) {
         m_step += 1;
         if ( Maybe_Shift_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2902,7 +2951,7 @@ class Parser {
   private boolean Rest_of_Maybe_Relational_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Shift_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2919,7 +2968,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 17 ) {
         m_step += 1;
         if ( Maybe_Shift_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2940,7 +2989,7 @@ class Parser {
   private boolean Maybe_Shift_Exp() throws Throwable {
     try {
       if ( Maybe_Additive_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2955,7 +3004,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 16 ) {
         m_step += 1;
         if ( Maybe_Additive_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -2976,7 +3025,7 @@ class Parser {
   private boolean Rest_of_Maybe_Shift_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Additive_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -2991,7 +3040,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 16 ) {
         m_step += 1;
         if ( Maybe_Additive_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -3012,7 +3061,7 @@ class Parser {
   private boolean Maybe_Additive_Exp() throws Throwable {
     try {
       if ( Maybe_Mult_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -3027,7 +3076,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 16 ) {
         m_step += 1;
         if ( Maybe_Mult_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -3048,7 +3097,7 @@ class Parser {
   private boolean Rest_of_Maybe_Additive_Exp() throws Throwable {
     try {
       if ( Rest_of_Maybe_Mult_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
       } // if
       else {
         return false;
@@ -3063,7 +3112,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 16 ) {
         m_step += 1;
         if ( Maybe_Mult_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -3084,7 +3133,7 @@ class Parser {
   private boolean Maybe_Mult_Exp() throws Throwable {
     try {
       if ( Unary_Exp() ) {
-        // m_step += 1;
+        m_step += 1;
         if ( Rest_of_Maybe_Mult_Exp() ) {
           return true;
         } // if
@@ -3113,7 +3162,7 @@ class Parser {
               m_statement.get( m_step ).GetType() == 16 ) {
         m_step += 1;
         if ( Unary_Exp() ) {
-          // m_step += 1;
+          m_step += 1;
         } // if
         else {
           return false;
@@ -3134,10 +3183,10 @@ class Parser {
   private boolean Unary_Exp() throws Throwable {
     try {
       if ( Sign() ) {
-        // m_step += 1;
+        m_step += 1;
 
         while ( Sign() ) {
-          // m_step += 1;
+          m_step += 1;
         } // while
 
         if ( Signed_Unary_Exp() ) {
@@ -3165,7 +3214,7 @@ class Parser {
                m_statement.get( m_step ).GetType() == 5 ) { // 可能會out of range
             m_step += 1;
             if ( Expression() ) {
-              // m_step += 1;
+              m_step += 1;
               if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
                    m_statement.get( m_step ).GetType() == 6 ) {
                 return true;
@@ -3207,7 +3256,7 @@ class Parser {
           m_step += 1;
 
           if ( Actual_Parameter_List() ) {
-            // m_step += 1;
+            m_step += 1;
           } // if
 
           if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
@@ -3232,7 +3281,7 @@ class Parser {
                 m_statement.get( m_step ).GetType() == 3 ) {
         m_step += 1;
         if ( Expression() ) {
-          // m_step += 1;
+          m_step += 1;
           if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                m_statement.get( m_step ).GetType() == 4 ) {
             return true;
@@ -3268,7 +3317,7 @@ class Parser {
           m_step += 1;
 
           if ( Actual_Parameter_List() ) {
-            // m_step += 1;
+            m_step += 1;
           } // if
 
           if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
@@ -3284,7 +3333,7 @@ class Parser {
           m_step += 1;
 
           if ( Expression() ) {
-            // m_step += 1;
+            m_step += 1;
 
             if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
                  m_statement.get( m_step ).GetType() == 6 ) {
@@ -3327,7 +3376,7 @@ class Parser {
         m_step += 1;
 
         if ( Expression() ) {
-          // m_step += 1;
+          m_step += 1;
 
           if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                m_statement.get( m_step ).GetType() == 4 ) {
