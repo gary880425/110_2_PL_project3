@@ -1042,7 +1042,7 @@ class CutToken {
 
     } // if
 
-    if ( mnowLine.charAt( 0 ) == '\'' ) {
+    else if ( mnowLine.charAt( 0 ) == '\'' ) {
       gotCONSTANT += "\'";
       RemoveFirstCherFormNowLine();
       try {
@@ -1563,13 +1563,6 @@ class Parser {
 
   public boolean GrammarParser() throws Throwable {
     try {
-      if ( m_statement.get( 0 ).GetToken().equals( ";" ) && m_statement.get( 0 ).GetType() == 21 ) {
-        System.out.println( "Unexpected token : ';'" );
-        System.out.print( "> " );
-        m_statement.clear();
-        return false;
-      } // if
-
       if ( this.UserInput() ) {
         return true;
       } // if ()
@@ -2129,7 +2122,7 @@ class Parser {
   private boolean Expression() throws Throwable {
     try {
       if ( Basic_Expression() ) {
-        m_step += 1;
+        ;
       } // if
       else {
         return false;
@@ -2142,7 +2135,7 @@ class Parser {
       while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
         m_step += 1;
         if ( Basic_Expression() ) {
-          m_step += 1;
+          ;
         } // if
         else {
           return false;
