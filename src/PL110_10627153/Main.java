@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220612 20:05
+// 20220613 00:14
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -513,6 +513,7 @@ class CutToken {
 
   public boolean Cutting( Vector<TOKEN> stament ) throws Throwable {
 
+    mLineCount = 0;
     boolean notGetSEMICOLON = true;
 
     System.out.print( "> " );
@@ -635,7 +636,8 @@ class CutToken {
         } // else if
         else {
           if ( ! mnowLine.isEmpty() ) {
-            System.out.println( "Unrecognized token with first char : '" + mnowLine.charAt( 0 ) + "'" );
+            System.out.println( "Line " + mLineCount + " : " + "Unrecognized token with first char : '" +
+                                mnowLine.charAt( 0 ) + "'" );
             // System.out.print( "> " );
             mBuffer.clear();
             throw new Throwable();
@@ -652,7 +654,7 @@ class CutToken {
 
       } // catch
 
-    } // whil e
+    } // while
 
     if ( Buffer1HasFullCommend( stament ) )
       return true;
@@ -787,7 +789,8 @@ class CutToken {
         } // else if
         else {
           if ( ! mnowLine.isEmpty() ) {
-            System.out.println( "Unrecognized token with first char : '" + mnowLine.charAt( 0 ) + "'" );
+            System.out.println( "Line " + mLineCount + " : " + "Unrecognized token with first char : '" +
+                                mnowLine.charAt( 0 ) + "'" );
             // System.out.print( "> " );
             mBuffer.clear();
             throw new Throwable();
@@ -804,7 +807,7 @@ class CutToken {
 
       } // catch
 
-    } // whil e
+    } // while
 
     if ( Buffer1HasFullCommend( stament ) )
       return true;
@@ -827,7 +830,7 @@ class CutToken {
            mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( "*" ) ||
            mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( "/" ) ) {
         if ( gotOPERATOR.equals( "*" ) || gotOPERATOR.equals( "/" ) ) {
-          System.out.println( "Unexpected token : '"
+          System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -843,7 +846,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 3 ).GetType() == Global.s_T_OPERATOR &&
            mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_OPERATOR ) {
 
-        System.out.println( "Unexpected token : '"
+        System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
                             + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
         // System.out.print( "> " );
         mBuffer.clear();
@@ -859,7 +862,7 @@ class CutToken {
 
         if ( Global.G_FindVariable( Global.s_Variables,
                                     mBuffer.get( mBuffer.size() - 2 ).GetToken() ) == null ) {
-          System.out.println( "Undefined identifier : '"
+          System.out.println("Line "+ mLineCount +" : " +"Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           System.out.print( "> " );
           mBuffer.clear() ;
@@ -919,7 +922,7 @@ class CutToken {
     } // for
 
     if ( count < 0 ) {
-      System.out.println( "Unexpected token : '"
+      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -934,7 +937,7 @@ class CutToken {
         if ( ! ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_TYPE ||
                  mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_VOID ) ) {
           if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-            System.out.println( "Undefined identifier : '"
+            System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
                                 + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
             // System.out.print( "> " );
             mBuffer.clear();
@@ -946,7 +949,7 @@ class CutToken {
       } // if
       else {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-          System.out.println( "Undefined identifier : '"
+          System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -964,7 +967,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
 
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-          System.out.println( "Undefined identifier : '"
+          System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -979,7 +982,7 @@ class CutToken {
 
   protected void HASOTHERTOKENISERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
-      System.out.println( "Undefined identifier : '"
+      System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1000,7 +1003,7 @@ class CutToken {
     } // for
 
     if ( count < 0 ) {
-      System.out.println( "Unexpected token : '"
+      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1036,7 +1039,7 @@ class CutToken {
   protected void CONSTANTFINDERROR( String gotNUM ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_CONSTANT ) {
-        System.out.println( "Unexpected token : '"
+        System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
                             + gotNUM + "'" );
         // System.out.print( "> " );
         mBuffer.clear();
@@ -1092,7 +1095,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
 
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-          System.out.println( "Undefined identifier : '"
+          System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -1116,7 +1119,7 @@ class CutToken {
     } // for
 
     if ( count < 0 ) {
-      System.out.println( "Unexpected token : '"
+      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1198,12 +1201,13 @@ class CutToken {
     if ( mnowLine.charAt( 0 ) == '.' )
       gotCONSTANT = gotCONSTANT + "0";
 
-    while ( IsNumberAndNumberLegalWordInmNowLineFirstChar() ) {
-      gotCONSTANT = gotCONSTANT + mnowLine.substring( 0, 1 );
-      RemoveFirstCherFormNowLine();
-    } // while
-
-    if ( mnowLine.charAt( 0 ) == '"' ) {
+    if ( IsNumberAndNumberLegalWordInmNowLineFirstChar() ) {
+      while ( IsNumberAndNumberLegalWordInmNowLineFirstChar() ) {
+        gotCONSTANT = gotCONSTANT + mnowLine.substring( 0, 1 );
+        RemoveFirstCherFormNowLine();
+      } // while
+    } // if
+    else if ( mnowLine.charAt( 0 ) == '"' ) {
       gotCONSTANT += "\"";
       RemoveFirstCherFormNowLine();
       try {
@@ -1222,7 +1226,7 @@ class CutToken {
         throw new Throwable();
       } // catch
 
-    } // if
+    } // else if
     else if ( mnowLine.charAt( 0 ) == '\'' ) {
       gotCONSTANT += "\'";
       RemoveFirstCherFormNowLine();
@@ -1232,6 +1236,7 @@ class CutToken {
             gotCONSTANT += mnowLine.charAt( 0 );
             RemoveFirstCherFormNowLine();
           } // if
+
           if ( i == 1 ) {
             if ( mnowLine.charAt( 0 ) != '\'' )
               throw new Throwable();
@@ -1260,7 +1265,7 @@ class CutToken {
       return gotCONSTANT;
     } // if
     else {
-      System.out.println( "Unexpected token : '" + gotCONSTANT + "'" );
+      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '" + gotCONSTANT + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
@@ -1557,12 +1562,14 @@ class CutToken {
   protected void InputNextLineTomNowLine() throws Throwable {
 
     mnowLine = msc.nextLine();
+    mLineCount += 1;
     mnowLine = RemoveCommend( mnowLine );
     RemoveHeadWhiteCherFormNowLine();
     RemoveTailWhiteCherFormNowLine();
 
     while ( mnowLine.isEmpty() ) {
       mnowLine = msc.nextLine();
+      mLineCount += 1;
       mnowLine = RemoveCommend( mnowLine );
       RemoveHeadWhiteCherFormNowLine();
       RemoveTailWhiteCherFormNowLine();
@@ -1743,7 +1750,8 @@ class Parser {
       } // if ()
       else {
         if ( ! m_statement.isEmpty() ) {
-          System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+          System.out.println( "Line " + m_statement.get( m_step ).Getline() + " : " +
+                              "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
         } // if
         // System.out.print( "> " );
         return false;
@@ -1752,14 +1760,15 @@ class Parser {
     } // try
     catch ( Throwable throwable ) {
       if ( ! m_statement.isEmpty() ) {
-        System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+        System.out.println( "Line " + m_statement.get( m_step ).Getline() + " : " +
+                            "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
       } // if
       // System.out.print( "> " );
       return false;
     } // catch
   } // GrammarParser()
 
-  private boolean isStepEnd() throws Throwable {
+  private boolean IsStepEnd() throws Throwable {
     try {
       if ( m_step + 1 >= m_statement.size() ) {
         m_step = m_statement.size() - 1;
@@ -1771,7 +1780,7 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch
-  } // isStepEnd
+  } // IsStepEnd()
 
   private boolean UserInput() throws Throwable {
     try {
@@ -1779,7 +1788,7 @@ class Parser {
 
       if ( Definition() ) {
         ;
-      } //if
+      } // if
       else if ( Statement() ) {
         ;
       } // else if
@@ -1787,13 +1796,13 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
       while ( ( Definition() || Statement() ) ) {
         // m_step += 1;
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -1922,7 +1931,7 @@ class Parser {
             else {
               return false;
             } // else
-          } //if
+          } // if
         } // if
         else {
           return false;
@@ -1941,7 +1950,7 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch
-  } // Rest_of_Declarators
+  } // Rest_of_Declarators()
 
   private boolean Function_Definition_Without_ID() throws Throwable {
     try {
@@ -1975,11 +1984,12 @@ class Parser {
         } // else if
         else {
           return false;
-        } //else
+        } // else
       } // if
       else {
         return false;
       } // else
+
       m_statement = new Vector<TOKEN>();
       m_step = 0;
       if ( m_cuttoken.GetStament( m_statement ) ) {
@@ -2011,7 +2021,7 @@ class Parser {
         if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
           m_step += 1;
 
-          if ( isStepEnd() ) {
+          if ( IsStepEnd() ) {
             return true;
           } // if
 
@@ -2168,7 +2178,7 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch()
-  } // declaration()
+  } // Declaration()
 
   private boolean Statement() throws Throwable {
     try {
@@ -2249,7 +2259,7 @@ class Parser {
                   else if ( isGetOK ) {
                     m_cuttoken.ReturnmBuffer2( m_statement );
                     m_statement = new Vector<TOKEN>();
-                  }
+                  } // else if
 
                   return true; // ?_?
                 } // if
@@ -2355,7 +2365,7 @@ class Parser {
           else {
             return false;
           } // else
-        }
+        } // if
         else
           return false;
       } // else if
@@ -2377,7 +2387,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2390,7 +2400,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2535,7 +2545,7 @@ class Parser {
         else
           return false;
 
-      }
+      } // else if
       else if ( Romce_and_Romloe() ) {
         return true;
       } // else if
@@ -2609,7 +2619,7 @@ class Parser {
             return false;
           } // else
 
-          if ( isStepEnd() ) {
+          if ( IsStepEnd() ) {
             return true;
           } // if
         } // while
@@ -2623,7 +2633,8 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch()
-  } // Actual_Parameter_List
+
+  } // Actual_Parameter_List()
 
   private boolean Assignment_Operator() throws Throwable {
     if ( m_statement.get( m_step ).GetToken().equals( "=" )
@@ -2666,7 +2677,7 @@ class Parser {
       if ( Rest_of_Maybe_Logical_OR_Exp() ) {
         // m_step += 1; // 可能會out of range
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
 
@@ -2714,7 +2725,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2728,7 +2739,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2749,7 +2760,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2763,7 +2774,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2784,7 +2795,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2799,7 +2810,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2820,7 +2831,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2834,7 +2845,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2855,7 +2866,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2869,7 +2880,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2890,7 +2901,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2903,7 +2914,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2913,7 +2924,7 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch()
-  } // Maybe_Bit_Ex_OR_Exp
+  } // Maybe_Bit_Ex_OR_Exp()
 
   private boolean Rest_of_Maybe_Bit_Ex_OR_Exp() throws Throwable {
     try {
@@ -2924,7 +2935,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2938,7 +2949,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2948,7 +2959,7 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch
-  } // Rest_of_Maybe_Bit_OR_Exp
+  } // Rest_of_Maybe_Bit_Ex_OR_Exp()
 
   private boolean Maybe_Bit_AND_Exp() throws Throwable {
     try {
@@ -2959,7 +2970,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -2973,7 +2984,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -2994,7 +3005,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3008,7 +3019,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3029,7 +3040,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3042,9 +3053,9 @@ class Parser {
         } // if
         else {
           return false;
-        } //
+        } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3065,7 +3076,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3080,7 +3091,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3090,7 +3101,7 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch()
-  } // Rest_of_Maybe_Relational_Exp()
+  } // Rest_of_Maybe_Equality_Exp()
 
   private boolean Maybe_Relational_Exp() throws Throwable {
     try {
@@ -3101,7 +3112,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3118,7 +3129,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3139,7 +3150,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3156,7 +3167,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3177,7 +3188,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3192,7 +3203,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3213,7 +3224,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3228,7 +3239,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3249,7 +3260,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3264,7 +3275,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3285,7 +3296,7 @@ class Parser {
         return false;
       } // else
 
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3300,7 +3311,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3334,7 +3345,7 @@ class Parser {
 
   private boolean Rest_of_Maybe_Mult_Exp() throws Throwable {
     try {
-      if ( isStepEnd() ) {
+      if ( IsStepEnd() ) {
         return true;
       } // if
 
@@ -3350,7 +3361,7 @@ class Parser {
           return false;
         } // else
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
       } // while
@@ -3389,7 +3400,7 @@ class Parser {
         if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
           m_step += 1;
 
-          if ( isStepEnd() ) {
+          if ( IsStepEnd() ) {
             return true;
           } // if
 
@@ -3411,6 +3422,7 @@ class Parser {
               return false;
             } // else
           } // if
+
           return true;
         } // if
         else {
@@ -3431,7 +3443,7 @@ class Parser {
       if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
         m_step += 1;
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
 
@@ -3495,7 +3507,7 @@ class Parser {
       if ( m_statement.get( m_step ).GetType() == 1 ) {  // id
         m_step += 1;
 
-        if ( isStepEnd() ) {
+        if ( IsStepEnd() ) {
           return true;
         } // if
 
@@ -3515,7 +3527,7 @@ class Parser {
           else {
             return false;
           } // else
-        } //if
+        } // if
         else if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
                   m_statement.get( m_step ).GetType() == 5 ) {
           m_step += 1;
@@ -3527,7 +3539,7 @@ class Parser {
                  m_statement.get( m_step ).GetType() == 6 ) {
               m_step += 1;
 
-              if ( isStepEnd() ) {
+              if ( IsStepEnd() ) {
                 return true;
               } // if
 
@@ -3589,7 +3601,8 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch()
-  } // Signed_Unary_Exp()
+  } // Unsigned_Unary_Exp()
+
 } // class Parser
 
 class Excute {
@@ -3605,11 +3618,11 @@ class Excute {
     IsDoneFun();
     if ( mStament.get( 0 ).GetType() == Global.s_T_TYPE ) {
       VerDefinWithoutput();
-    }
+    } // if
     else
       System.out.println( "Statement executed ..." );
 
-  } // Excute()
+  } // ExcuteComm()
 
   private void IsDoneFun() throws Throwable {
     if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) {
@@ -3639,25 +3652,30 @@ class Excute {
 
     } // if
 
-  } // IsDoneFun()
+  } // IsCinFun()
 
   private void VerDefinWithoutput() throws Throwable {
     Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
     if ( var == null ) {
       if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
-        Global.G_AddVariable( new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() ) );
+        var = new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
       } // if
       else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
-        Global.G_AddVariable( new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() ) );
+        var = new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
       } // else if
       else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
-        Global.G_AddVariable( new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() ) );
+        var = new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
       } // else if
       else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
-        Global.G_AddVariable( new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() ) );
+        var = new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
       } // else if
       else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
-        Global.G_AddVariable( new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() ) );
+        var = new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
       } // else if
 
       System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
@@ -3696,16 +3714,15 @@ class Main {
     int isInIfWhileElse = 0;
     while ( true ) {
       Vector<TOKEN> stament = new Vector<TOKEN>();
-      //System.out.println( "main CutToken Part! " );
+      // System.out.println( "main CutToken Part! " );
       if ( cutToken.Cutting( stament ) ) {
         Parser parser = new Parser( stament, cutToken );
-        //System.out.println( "main Parser Part! " );
+        // System.out.println( "main Parser Part! " );
         if ( parser.GrammarParser() ) {
           Excute excute = new Excute( stament );
           excute.ExcuteComm();
-        }
+        } // if
       } // if
-
     } // while
 
   } // main()
