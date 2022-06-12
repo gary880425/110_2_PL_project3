@@ -2119,8 +2119,13 @@ class Parser {
         while ( isHave ) {
           boolean issucess = false;
           if ( Declaration() || Statement() ) {
-            issucess = true;
-            isHave = false;
+            Excute excute = new Excute( m_statement );
+            if ( excute.ExcuteCommWithoutoutput() ) {
+              issucess = true;
+              isHave = false;
+            } // if
+            else
+              return false;
           } // if
           else {
             issucess = false;
@@ -3613,7 +3618,7 @@ class Excute {
     this.mStament = stament;
   } // Excute()
 
-  public void ExcuteComm() throws Throwable {
+  public boolean ExcuteCommWithoutput() throws Throwable {
 
     IsDoneFun();
     if ( mStament.get( 0 ).GetType() == Global.s_T_TYPE ) {
@@ -3622,7 +3627,20 @@ class Excute {
     else
       System.out.println( "Statement executed ..." );
 
-  } // ExcuteComm()
+    return true;
+  } // ExcuteCommWithoutput()
+
+  public boolean ExcuteCommWithoutoutput() throws Throwable {
+
+    IsDoneFun();
+    if ( mStament.get( 0 ).GetType() == Global.s_T_TYPE ) {
+      VerDefinWithoutoutput();
+    } // if
+    else
+      ; // System.out.println( "Statement executed ..." );
+
+    return true;
+  } // ExcuteCommWithoutoutput()
 
   private void IsDoneFun() throws Throwable {
     if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) {
@@ -3702,6 +3720,54 @@ class Excute {
 
   } // VerDefinWithoutput()
 
+  private void VerDefinWithoutoutput() throws Throwable {
+    Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
+    if ( var == null ) {
+      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+        var = new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
+      } // if
+      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+        var = new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+        var = new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+        var = new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+        var = new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() );
+        Global.G_AddVariable( var );
+      } // else if
+
+      // System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+    } // if
+    else {
+      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+        var.SetType( Global.s_V_INT );
+      } // if
+      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+        var.SetType( Global.s_V_STRING );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+        var.SetType( Global.s_V_FLOAT );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+        var.SetType( Global.s_V_CHAR );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+        var.SetType( Global.s_V_BOOL );
+      } // else if
+
+      // System.out.println( "New definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+    } // else
+
+  } // VerDefinWithoutoutput()
+
 } // class Excute
 
 class Main {
@@ -3720,7 +3786,7 @@ class Main {
         // System.out.println( "main Parser Part! " );
         if ( parser.GrammarParser() ) {
           Excute excute = new Excute( stament );
-          excute.ExcuteComm();
+          excute.ExcuteCommWithoutput();
         } // if
       } // if
     } // while
