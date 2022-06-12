@@ -1315,7 +1315,7 @@ class CutToken {
 
   protected boolean Buffer1HasFullCommend( Vector<TOKEN> buffer ) throws Throwable {
 
-    if ( mBuffer.size() > 1 ) {
+    if ( mBuffer.size() > 0 ) {
       buffer.clear();
       for ( int i = 0 ; i < mBuffer.size() ; i++ )
         buffer.add( mBuffer.get( i ) );
