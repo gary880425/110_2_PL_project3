@@ -38,6 +38,7 @@ class Global {
   static final int s_V_BOOL = 5;
 
   static public int s_NOWLINE = 0;
+
   static public Scanner sc = new Scanner( System.in );
 
   static public Vector<VarList> s_Variables = new Vector<VarList>();
@@ -182,6 +183,8 @@ class Global {
     s_Functions.add( new Function( "Done", new Vector<VarList>(), new Vector<Stament>() ) );
     s_Variables.add( new VarList() );
     s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "i" ) );
+    s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "x" ) );
+
   } // G_OurCInitialize()
 
 } // class Global
@@ -615,7 +618,7 @@ class CutToken {
         else {
           if ( ! mnowLine.isEmpty() ) {
             System.out.println( "Unrecognized token with first char : '" + mnowLine.charAt( 0 ) + "'" );
-            System.out.print( "> " );
+            // System.out.print( "> " );
             mBuffer.clear();
             throw new Throwable();
           } // if
@@ -627,6 +630,7 @@ class CutToken {
 
         // System.out.print( "> " );
         mnowLine = new String();
+        return false;
 
       } // catch
 
@@ -648,7 +652,7 @@ class CutToken {
         if ( gotOPERATOR.equals( "*" ) || gotOPERATOR.equals( "/" ) ) {
           System.out.println( "Unexpected token : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-          System.out.print( "> " );
+          // System.out.print( "> " );
           mBuffer.clear();
           throw new Throwable();
         } // if
@@ -664,7 +668,7 @@ class CutToken {
 
         System.out.println( "Unexpected token : '"
                             + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-        System.out.print( "> " );
+        // System.out.print( "> " );
         mBuffer.clear();
         throw new Throwable();
 
@@ -740,7 +744,7 @@ class CutToken {
     if ( count < 0 ) {
       System.out.println( "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-      System.out.print( "> " );
+      // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
     } // if
@@ -755,7 +759,7 @@ class CutToken {
           if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
             System.out.println( "Undefined identifier : '"
                                 + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-            System.out.print( "> " );
+            // System.out.print( "> " );
             mBuffer.clear();
             throw new Throwable();
           } // if
@@ -767,7 +771,7 @@ class CutToken {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
           System.out.println( "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-          System.out.print( "> " );
+          // System.out.print( "> " );
           mBuffer.clear();
           throw new Throwable();
         } // if
@@ -785,7 +789,7 @@ class CutToken {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
           System.out.println( "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
-          System.out.print( "> " );
+          // System.out.print( "> " );
           mBuffer.clear();
           throw new Throwable();
         } // if
@@ -800,7 +804,7 @@ class CutToken {
     if ( mBuffer.size() > 1 ) {
       System.out.println( "Undefined identifier : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-      System.out.print( "> " );
+      // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
 
@@ -821,7 +825,7 @@ class CutToken {
     if ( count < 0 ) {
       System.out.println( "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-      System.out.print( "> " );
+      // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
     } // if
@@ -857,7 +861,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_CONSTANT ) {
         System.out.println( "Unexpected token : '"
                             + gotNUM + "'" );
-        System.out.print( "> " );
+        // System.out.print( "> " );
         mBuffer.clear();
         throw new Throwable();
       } // if
@@ -895,7 +899,7 @@ class CutToken {
 
         if ( ! isnnotAll0orp ) {
           System.out.println( "Error" );
-          System.out.print( "> " );
+          // System.out.print( "> " );
           mBuffer.clear();
           throw new Throwable();
         } // if
@@ -913,7 +917,7 @@ class CutToken {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
           System.out.println( "Undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
-          System.out.print( "> " );
+          // System.out.print( "> " );
           mBuffer.clear();
           throw new Throwable();
         } // if
@@ -937,7 +941,7 @@ class CutToken {
     if ( count < 0 ) {
       System.out.println( "Unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
-      System.out.print( "> " );
+      // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
     } // if
@@ -1036,7 +1040,7 @@ class CutToken {
       } // try
       catch ( Throwable throwable ) {
         System.out.println( "String 要在同一行" );
-        System.out.print( "> " );
+        // System.out.print( "> " );
         mBuffer.clear();
         throw new Throwable();
       } // catch
@@ -1066,7 +1070,7 @@ class CutToken {
       } // try
       catch ( Throwable throwable ) {
         System.out.println( "Char只能是一個charter" );
-        System.out.print( "> " );
+        // System.out.print( "> " );
         mBuffer.clear();
         throw new Throwable();
       } // catch
@@ -1080,7 +1084,7 @@ class CutToken {
     } // if
     else {
       System.out.println( "Unexpected token : '" + gotCONSTANT + "'" );
-      System.out.print( "> " );
+      // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
     } // else
@@ -1556,10 +1560,12 @@ class FunDEefCutToken extends CutToken {
 class Parser {
   public Vector<TOKEN> m_statement;
   public int m_step;
+  public CutToken m_cuttoken;
 
-  public Parser( Vector<TOKEN> mBuffer ) throws Throwable {
+  public Parser( Vector<TOKEN> mBuffer, CutToken cutToken ) throws Throwable {
     m_statement = mBuffer;
     m_step = 0; // check which token is wrong
+    m_cuttoken = cutToken;
   } // Parser()
 
   public boolean GrammarParser() throws Throwable {
@@ -1569,20 +1575,19 @@ class Parser {
       } // if ()
       else {
         System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
-        System.out.print( "> " );
+        // System.out.print( "> " );
         return false;
       } // else
 
     } // try
     catch ( Throwable throwable ) {
       System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
-      System.out.print( "> " );
+      // System.out.print( "> " );
       return false;
     } // catch
   } // GrammarParser()
 
   private boolean isStepEnd() throws Throwable {
-    /*
     try {
       if ( m_step + 1 >= m_statement.size() ) {
         m_step = m_statement.size() - 1;
@@ -1594,8 +1599,6 @@ class Parser {
     catch ( Throwable throwable ) {
       return false;
     } // catch
-    */
-    return false;
   } // isStepEnd
 
   private boolean UserInput() throws Throwable {
@@ -1916,8 +1919,31 @@ class Parser {
            m_statement.get( m_step ).GetType() == 7 ) {
         m_step += 1;
 
-        while ( Declaration() || Statement() ) {
-          // m_step += 1;
+        boolean isHave = false;
+        m_statement = new Vector<TOKEN>();
+        m_step = 0;
+        if ( m_cuttoken.Cutting( m_statement ) ) {
+          isHave = true;
+        }
+
+        while ( isHave ) {
+          boolean issucess = false;
+          if ( Declaration() || Statement() ) {
+            issucess = true;
+            isHave = false;
+          } // if
+          else {
+            issucess = false;
+            isHave = false;
+          } // else
+
+          if ( issucess ) {
+            m_statement = new Vector<TOKEN>();
+            m_step = 0;
+            if ( m_cuttoken.Cutting( m_statement ) )
+              isHave = true;
+          } // if
+
         } // while
 
         if ( m_statement.get( m_step ).GetToken().equals( "}" ) &&
@@ -2009,25 +2035,34 @@ class Parser {
             if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                  m_statement.get( m_step ).GetType() == 4 ) {
               m_step += 1;
-              if ( Statement() ) {
-                // m_step += 1; // 可能會out of range
+              m_statement = new Vector<TOKEN>();
+              m_step = 0;
 
-                if ( isStepEnd() ) {
-                  return true;
-                } // if
+              if ( m_cuttoken.Cutting( m_statement ) ) {
+                if ( Statement() ) {
+                  // m_step += 1; // 可能會out of range
 
-                if ( m_statement.get( m_step ).GetToken().equals( "else" ) &&
-                     m_statement.get( m_step ).GetType() == 12 ) {
-                  m_step += 1;
-                  if ( Statement() ) {
+                  if ( isStepEnd() ) {
                     return true;
                   } // if
-                  else {
-                    return false;
-                  } // else
-                } // if
 
-                return true; // ?_?
+                  if ( m_statement.get( m_step ).GetToken().equals( "else" ) &&
+                       m_statement.get( m_step ).GetType() == 12 ) {
+                    m_step += 1;
+                    if ( Statement() ) {
+                      return true;
+                    } // if
+                    else {
+                      return false;
+                    } // else
+                  } // if
+
+                  return true; // ?_?
+                } // if
+                else {
+                  return false;
+                } // else
+
               } // if
               else {
                 return false;
@@ -3182,7 +3217,7 @@ class Parser {
         } // if
       } // while
 
-      return true;
+      return false;
     } // try
     catch ( Throwable throwable ) {
       return false;
@@ -3426,7 +3461,8 @@ class Excute {
     this.mStament = stament;
   } // Excute()
 
-  public void Excute() throws Throwable {
+  public void ExcuteComm() throws Throwable {
+    System.out.println( "Here is comm excute!" );
     IsDoneFun();
 
   } // Excute()
@@ -3459,15 +3495,16 @@ class Main {
 
     while ( true ) {
       Vector<TOKEN> stament = new Vector<TOKEN>();
-      System.out.println( "CutToken Part! " );
-      cutToken.Cutting( stament );
-      Parser parser = new Parser( stament );
-      System.out.println( "Parser Part! " );
-      if ( parser.GrammarParser() )
-        System.out.println( "Parser sucess! " );
-      else
-        System.out.println( "Gramer unsucess! " );
-      Excute excute = new Excute( stament );
+      //System.out.println( "main CutToken Part! " );
+      if ( cutToken.Cutting( stament ) ) {
+        Parser parser = new Parser( stament, cutToken );
+        //System.out.println( "main Parser Part! " );
+        if ( parser.GrammarParser() ) {
+          Excute excute = new Excute( stament );
+          excute.ExcuteComm();
+        }
+      } // if
+
     } // while
 
   } // main()
