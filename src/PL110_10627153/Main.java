@@ -477,7 +477,7 @@ class Function {
 class CutToken {
 
   protected Vector<TOKEN> mBuffer;
-  // private Vector<Variable> mVariables;
+  private Vector<TOKEN> mBuffer2;
   protected int mLineCount;
   protected String mnowLine;
   protected Scanner msc;
@@ -489,6 +489,7 @@ class CutToken {
     // mVariables = iV;
     mnowLine = new String();
     mLineCount = 0;
+    mBuffer2 = null;
 
   } // CutToken()
 
@@ -496,13 +497,11 @@ class CutToken {
 
     boolean notGetSEMICOLON = true;
 
-    if ( Buffer1HasFullCommend( stament ) ) {
-      System.out.print( "> " );
-      return true;
-    } // if
-    else {
-      System.out.print( "> " );
-    } // else
+    System.out.print( "> " );
+
+    if ( mBuffer2 != null )
+      if ( ReturnBuffer2Stament( stament ) )
+        return true;
 
     if ( mnowLine.isEmpty() )
       InputNextLineTomNowLine();
@@ -643,6 +642,165 @@ class CutToken {
     return true;
 
   } // Cutting()
+
+  public boolean GetStament( Vector<TOKEN> stament ) throws Throwable {
+
+    boolean notGetSEMICOLON = true;
+
+    if ( Buffer1HasFullCommend( stament ) ) {
+      // System.out.print( "> " );
+      return true;
+    } // if
+    else {
+      // System.out.print( "> " );
+    } // else
+
+    if ( mnowLine.isEmpty() )
+      InputNextLineTomNowLine();
+
+    while ( notGetSEMICOLON ) {
+      if ( mnowLine.isEmpty() )
+        InputNextLineTomNowLine();
+      try {
+        if ( mnowLine.charAt( 0 ) == '(' ) {
+          mBuffer.add( new TOKEN( "(", Global.s_T_SMALL_LEFT_PAREN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          // SMALLLEFTPARENFINDERROR();
+        } // if
+        else if ( mnowLine.charAt( 0 ) == ')' ) {
+          mBuffer.add( new TOKEN( ")", Global.s_T_SMALL_RIGHT_PAREN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          SMALLRIGHTPARENFINDERROR();
+          if ( ISFUNDEFORIFWHILEEND() )
+            return Buffer1HasFullCommend( stament );
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '[' ) {
+          mBuffer.add( new TOKEN( "[", Global.s_T_MID_LEFT_PAREN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          // MIDLEFTPARENFINDERROR();
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == ']' ) {
+          mBuffer.add( new TOKEN( "]", Global.s_T_MID_RIGHT_PAREN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          MIDRIGHTPARENFINDERROR();
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '{' ) {
+          mBuffer.add( new TOKEN( "{", Global.s_T_BIG_LEFT_PAREN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          HASOTHERTOKENISERROR();
+          stament.add( mBuffer.get( 0 ) );
+          mBuffer.clear();
+          return true;
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '}' ) {
+          mBuffer.add( new TOKEN( "}", Global.s_T_BIG_RIGHT_PAREN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          HASOTHERTOKENISERROR();
+          stament.add( mBuffer.get( 0 ) );
+          mBuffer.clear();
+          return true;
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == ',' ) {
+          mBuffer.add( new TOKEN( ",", Global.s_T_COMMA, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '?' || mnowLine.charAt( 0 ) == ':' ) {
+          mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_TERNARYOPERATOR, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          TERNARYOPERATORFINDERROR();
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == ';' ) {
+          mBuffer.add( new TOKEN( ";", Global.s_T_SEMICOLON, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+          notGetSEMICOLON = false;
+          if ( Buffer1HasFullCommend( stament ) )
+            return true;
+        } // else if
+        else if ( IsBOOLEANCONDITION1InmNowLineFirst() ) {
+          String gotBOOLEANCONDITION;
+          gotBOOLEANCONDITION = mnowLine.substring( 0, 2 );
+          mBuffer.add( new TOKEN( gotBOOLEANCONDITION, Global.s_T_BOOLEANCONDITION, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotBOOLEANCONDITION.length() );
+        } // else if
+        else if ( IsASSISNOPERATORInmNowLineFirst() ) {
+          String gotASSISNOPERATOR = mnowLine.substring( 0, 2 );
+          mBuffer.add( new TOKEN( gotASSISNOPERATOR, Global.s_T_ASSIGNOPERATOR, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotASSISNOPERATOR.length() );
+        } // else if
+        else if ( IsOPERATORInmNowLineFirst() ) {
+          String gotOPERATOR = GetOPERATORToken();
+          mBuffer.add( new TOKEN( gotOPERATOR, Global.s_T_OPERATOR, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotOPERATOR.length() );
+          OPERATORFINDERROR( gotOPERATOR );
+        } // else if
+        else if ( IsBOOLEANRELATIONALInmNowLineFirst() ) {
+          String gotBOOLEANRELATIONAL = GetBOOLEANRELATIONALToken();
+          mBuffer.add( new TOKEN( gotBOOLEANRELATIONAL, Global.s_T_BOOLEANRELATIONAL, mLineCount ) );
+          IsGotTokenProcessFormNowLine( gotBOOLEANRELATIONAL.length() );
+          OPERATORFINDERROR( gotBOOLEANRELATIONAL );
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '!' ) {
+          mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ),
+                                  Global.s_T_BOOLEANCONDITION, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+        } // else if
+        else if ( mnowLine.charAt( 0 ) == '=' ) {
+          mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_ASSIGN, mLineCount ) );
+          IsGotTokenProcessFormNowLine( 1 );
+        } // else if
+        else if ( IsCONSTANTInmNowLineFirst() ) {
+          String gotCONSTANT;
+          gotCONSTANT = GetCONSTANTTokenInmNowLine();
+          mBuffer.add( new TOKEN( gotCONSTANT, Global.s_T_CONSTANT, mLineCount ) );
+          CONSTANTFINDERROR( gotCONSTANT );
+        } // else if
+        else if ( IsIDInmNowLineFirst() ) {
+          String gotID;
+          gotID = GetIDTOETokenInmNowLine();
+          DISTINGUISHANDPUSHTOKEN( gotID );
+          IDFINDERROR();
+          if ( gotID.equals( "do" ) || gotID.equals( "else" ) ) {
+            HASOTHERTOKENISERROR();
+            stament.add( mBuffer.get( 0 ) );
+            mBuffer.clear();
+            return true;
+          } // if
+
+        } // else if
+        else {
+          if ( ! mnowLine.isEmpty() ) {
+            System.out.println( "Unrecognized token with first char : '" + mnowLine.charAt( 0 ) + "'" );
+            // System.out.print( "> " );
+            mBuffer.clear();
+            throw new Throwable();
+          } // if
+
+        } // else
+
+      }
+      catch ( Throwable throwable ) {
+
+        // System.out.print( "> " );
+        mnowLine = new String();
+        return false;
+
+      } // catch
+
+    } // whil e
+
+    if ( Buffer1HasFullCommend( stament ) )
+      return true;
+
+    return true;
+
+  } // GetStament()
+
+  public void ReturnmBuffer2( Vector<TOKEN> stament ) throws Throwable {
+    mBuffer2 = new Vector<TOKEN>();
+    for ( int i = 0 ; i < stament.size() ; i++ )
+      mBuffer2.add( stament.get( i ) );
+
+  } // ReturnmBuffer2()
 
   protected void OPERATORFINDERROR( String gotOPERATOR ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -1135,6 +1293,7 @@ class CutToken {
   protected boolean Buffer1HasFullCommend( Vector<TOKEN> buffer ) throws Throwable {
 
     if ( mBuffer.size() > 1 ) {
+      buffer.clear();
       for ( int i = 0 ; i < mBuffer.size() ; i++ )
         buffer.add( mBuffer.get( i ) );
       mBuffer.clear();
@@ -1144,6 +1303,20 @@ class CutToken {
     return false;
 
   } // Buffer1HasFullCommend()
+
+  private boolean ReturnBuffer2Stament( Vector<TOKEN> buffer ) throws Throwable {
+
+    if ( mBuffer2.size() > 1 ) {
+      buffer.clear();
+      for ( int i = 0 ; i < mBuffer2.size() ; i++ )
+        buffer.add( mBuffer2.get( i ) );
+      mBuffer2 = null;
+      return true;
+    } // if
+
+    return false;
+
+  } // ReturnBuffer2Stament()
 
   protected boolean IsIDLegalStar( char theWord ) throws Throwable {
 
@@ -1813,13 +1986,20 @@ class Parser {
       else {
         return false;
       } // else
-
-      if ( Compound_Statement() ) {
-        return true;
+      m_statement = new Vector<TOKEN>();
+      m_step = 0;
+      if ( m_cuttoken.GetStament( m_statement ) ) {
+        if ( Compound_Statement() ) {
+          return true;
+        } // if
+        else {
+          return false;
+        } // else
       } // if
       else {
         return false;
       } // else
+
     } // try
     catch ( Throwable throwable ) {
       return false;
@@ -1928,7 +2108,7 @@ class Parser {
         m_statement = new Vector<TOKEN>();
         m_step = 0;
 
-        if ( m_cuttoken.Cutting( m_statement ) ) {
+        if ( m_cuttoken.GetStament( m_statement ) ) {
           isHave = true;
         } // if
 
@@ -1946,7 +2126,7 @@ class Parser {
           if ( issucess ) {
             m_statement = new Vector<TOKEN>();
             m_step = 0;
-            if ( m_cuttoken.Cutting( m_statement ) )
+            if ( m_cuttoken.GetStament( m_statement ) )
               isHave = true;
           } // if
 
@@ -2041,27 +2221,41 @@ class Parser {
             if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                  m_statement.get( m_step ).GetType() == 4 ) {
               m_step += 1;
+
               m_statement = new Vector<TOKEN>();
               m_step = 0;
-
-              if ( m_cuttoken.Cutting( m_statement ) ) {
+              if ( m_cuttoken.GetStament( m_statement ) ) {
                 if ( Statement() ) {
                   // m_step += 1; // 可能會out of range
 
-                  if ( isStepEnd() ) {
-                    return true;
-                  } // if
+                  m_statement = new Vector<TOKEN>();
+                  m_step = 0;
+                  boolean isGetOK = false;
+                  if ( m_cuttoken.GetStament( m_statement ) )
+                    isGetOK = true;
 
-                  if ( m_statement.get( m_step ).GetToken().equals( "else" ) &&
+                  if ( isGetOK && m_statement.get( m_step ).GetToken().equals( "else" ) &&
                        m_statement.get( m_step ).GetType() == 12 ) {
                     m_step += 1;
-                    if ( Statement() ) {
-                      return true;
+
+                    m_statement = new Vector<TOKEN>();
+                    m_step = 0;
+                    if ( m_cuttoken.GetStament( m_statement ) ) {
+                      if ( Statement() ) {
+                        return true;
+                      } // if
+                      else {
+                        return false;
+                      } // else
                     } // if
-                    else {
+                    else
                       return false;
-                    } // else
+
                   } // if
+                  else if ( isGetOK ) {
+                    m_cuttoken.ReturnmBuffer2( m_statement );
+                    m_statement = new Vector<TOKEN>();
+                  }
 
                   return true; // ?_?
                 } // if
@@ -2086,8 +2280,7 @@ class Parser {
           return false;
         } // else
       } // else if
-      else if ( m_statement.get( m_step ).equals( "while" ) &&
-                m_statement.get( m_step ).GetType() == 13 ) {
+      else if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
         m_step += 1;
         if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
              m_statement.get( m_step ).GetType() == 3 ) {
@@ -2096,12 +2289,19 @@ class Parser {
             if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                  m_statement.get( m_step ).GetType() == 4 ) {
               m_step += 1;
-              if ( Statement() ) {
-                return true;
+
+              m_statement = new Vector<TOKEN>();
+              m_step = 0;
+              if ( m_cuttoken.GetStament( m_statement ) ) {
+                if ( Statement() ) {
+                  return true;
+                } // if
+                else {
+                  return false;
+                } // else
               } // if
-              else {
+              else
                 return false;
-              } // else
             } // if
             else {
               return false;
@@ -2115,13 +2315,15 @@ class Parser {
           return false;
         } // else
       } // else if
-      else if ( m_statement.get( m_step ).GetToken().equals( "do" ) &&
-                m_statement.get( m_step ).GetType() == 14 ) {
+      else if ( m_statement.get( m_step ).GetType() == Global.s_T_DO ) {
         m_step += 1;
+
+        m_statement = new Vector<TOKEN>();
+        m_step = 0;
+        if ( m_cuttoken.GetStament( m_statement ) ) {
         if ( Statement() ) {
           // m_step += 1;
-          if ( m_statement.get( m_step ).GetToken().equals( "while" ) &&
-               m_statement.get( m_step ).GetType() == 13 ) {
+          if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
             m_step += 1;
             if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
                  m_statement.get( m_step ).GetType() == 3 ) {
@@ -2159,6 +2361,9 @@ class Parser {
         else {
           return false;
         } // else
+      }
+      else
+        return false;
       } // else if
       else {
         return false;
