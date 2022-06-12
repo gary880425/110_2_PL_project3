@@ -184,6 +184,7 @@ class Global {
     s_Variables.add( new VarList() );
     s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "i" ) );
     s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "x" ) );
+    s_Functions.add( new Function( "cout", new Vector<VarList>(), new Vector<Stament>() ) );
 
   } // G_OurCInitialize()
 
@@ -720,10 +721,10 @@ class CutToken {
       mBuffer.add( new TOKEN( gotID, Global.s_T_RETURN, mLineCount ) );
     } // else if
     else if ( gotID.equals( "cin" ) ) {
-      mBuffer.add( new TOKEN( gotID, Global.s_T_OURCCOMMAND, mLineCount ) );
+      mBuffer.add( new TOKEN( gotID, Global.s_T_ID, mLineCount ) );
     } // else if
     else if ( gotID.equals( "cout" ) ) {
-      mBuffer.add( new TOKEN( gotID, Global.s_T_OURCCOMMAND, mLineCount ) );
+      mBuffer.add( new TOKEN( gotID, Global.s_T_ID, mLineCount ) );
     } // else if
     else {
       mBuffer.add( new TOKEN( gotID, Global.s_T_ID, mLineCount ) );
@@ -1574,14 +1575,18 @@ class Parser {
         return true;
       } // if ()
       else {
-        System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+        if ( ! m_statement.isEmpty() ) {
+          System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+        } // if
         // System.out.print( "> " );
         return false;
       } // else
 
     } // try
     catch ( Throwable throwable ) {
-      System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+      if ( ! m_statement.isEmpty() ) {
+        System.out.println( "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+      } // if
       // System.out.print( "> " );
       return false;
     } // catch
@@ -1922,9 +1927,10 @@ class Parser {
         boolean isHave = false;
         m_statement = new Vector<TOKEN>();
         m_step = 0;
+
         if ( m_cuttoken.Cutting( m_statement ) ) {
           isHave = true;
-        }
+        } // if
 
         while ( isHave ) {
           boolean issucess = false;
@@ -2291,119 +2297,52 @@ class Parser {
       if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
            m_statement.get( m_step ).GetType() == 5 ) {
         m_step += 1;
-        if ( Expression() ) {
-          // m_step += 1;
-          if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
-               m_statement.get( m_step ).GetType() == 6 ) {
-            m_step += 1;
-
-            if ( Assignment_Operator() ) {
-              // m_step += 1;
-              if ( Basic_Expression() ) {
-                return true;
-              } // if
-              else {
-                return false;
-              } // else
-            } // if
-            else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
-                        m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
-                      m_statement.get( m_step ).GetType() == 20 ) {
-              m_step += 1;
-              if ( Romce_and_Romloe() ) {
-                return true;
-              } // if
-              else {
-                return false;
-              } // else
-            } // else if
-            else if ( Romce_and_Romloe() ) {
-              return true;
-            } // else if
-            else {
-              return false;
-            } // else
-          } // if
-          else {
-            return false;
-          } // else
-        } // if
-        else {
+        if ( ! Expression() ) {
           return false;
-        } // else
-      } // if
-
-      else if ( Assignment_Operator() ) {
-        // m_step += 1;
-        if ( Basic_Expression() ) {
-          return true;
-        } // if
-        else {
-          return false;
-        } // else
-      } // if
-      else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
-                  m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
-                m_statement.get( m_step ).GetType() == 20 ) {
-        m_step += 1;
-        if ( Romce_and_Romloe() ) {
-          return true;
-        } // if
-        else {
-          return false;
-        } // else
-      } // else if
-      else if ( Romce_and_Romloe() ) {
-        return true;
-      } // else if
-      else if ( Assignment_Operator() ) {
-        // m_step += 1;
-        if ( Basic_Expression() ) {
-          return true;
-        } // if
-        else {
-          return false;
-        } // else
-      } // if
-      else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
-                  m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
-                m_statement.get( m_step ).GetType() == 20 ) {
-        m_step += 1;
-        if ( Romce_and_Romloe() ) {
-          return true;
-        } // if
-        else {
-          return false;
-        } // else
-      } // else if
-      else if ( Romce_and_Romloe() ) {
-        return true;
-      } // else if
-      else if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
-                m_statement.get( m_step ).GetType() == 3 ) {
-        m_step += 1;
-
-        if ( Actual_Parameter_List() ) {
-          // m_step += 1;
         } // if
 
-        if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-             m_statement.get( m_step ).GetType() == 4 ) {
+        if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
+             m_statement.get( m_step ).GetType() == 6 ) {
           m_step += 1;
-          if ( Romce_and_Romloe() ) {
-            return true;
-          } // if
-          else {
-            return false;
-          } // else
         } // if
-        else {
+        else
           return false;
-        } // else
+      } // if
+
+      if ( Assignment_Operator() ) {
+        if ( ! Basic_Expression() )
+          return false;
+        else
+          return true;
+      } // if
+      else if ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
+                m_statement.get( m_step ).GetToken().equals( "--" ) ) {
+        m_step += 1;
+        if ( ! Romce_and_Romloe() )
+          return false; // print error
+        else
+          return true;
       } // else if
-      else {
+      else if ( m_statement.get( m_step ).GetToken().equals( "(" ) ) {
+        m_step += 1;
+        Actual_Parameter_List();
+        if ( ! m_statement.get( m_step ).GetToken().equals( ")" ) )
+          return false;
+        else
+          m_step += 1;
+
+        if ( Romce_and_Romloe() )
+          return true;
+        else
+          return false;
+
+      }
+      else if ( Romce_and_Romloe() ) {
+        return true;
+      } // else if
+      else
         return false;
-      } // else
+
     } // try
     catch ( Throwable throwable ) {
       return false;
@@ -3217,7 +3156,8 @@ class Parser {
         } // if
       } // while
 
-      return false;
+
+      return true;
     } // try
     catch ( Throwable throwable ) {
       return false;
