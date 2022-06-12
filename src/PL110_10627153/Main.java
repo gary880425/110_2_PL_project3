@@ -3637,7 +3637,7 @@ class Main {
     Global.sc.nextLine();
     System.out.println( "Our-C running ..." );
     int isInIfWhileElse = 0;
-
+    // CutToken和Parser內的功能目前都全數正常了，差error line還沒算。 20220612 20:05
     while ( true ) {
       Vector<TOKEN> stament = new Vector<TOKEN>();
       //System.out.println( "main CutToken Part! " );
