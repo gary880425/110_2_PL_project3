@@ -1,5 +1,6 @@
 package PL110_10627153;
 // 20220612 20:05
+
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -147,6 +148,11 @@ class Global {
 
   } // G_CompareRegularFloat()
 
+  public static void G_AddVariable( Variable var ) throws Throwable {
+    int buttonList = s_Variables.size();
+    s_Variables.get( buttonList - 1 ).m_Var.add( var );
+  } // G_AddVariable()
+
   public static Variable G_FindVariable( Vector<VarList> vList, String vName ) throws Throwable {
     for ( int r = vList.size() - 1 ; r >= 0 ; r-- ) {
       for ( int i = 0 ; i < vList.get( r ).m_Var.size() ; i++ ) {
@@ -182,9 +188,10 @@ class Global {
   public static void G_OurCInitialize() throws Throwable {
     s_Functions.add( new Function( "Done", new Vector<VarList>(), new Vector<Stament>() ) );
     s_Variables.add( new VarList() );
-    s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "i" ) );
-    s_Variables.get( 0 ).m_Var.add( new VarINT( s_V_INT, "x" ) );
+    // G_AddVariable( new VarINT( s_V_INT, "i" ) );
+    // G_AddVariable( new VarINT( s_V_INT, "x" ) );
     s_Functions.add( new Function( "cout", new Vector<VarList>(), new Vector<Stament>() ) );
+    s_Functions.add( new Function( "cin", new Vector<VarList>(), new Vector<Stament>() ) );
 
   } // G_OurCInitialize()
 
@@ -297,6 +304,17 @@ abstract class Variable {
     return m_Type;
 
   } // GetType()
+
+  public boolean SetType( int type ) throws Throwable {
+    if ( m_Type != type ) {
+      m_Type = type;
+      return true;
+    } // if
+    else {
+      return false;
+    } // else
+
+  } // SetType()
 
   public abstract String GetValue() throws Throwable; // VarType()
 
@@ -1707,30 +1725,6 @@ class CutToken {
 
 } // class CutToken
 
-class FunDEefCutToken extends CutToken {
-
-  public FunDEefCutToken() throws Throwable {
-    super();
-  } // FunDEefCutToken()
-
-  protected void InputNextLineTomNowLine() throws Throwable {
-
-    mnowLine = msc.nextLine();
-    mnowLine = RemoveCommend( mnowLine );
-    RemoveHeadWhiteCherFormNowLine();
-    RemoveTailWhiteCherFormNowLine();
-
-    while ( mnowLine.isEmpty() ) {
-      mnowLine = msc.nextLine();
-      mnowLine = RemoveCommend( mnowLine );
-      RemoveHeadWhiteCherFormNowLine();
-      RemoveTailWhiteCherFormNowLine();
-    } // while
-
-  } // InputNextLineTomNowLine()
-
-} // class FunDEefCutToken
-
 class Parser {
   public Vector<TOKEN> m_statement;
   public int m_step;
@@ -2321,22 +2315,26 @@ class Parser {
         m_statement = new Vector<TOKEN>();
         m_step = 0;
         if ( m_cuttoken.GetStament( m_statement ) ) {
-        if ( Statement() ) {
-          // m_step += 1;
-          if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
-            m_step += 1;
-            if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
-                 m_statement.get( m_step ).GetType() == 3 ) {
+          if ( Statement() ) {
+            // m_step += 1;
+            if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
               m_step += 1;
-              if ( Expression() ) {
-                // m_step += 1;
-                if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-                     m_statement.get( m_step ).GetType() == 4 ) {
-                  m_step += 1;
-                  if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
-                       m_statement.get( m_step ).GetType() == 21 ) {
+              if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
+                   m_statement.get( m_step ).GetType() == 3 ) {
+                m_step += 1;
+                if ( Expression() ) {
+                  // m_step += 1;
+                  if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
+                       m_statement.get( m_step ).GetType() == 4 ) {
                     m_step += 1;
-                    return true;
+                    if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
+                         m_statement.get( m_step ).GetType() == 21 ) {
+                      m_step += 1;
+                      return true;
+                    } // if
+                    else {
+                      return false;
+                    } // else
                   } // if
                   else {
                     return false;
@@ -2357,13 +2355,9 @@ class Parser {
           else {
             return false;
           } // else
-        } // if
-        else {
+        }
+        else
           return false;
-        } // else
-      }
-      else
-        return false;
       } // else if
       else {
         return false;
@@ -3607,8 +3601,13 @@ class Excute {
   } // Excute()
 
   public void ExcuteComm() throws Throwable {
-    System.out.println( "Here is comm excute!" );
+
     IsDoneFun();
+    if ( mStament.get( 0 ).GetType() == Global.s_T_TYPE ) {
+      VerDefinWithoutput();
+    }
+    else
+      System.out.println( "Statement executed ..." );
 
   } // Excute()
 
@@ -3626,6 +3625,64 @@ class Excute {
     } // if
 
   } // IsDoneFun()
+
+  private void IsCinFun() throws Throwable {
+    if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) {
+      if ( mStament.size() == 4 ) {
+        if ( mStament.get( 1 ).GetToken().equals( "(" ) && mStament.get( 2 ).GetToken().equals( ")" )
+             && mStament.get( 3 ).GetToken().equals( ";" ) ) {
+          System.out.println( "Our-C exited ..." );
+          System.exit( 0 );
+        } // if
+
+      } // if
+
+    } // if
+
+  } // IsDoneFun()
+
+  private void VerDefinWithoutput() throws Throwable {
+    Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
+    if ( var == null ) {
+      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+        Global.G_AddVariable( new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() ) );
+      } // if
+      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+        Global.G_AddVariable( new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() ) );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+        Global.G_AddVariable( new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() ) );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+        Global.G_AddVariable( new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() ) );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+        Global.G_AddVariable( new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() ) );
+      } // else if
+
+      System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+    } // if
+    else {
+      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+        var.SetType( Global.s_V_INT );
+      } // if
+      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+        var.SetType( Global.s_V_STRING );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+        var.SetType( Global.s_V_FLOAT );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+        var.SetType( Global.s_V_CHAR );
+      } // else if
+      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+        var.SetType( Global.s_V_BOOL );
+      } // else if
+
+      System.out.println( "New definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+    } // else
+
+  } // VerDefinWithoutput()
 
 } // class Excute
 
