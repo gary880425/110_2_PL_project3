@@ -935,22 +935,25 @@ class CutToken {
   } // TERNARYOPERATORFINDERROR()
 
   protected void IDFINDERROR() throws Throwable {
+
     if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_ID ) {
       if ( mBuffer.size() > 1 ) {
-        if ( ! ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_TYPE ||
-                 mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_VOID ) ) {
+        if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_VOID ) {
+          ;
+        }
+        else if ( ! IsDefStam() ) {
           if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
             System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                                 + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
             // System.out.print( "> " );
             mBuffer.clear();
             throw new Throwable();
-          } // if
+          } // else if
 
         } // if
 
       } // if
-      else {
+      else if ( mBuffer.size() == 1 ) {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
           System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
@@ -959,7 +962,7 @@ class CutToken {
           throw new Throwable();
         } // if
 
-      } // else
+      } // else if
 
     } // if
 
@@ -1038,6 +1041,27 @@ class CutToken {
 
     return false;
   } // ISFUNDEFORIFWHILEEND()
+
+  protected boolean IsDefStam() throws Throwable {
+    try {
+      for ( int i = mBuffer.size() - 2 ; i >= 0 ; i = i - 2 ) {
+        if ( mBuffer.get( i ).GetType() == Global.s_T_TYPE ) {
+          return true;
+        } // else
+        else if ( mBuffer.get( i ).GetType() == Global.s_T_COMMA ) {
+          if ( ! ( mBuffer.get( i - 1 ).GetType() == Global.s_T_ID ) ) {
+            return false;
+          }
+        } // else if
+        else
+          return false;
+      } // for
+    } // try
+    catch ( Throwable throwable ) {
+      return false;
+    }
+    return false;
+  } // IsDefStam()
 
   protected void CONSTANTFINDERROR( String gotNUM ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -1860,12 +1884,7 @@ class Parser {
 
   private boolean Type_Specifier() throws Throwable {
     try {
-      if ( m_statement.get( m_step ).GetType() == 9 &&
-           ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "int" ) ||
-             m_statement.get( m_step ).GetToken().toLowerCase().equals( "char" ) ||
-             m_statement.get( m_step ).GetToken().toLowerCase().equals( "float" ) ||
-             m_statement.get( m_step ).GetToken().toLowerCase().equals( "string" ) ||
-             m_statement.get( m_step ).GetToken().toLowerCase().equals( "bool" ) ) ) {
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_TYPE ) {
         m_step += 1;
         return true;
       } // if
@@ -1956,153 +1975,89 @@ class Parser {
   } // Rest_of_Declarators()
 
   private boolean Function_Definition_Without_ID() throws Throwable {
-    try {
-      if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
-           m_statement.get( m_step ).GetType() == 3 ) {
+    if ( m_statement.get( m_step ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) {
+      m_step += 1;
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_VOID ) {
         m_step += 1;
-        if ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "void" ) &&
-             m_statement.get( m_step ).GetType() == 10 ) {
-          m_step += 1;
-          if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-               m_statement.get( m_step ).GetType() == 4 ) {
-            m_step += 1;
-          } // if
-          else {
-            return false;
-          } // else
-        } // if
-        else if ( Formal_Parameter_List() ) {
-          // m_step += 1;
-          if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-               m_statement.get( m_step ).GetType() == 3 ) {
-            m_step += 1;
-          } // if
-          else {
-            return false;
-          } // else
-        } // else if
-        else if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-                  m_statement.get( m_step ).GetType() == 4 ) {
-          m_step += 1;
-        } // else if
-        else {
-          return false;
-        } // else
       } // if
-      else {
-        return false;
-      } // else
+      else if ( Formal_Parameter_List() ) {
+        ;
+      } // else if
 
-      m_statement = new Vector<TOKEN>();
-      m_step = 0;
-      if ( m_cuttoken.GetStament( m_statement ) ) {
-        if ( Compound_Statement() ) {
-          return true;
-        } // if
-        else {
-          return false;
-        } // else
-      } // if
-      else {
+      if ( ! ( m_statement.get( m_step ).GetType() == Global.s_T_SMALL_RIGHT_PAREN ) )
         return false;
-      } // else
 
-    } // try
-    catch ( Throwable throwable ) {
+    } // if
+    else {
       return false;
-    } // catch()
+    } // else
+
+    m_statement = new Vector<TOKEN>();
+    m_step = 0;
+    if ( m_cuttoken.GetStament( m_statement ) ) {
+      if ( Compound_Statement() ) {
+        return true;
+      } // if
+      else {
+        return false;
+      } // else
+    } // if
+    else {
+      return false;
+    } // else
+
   } // Function_Definition_Without_ID()
 
   private boolean Formal_Parameter_List() throws Throwable {
-    try {
-      if ( Type_Specifier() ) {
-        // m_step += 1;
-
-        if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
-          m_step += 1;
-
-        if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
-          m_step += 1;
-
-          if ( IsStepEnd() ) {
-            return true;
-          } // if
-
-          if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
-               m_statement.get( m_step ).GetType() == 5 ) {
-            m_step += 1;
-
-            if ( m_statement.get( m_step ).GetType() == 2 ) { // Constant
-              m_step += 1;
-
-              if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
-                   m_statement.get( m_step ).GetType() == 6 ) {
-                m_step += 1;
-              } // if
-              else {
-                return false;
-              } // else
-            } // if
-            else {
-              return false;
-            } // else
-          } // if
-
-          boolean isIn = false;
-          while ( m_statement.get( m_step ).GetToken().equals( "," ) ) {
-            isIn = true;
-            m_step += 1;
-            if ( Type_Specifier() ) {
-              // m_step += 1;
-              if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
-                m_step += 1;
-
-              if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
-                m_step += 1;
-                if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
-                     m_statement.get( m_step ).GetType() == 5 ) {
-                  m_step += 1;
-                  if ( m_statement.get( m_step ).GetType() == 2 ) { // Constant
-                    m_step += 1;
-                    if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
-                         m_statement.get( m_step ).GetType() == 6 ) {
-                      m_step += 1;
-                    } // if
-                    else {
-                      return false;
-                    } // else
-                  } // if
-                  else {
-                    return false;
-                  } // else
-                } // if
-              } // if
-              else {
-                return false;
-              } // else
-            } // if
-            else {
-              return false;
-            } // else
-          } // while
-
-          if ( isIn ) {
-            m_step -= 1;
-          } // if
-
-          return true;
-        } // if
-        else {
-          return false;
-        } // else
-      } // if
-      else {
-        return false;
-      } // else
-    } // try
-    catch ( Throwable throwable ) {
+    if ( ! Type_Specifier() )
       return false;
-    } // catch()
+    if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
+      m_step += 1;
+    if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) // ID
+      m_step += 1;
+    else
+      return false;
+
+    if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
+      m_step += 1;
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_CONSTANT ) {
+        m_step += 1;
+      } // if
+      else
+        return false;
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_RIGHT_PAREN ) {
+        m_step += 1;
+      } // if
+      else
+        return false;
+    } // if
+
+    while ( m_statement.get( m_step ).GetType() == Global.s_T_COMMA ) {
+      m_step += 1;
+      if ( ! Type_Specifier() )
+        return false;
+      if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
+        m_step += 1;
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) // ID
+        m_step += 1;
+      else
+        return false;
+
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
+        m_step += 1;
+        if ( m_statement.get( m_step ).GetType() == Global.s_T_CONSTANT ) {
+          m_step += 1;
+        } // if
+        else
+          return false;
+        if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_RIGHT_PAREN ) {
+          m_step += 1;
+        } // if
+        else
+          return false;
+      } // if
+    } // while
+    return true;
   } // Formal_Parameter_List()
 
   private boolean Compound_Statement() throws Throwable {
@@ -2340,20 +2295,34 @@ class Parser {
         if ( m_cuttoken.GetStament( m_statement ) ) {
           if ( Statement() ) {
             // m_step += 1;
-            if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
-              m_step += 1;
-              if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
-                   m_statement.get( m_step ).GetType() == 3 ) {
+            m_statement = new Vector<TOKEN>();
+            m_step = 0;
+            if ( m_cuttoken.GetStament( m_statement ) ) {
+              if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
                 m_step += 1;
-                if ( Expression() ) {
-                  // m_step += 1;
-                  if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-                       m_statement.get( m_step ).GetType() == 4 ) {
-                    m_step += 1;
-                    if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
-                         m_statement.get( m_step ).GetType() == 21 ) {
+                if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
+                     m_statement.get( m_step ).GetType() == 3 ) {
+                  m_step += 1;
+                  if ( Expression() ) {
+                    // m_step += 1;
+                    if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
+                         m_statement.get( m_step ).GetType() == 4 ) {
                       m_step += 1;
-                      return true;
+                      m_statement = new Vector<TOKEN>();
+                      m_step = 0;
+                      if ( m_cuttoken.GetStament( m_statement ) ) {
+                        if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
+                             m_statement.get( m_step ).GetType() == 21 ) {
+                          m_step += 1;
+                          return true;
+                        } // if
+                        else {
+                          return false;
+                        } // else
+                      } // if
+                      else {
+                        return false;
+                      } // else
                     } // if
                     else {
                       return false;
@@ -2370,10 +2339,10 @@ class Parser {
               else {
                 return false;
               } // else
-            } // if
+            }
             else {
               return false;
-            } // else
+            }
           } // if
           else {
             return false;
@@ -2386,9 +2355,11 @@ class Parser {
         return false;
       } // else
     } // try
-    catch ( Throwable throwable ) {
+    catch (
+            Throwable throwable ) {
       return false;
     } // catch()
+
   } // Statement()
 
   private boolean Expression() throws Throwable {
@@ -2742,7 +2713,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "||" ) &&
+      while ( m_statement.get( m_step ).GetToken().equals( "||" ) &&
               m_statement.get( m_step ).GetType() == 19 ) { // 可能會out of range
         m_step += 1;
         if ( Maybe_Logical_AND_Exp() ) {
@@ -2777,7 +2748,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "&&" ) &&
+      while ( m_statement.get( m_step ).GetToken().equals( "&&" ) &&
               m_statement.get( m_step ).GetType() == 19 ) { // maybe will out of range
         m_step += 1;
         if ( Maybe_Bit_OR_Exp() ) {
@@ -2812,7 +2783,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().toLowerCase().equals( "&&" ) &&
+      while ( m_statement.get( m_step ).GetToken().equals( "&&" ) &&
               m_statement.get( m_step ).GetType() == 19 ) { // maybe will out of range
         m_step += 1;
 
@@ -3665,6 +3636,18 @@ class Excute {
 
   } // IsDoneFun()
 
+  private boolean IsSystemCom() throws Throwable {
+    if ( mStament.get( 0 ).GetToken().equals( "ListAllVariables" ) ) {
+      if ( mStament.size() == 4 ) {
+        if ( mStament.get( 1 ).GetToken().equals( "(" ) && mStament.get( 2 ).GetToken().equals( ")" )
+             && mStament.get( 3 ).GetToken().equals( ";" ) ) {
+
+        } // if
+      } // if
+    } // if
+    return false;
+  }
+
   private void IsCinFun() throws Throwable {
     if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) {
       if ( mStament.size() == 4 ) {
@@ -3681,98 +3664,117 @@ class Excute {
   } // IsCinFun()
 
   private void VerDefinWithoutput() throws Throwable {
-    Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
-    if ( var == null ) {
-      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
-        var = new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // if
-      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
-        var = new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
-        var = new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
-        var = new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
-        var = new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
 
-      System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
-    } // if
-    else {
-      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
-        var.SetType( Global.s_V_INT );
-      } // if
-      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
-        var.SetType( Global.s_V_STRING );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
-        var.SetType( Global.s_V_FLOAT );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
-        var.SetType( Global.s_V_CHAR );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
-        var.SetType( Global.s_V_BOOL );
-      } // else if
+    for ( int i = 1 ; i < mStament.size() ; i = i ) {
+      Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
+      if ( var == null ) {
+        if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+          var = new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // if
+        else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+          var = new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+          var = new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+          var = new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+          var = new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
 
-      System.out.println( "New definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
-    } // else
+        System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+      } // if
+      else {
+        if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+          var.SetType( Global.s_V_INT );
+        } // if
+        else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+          var.SetType( Global.s_V_STRING );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+          var.SetType( Global.s_V_FLOAT );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+          var.SetType( Global.s_V_CHAR );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+          var.SetType( Global.s_V_BOOL );
+        } // else if
+
+        System.out.println( "New definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+      } // else
+
+      mStament.remove( 1 );
+      if ( mStament.get( 1 ).GetType() == Global.s_T_COMMA )
+        mStament.remove( 1 );
+      if ( ! ( mStament.get( 1 ).GetType() == Global.s_T_ID ) )
+        i = mStament.size();
+    } // for
 
   } // VerDefinWithoutput()
 
   private void VerDefinWithoutoutput() throws Throwable {
-    Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
-    if ( var == null ) {
-      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
-        var = new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // if
-      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
-        var = new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
-        var = new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
-        var = new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
-        var = new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() );
-        Global.G_AddVariable( var );
-      } // else if
 
-      // System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
-    } // if
-    else {
-      if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
-        var.SetType( Global.s_V_INT );
-      } // if
-      else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
-        var.SetType( Global.s_V_STRING );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
-        var.SetType( Global.s_V_FLOAT );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
-        var.SetType( Global.s_V_CHAR );
-      } // else if
-      else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
-        var.SetType( Global.s_V_BOOL );
-      } // else if
+    for ( int i = 1 ; i < mStament.size() ; i = i ) {
+      Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( 1 ).GetToken() );
+      if ( var == null ) {
+        if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+          var = new VarINT( Global.s_V_INT, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // if
+        else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+          var = new VarINT( Global.s_V_STRING, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+          var = new VarINT( Global.s_V_FLOAT, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+          var = new VarINT( Global.s_V_CHAR, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+          var = new VarINT( Global.s_V_BOOL, mStament.get( 1 ).GetToken() );
+          Global.G_AddVariable( var );
+        } // else if
 
-      // System.out.println( "New definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
-    } // else
+        // System.out.println( "Definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+      } // if
+      else {
+        if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
+          var.SetType( Global.s_V_INT );
+        } // if
+        else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
+          var.SetType( Global.s_V_STRING );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
+          var.SetType( Global.s_V_FLOAT );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
+          var.SetType( Global.s_V_CHAR );
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
+          var.SetType( Global.s_V_BOOL );
+        } // else if
+
+        // System.out.println( "New definition of " + mStament.get( 1 ).GetToken() + " entered ..." );
+      } // else
+
+      mStament.remove( 1 );
+      if ( mStament.get( 1 ).GetType() == Global.s_T_COMMA )
+        mStament.remove( 1 );
+      if ( ! ( mStament.get( 1 ).GetType() == Global.s_T_ID ) )
+        i = mStament.size();
+
+    } // for
 
   } // VerDefinWithoutoutput()
 
