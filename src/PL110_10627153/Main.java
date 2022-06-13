@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220613 10:26
+// 20220613 10:40
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -513,6 +513,8 @@ class CutToken {
 
   public boolean Cutting( Vector<TOKEN> stament ) throws Throwable {
     boolean notGetSEMICOLON = true;
+    if ( mnowLine.length() == 0 || mnowLine == null )
+      mLineCount = 0;
 
     System.out.print( "> " );
 
@@ -521,13 +523,11 @@ class CutToken {
         return true;
 
     if ( mnowLine.isEmpty() ) {
-      mLineCount = 0;
       InputNextLineTomNowLine();
     } // if
 
     while ( notGetSEMICOLON ) {
       if ( mnowLine.isEmpty() ) {
-        mLineCount = 0;
         InputNextLineTomNowLine();
       } // if
 
@@ -833,7 +833,7 @@ class CutToken {
            mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( "*" ) ||
            mBuffer.get( mBuffer.size() - 2 ).GetToken().equals( "/" ) ) {
         if ( gotOPERATOR.equals( "*" ) || gotOPERATOR.equals( "/" ) ) {
-          System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
+          System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -849,7 +849,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 3 ).GetType() == Global.s_T_OPERATOR &&
            mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_OPERATOR ) {
 
-        System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
+        System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                             + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
         // System.out.print( "> " );
         mBuffer.clear();
@@ -865,7 +865,7 @@ class CutToken {
 
         if ( Global.G_FindVariable( Global.s_Variables,
                                     mBuffer.get( mBuffer.size() - 2 ).GetToken() ) == null ) {
-          System.out.println("Line "+ mLineCount +" : " +"Undefined identifier : '"
+          System.out.println("Line "+ mLineCount +" : " +"undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           System.out.print( "> " );
           mBuffer.clear() ;
@@ -925,7 +925,7 @@ class CutToken {
     } // for
 
     if ( count < 0 ) {
-      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -940,7 +940,7 @@ class CutToken {
         if ( ! ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_TYPE ||
                  mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_VOID ) ) {
           if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-            System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
+            System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                                 + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
             // System.out.print( "> " );
             mBuffer.clear();
@@ -952,7 +952,7 @@ class CutToken {
       } // if
       else {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-          System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
+          System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -970,7 +970,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
 
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-          System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
+          System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -985,7 +985,7 @@ class CutToken {
 
   protected void HASOTHERTOKENISERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
-      System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
+      System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1006,7 +1006,7 @@ class CutToken {
     } // for
 
     if ( count < 0 ) {
-      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1042,7 +1042,7 @@ class CutToken {
   protected void CONSTANTFINDERROR( String gotNUM ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_CONSTANT ) {
-        System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
+        System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                             + gotNUM + "'" );
         // System.out.print( "> " );
         mBuffer.clear();
@@ -1098,7 +1098,7 @@ class CutToken {
       if ( mBuffer.get( mBuffer.size() - 2 ).GetType() == Global.s_T_ID ) {
 
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
-          System.out.println( "Line " + mLineCount + " : " + "Undefined identifier : '"
+          System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
                               + mBuffer.get( mBuffer.size() - 2 ).GetToken() + "'" );
           // System.out.print( "> " );
           mBuffer.clear();
@@ -1122,7 +1122,7 @@ class CutToken {
     } // for
 
     if ( count < 0 ) {
-      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '"
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1268,7 +1268,7 @@ class CutToken {
       return gotCONSTANT;
     } // if
     else {
-      System.out.println( "Line " + mLineCount + " : " + "Unexpected token : '" + gotCONSTANT + "'" );
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '" + gotCONSTANT + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
       throw new Throwable();
@@ -1754,7 +1754,7 @@ class Parser {
       else {
         if ( ! m_statement.isEmpty() ) {
           System.out.println( "Line " + m_statement.get( m_step ).Getline() + " : " +
-                              "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+                              "unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
         } // if
         // System.out.print( "> " );
         return false;
@@ -1764,7 +1764,7 @@ class Parser {
     catch ( Throwable throwable ) {
       if ( ! m_statement.isEmpty() ) {
         System.out.println( "Line " + m_statement.get( m_step ).Getline() + " : " +
-                            "Unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+                            "unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
       } // if
       // System.out.print( "> " );
       return false;
