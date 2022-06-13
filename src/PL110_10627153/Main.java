@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220613 00:30
+// 20220613 10:26
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -512,8 +512,6 @@ class CutToken {
   } // CutToken()
 
   public boolean Cutting( Vector<TOKEN> stament ) throws Throwable {
-
-    mLineCount = 0;
     boolean notGetSEMICOLON = true;
 
     System.out.print( "> " );
@@ -522,12 +520,17 @@ class CutToken {
       if ( ReturnBuffer2Stament( stament ) )
         return true;
 
-    if ( mnowLine.isEmpty() )
+    if ( mnowLine.isEmpty() ) {
+      mLineCount = 0;
       InputNextLineTomNowLine();
+    } // if
 
     while ( notGetSEMICOLON ) {
-      if ( mnowLine.isEmpty() )
+      if ( mnowLine.isEmpty() ) {
+        mLineCount = 0;
         InputNextLineTomNowLine();
+      } // if
+
       try {
         if ( mnowLine.charAt( 0 ) == '(' ) {
           mBuffer.add( new TOKEN( "(", Global.s_T_SMALL_LEFT_PAREN, mLineCount ) );
@@ -2108,6 +2111,7 @@ class Parser {
            m_statement.get( m_step ).GetType() == 7 ) {
         m_step += 1;
 
+        Global.s_Variables.add( new VarList() );
         boolean isHave = false;
         m_statement = new Vector<TOKEN>();
         m_step = 0;
@@ -2124,8 +2128,10 @@ class Parser {
               issucess = true;
               isHave = false;
             } // if
-            else
+            else {
+              Global.s_Variables.remove( Global.s_Variables.size() - 1 );
               return false;
+            } // else
           } // if
           else {
             issucess = false;
@@ -2144,9 +2150,11 @@ class Parser {
         if ( m_statement.get( m_step ).GetToken().equals( "}" ) &&
              m_statement.get( m_step ).GetType() == 8 ) {
           m_step += 1;
+          Global.s_Variables.remove( Global.s_Variables.size() - 1 );
           return true;
         } // if
         else {
+          Global.s_Variables.remove( Global.s_Variables.size() - 1 );
           return false;
         } // else
       } // if
