@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 00:17
+// 20220615 01:47
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -2127,6 +2127,12 @@ class Parser {
       m_step = 0;
       if ( m_cuttoken.GetStament( m_statement ) ) {
         if ( Compound_Statement() ) {
+          if ( Global.s_Fundefin != null) {
+            int i = Global.s_Fundefin.m_commendLine.size();
+            Global.s_Fundefin.m_commendLine.add( new Stament() );
+            Global.s_Fundefin.m_commendLine.get( i ).m_Line.add( m_statement.get( m_step - 1 ) );
+          } // if
+
           Global.s_Variables.remove( Global.s_Variables.size() - 1 );
           return true;
         } // if
@@ -2209,8 +2215,9 @@ class Parser {
     try {
       if ( m_statement.get( m_step ).GetToken().equals( "{" ) &&
            m_statement.get( m_step ).GetType() == 7 ) {
-        if ( Global.s_Fundefin != null && Global.s_Fundefin.m_commendLine.size() != 0 ) {
-          int i = Global.s_Fundefin.m_commendLine.size() - 1;
+        if ( Global.s_Fundefin != null) {
+          int i = Global.s_Fundefin.m_commendLine.size();
+          Global.s_Fundefin.m_commendLine.add( new Stament() );
           Global.s_Fundefin.m_commendLine.get( i ).m_Line.add( m_statement.get( m_step ) );
         } // if
 
@@ -4038,7 +4045,7 @@ class Excute {
   public boolean ExcuteComm( boolean isPrint ) throws Throwable {
 
     try {
-      if ( IsFuncDefined() && isPrint ) {
+      if ( IsFuncDefined() && isPrint ) { // change
         FuncDefined();
         return true;
       } // if change
