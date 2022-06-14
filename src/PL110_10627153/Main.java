@@ -4264,6 +4264,12 @@ class Excute {
           String fName = Global.s_Functions.get( i ).m_localVarList.get( a ).GetName();
           System.out.print( " " + typeName + " " + fName );
 
+          // 印出array的[]
+          if ( Global.s_Functions.get( i ).m_localVarList.get( a ).IsArray() ) {
+            System.out.print( "[ " + Global.s_Functions.get( i ).m_localVarList.get( a ).GetArraySize()
+                              + " ]" );
+          } // if
+
           if ( Global.s_Functions.get( i ).m_localVarList.size() - a > 1 ) {
             System.out.print( "," );
           } // if
@@ -4286,17 +4292,19 @@ class Excute {
 
         // 印出function內容物
         // 宣告的[]還沒處理
-        for ( int j = 1 ; j < Global.s_Functions.get( i ).m_commLine.size() ; j++ ) { // 行數
-          for ( int k = 0 ; k < Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.size() ;
+        Vector<Stament> temp = Global.s_Functions.get( i ).m_commLine;
+        for ( int j = 1 ; j < temp.size() ; j++ ) { // 行數
+          for ( int k = 0 ; k < temp.get( j ).m_Line.size() ;
                 k++ ) { // Statement
-            String token = Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.get( k ).GetToken();
-            int lineSize = Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.size();
+            String token = temp.get( j ).m_Line.get( k ).GetToken();
+            int lineSize = temp.get( j ).m_Line.size();
             System.out.print( token );
 
             // 判斷下一個token是否要空格
-            // T是nextToken
-            String t = Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.get( k + 1 ).GetToken();
-            if ( k < lineSize && ( k + 1 < lineSize && ! t.equals( "[" ) ) ) {
+            if ( k < lineSize &&
+                 ( k + 1 < lineSize && ( !temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "[" ) &&
+                                         !temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "++" ) &&
+                                         !temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "--" ) ) ) ) {
               System.out.print( " " );
             } // if
 
@@ -4308,46 +4316,37 @@ class Excute {
 
             // 判斷此行第一個token是否為while do if else
             // k 是否已經指到最後一個token
-            String fT = Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.get( 0 ).GetToken();
             if ( k == lineSize - 1 &&
-                 ( fT.equals( "while" ) ||
-                   fT.equals( "do" ) ||
-                   fT.equals( "if" ) ||
-                   fT.equals( "else" ) ) ) {
+                 ( temp.get( j ).m_Line.get( 0 ).GetToken().equals( "while" ) ||
+                   temp.get( j ).m_Line.get( 0 ).GetToken().equals( "do" ) ||
+                   temp.get( j ).m_Line.get( 0 ).GetToken().equals( "if" ) ||
+                   temp.get( j ).m_Line.get( 0 ).GetToken().equals( "else" ) ) ) {
               // 檢查下行token是否為 {
               // 是的話就緊接著print在後面
-              // n = nextLineFirstToken
-              String n = Global.s_Functions.get( i ).m_commLine.get( j + 1 ).m_Line.get( 0 ).GetToken();
-              if ( j + 1 < Global.s_Functions.get( i ).m_commLine.size() - 1 &&
-                   Global.s_Functions.get( i ).m_commLine.get( j + 1 ).m_Line.size() == 1 &&
-                   n.equals( "{" ) ) {
+              if ( j + 1 < temp.size() - 1 &&
+                   temp.get( j + 1 ).m_Line.size() == 1 &&
+                   temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
                 System.out.print( " {" );
                 j += 1;
               } // if
             } // if
 
             // 如果下一行token為 } , white space - 2
-            // n = nextLineFirstToken
-            String n = Global.s_Functions.get( i ).m_commLine.get( j + 1 ).m_Line.get( 0 ).GetToken();
-            if ( k == lineSize - 1 && j + 1 < Global.s_Functions.get( i ).m_commLine.size() - 1 &&
-                 Global.s_Functions.get( i ).m_commLine.get( j + 1 ).m_Line.size() == 1 &&
-                 n.equals( "}" ) ) {
+            if ( k == lineSize - 1 && j + 1 < temp.size() - 1 &&
+                 temp.get( j + 1 ).m_Line.size() == 1 &&
+                 temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( "}" ) ) {
               whiteSpace -= 2;
             } // if
           } // for
 
           System.out.println(); // 換行
-          for ( int b = 0 ;
-                b < whiteSpace && j + 1 < Global.s_Functions.get( i ).m_commLine.size() - 1 ;
-                b++ ) { // 縮排用
+          for ( int b = 0 ; b < whiteSpace && j + 1 < temp.size() - 1 ; b++ ) { // 縮排用
             System.out.print( " " );
           } // for
 
-          // n = nextLineFirstToken
-          String n = Global.s_Functions.get( i ).m_commLine.get( j + 1 ).m_Line.get( 0 ).GetToken();
-          if ( j + 1 == Global.s_Functions.get( i ).m_commLine.size() &&
-               Global.s_Functions.get( i ).m_commLine.get( j + 1 ).m_Line.size() == 1 &&
-               n.equals( "}" ) ) {
+          if ( j + 1 == temp.size() &&
+               temp.get( j + 1 ).m_Line.size() == 1 &&
+               temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( "}" ) ) {
             System.out.println( "}" );
             j += 1;
           } // if
