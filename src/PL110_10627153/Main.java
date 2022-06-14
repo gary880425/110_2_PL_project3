@@ -578,8 +578,9 @@ class CutToken {
     System.out.print( "> " );
 
     if ( mBuffer2 != null )
-      if ( ReturnBuffer2Stament( stament ) )
+      if ( ReturnBuffer2Stament( stament ) ) {
         return true;
+      }
 
     if ( mnowLine.isEmpty() ) {
       InputNextLineTomNowLine();
