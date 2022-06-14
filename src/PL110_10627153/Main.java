@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220613 23:04
+// 20220614 14:24
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -260,58 +260,17 @@ class TOKEN {
 
 } // class TOKEN
 
-class TokenString {
-  public Vector<TOKEN> m_tokenString;
-
-  public TokenString() throws Throwable {
-    m_tokenString = new Vector<TOKEN>();
-  } // TokenString()
-
-} // class TokenString
-
 class Stament {
-  private Vector<TokenString> m_Line;
-  private int m_Size;
+  public Vector<TOKEN> m_Line = new Vector<TOKEN>();
+
+  public Stament( Vector<TOKEN> List ) throws Throwable {
+    for ( int i = 0 ; i < List.size() ; i++ )
+      m_Line.add( List.get( i ) );
+  } // Stament
 
   public Stament() throws Throwable {
-    m_Size = 0;
-  } // Stament()
-
-  public TOKEN GetToken( int index ) throws Throwable {
-    for ( int i = 0 ; i < m_Line.size() ; i++ ) {
-      for ( int j = 0 ; j < m_Line.get( i ).m_tokenString.size() ; j++ ) {
-        if ( index == 0 )
-          return m_Line.get( i ).m_tokenString.get( j );
-        index--;
-      } // for count the amount of token
-    } // for count the amount of rows
-
-    throw new Throwable();
-  } // GetToken()
-
-  public TokenString GetTokenRow( int index ) throws Throwable {
-    return null;
-  } // GetTokenRow()
-
-  public void PushLine( TokenString line ) throws Throwable {
-    m_Line.add( line );
-    m_Size = m_Size + line.m_tokenString.size();
-  } // PushLine()
-
-  public void PushToken( TOKEN token ) throws Throwable {
-    if ( token != null ) {
-      m_Line.get( m_Line.size() ).m_tokenString.add( token );
-      m_Size = m_Size + 1;
-    } // if
-  } // PushToken()
-
-  public void AddLine() throws Throwable {
-    m_Line.add( new TokenString() );
-  } // AddLine()
-
-  public int Size() throws Throwable {
-    return m_Size;
-  } // Size()
+    ;
+  } // Stament
 
 } // class Stament
 
@@ -2206,6 +2165,9 @@ class Parser {
           if ( Declaration() || Statement() ) {
             Excute excute = new Excute( m_statement );
             if ( excute.ExcuteComm( false ) ) {
+              if ( Global.s_Fundefin != null )
+                Global.s_Fundefin.m_commendLine.add( new Stament( m_statement ) );
+
               issucess = true;
               isHave = false;
             } // if
