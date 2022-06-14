@@ -201,6 +201,7 @@ class Global {
     varlists.add( var );
     s_Functions.add( new Function( "ListVariable",
                                    varlists, new Vector<Stament>() ) );
+
     varlists = null;
     var = null;
     varSTRING = null;
@@ -319,11 +320,13 @@ abstract class Variable {
   private String m_Name;
   private int m_Type;
   protected int m_arraySize = 1;
+  private boolean m_isArray ;
 
   public Variable( int type, String name ) throws Throwable {
     this.m_Name = new String( name );
     this.m_Type = type;
     m_arraySize = 1;
+    m_isArray = false ;
   } // Variable()
 
   public String GetName() throws Throwable {
@@ -338,7 +341,37 @@ abstract class Variable {
 
   } // GetType()
 
+  public String GetTypeName() throws Throwable {
+    if ( GetType() == 1 ) {
+      return "int";
+    } // if
+    else if ( GetType() == 2 ) {
+      return "String";
+    } // else if
+    else if ( GetType() == 3 ) {
+      return "float";
+    } // else if
+    else if ( GetType() == 4 ) {
+      return "char";
+    } // else if
+    else if ( GetType() == 5 ) {
+      return "bool";
+    } // else if
+    else {
+      return "Type error";
+    } // else
+  } // GetTypeName()
+
+  public boolean IsArray() throws Throwable {
+    return m_isArray ;
+  } // IsArray()
+
+  public int GetArraySize() throws Throwable {
+    return m_arraySize;
+  } // GetArraySize()
+
   public void SetArraySize( int size ) throws Throwable {
+    m_isArray = true ;
     m_arraySize = size;
   } // SetArraySize()
 
@@ -530,13 +563,13 @@ class Function {
     return this.m_name;
   } // GetName()
 
-  public int LocalVarCount() throws Throwable {
+  public int LocalVarSum() throws Throwable {
     return m_localVarList.size();
-  } // LocalVarCount()
+  } // LocalVarSum()
 
-  public Variable GetVarCount( int index ) throws Throwable {
+  public Variable GetVar( int index ) throws Throwable {
     return m_localVarList.get( index );
-  } // LocalVarCount()
+  } // GetVar()
 
 } // class Function
 
@@ -1014,7 +1047,7 @@ class CutToken {
       } // else if
 
     } // if
-     */
+    */
     if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_ID ) {
       if ( mBuffer.size() == 1 ) {
         if ( ! Global.G_IDHASDEFINED( mBuffer.get( mBuffer.size() - 1 ).GetToken() ) ) {
@@ -1118,11 +1151,11 @@ class CutToken {
       for ( int i = mBuffer.size() - 2 ; i >= 0 ; i = i - 2 ) {
         if ( mBuffer.get( i ).GetType() == Global.s_T_TYPE ) {
           return true;
-        } // else
+        } // if
         else if ( mBuffer.get( i ).GetType() == Global.s_T_COMMA ) {
           if ( ! ( mBuffer.get( i - 1 ).GetType() == Global.s_T_ID ) ) {
             return false;
-          }
+          } // if
         } // else if
         else
           return false;
@@ -1130,7 +1163,7 @@ class CutToken {
     } // try
     catch ( Throwable throwable ) {
       return false;
-    }
+    } // catch()
     return false;
   } // IsDefStam()
 
@@ -2126,6 +2159,7 @@ class Parser {
           return false;
       } // if
     } // while
+
     return true;
   } // Formal_Parameter_List()
 
@@ -2408,10 +2442,10 @@ class Parser {
               else {
                 return false;
               } // else
-            }
+            } // if
             else {
               return false;
-            }
+            } // else
           } // if
           else {
             return false;
@@ -3669,41 +3703,47 @@ class Excute {
   public boolean ExcuteComm( boolean isPrint ) throws Throwable {
 
     try {
-      if ( IsFunCommand() ) {
+      if ( IsFuncCommand() ) {
         if ( isPrint )
           System.out.println( "Statement executed ..." );
         return true;
       } // if
       else if ( mStament.get( 0 ).GetType() == Global.s_T_TYPE ) {
-        VarDefin( isPrint );
+        IsVarDefinOK( isPrint );
         return true;
       } // else if
       else {
         if ( isPrint )
           System.out.println( "Statement executed ..." );
         return true;
-      } //else
+      } // else
 
     } // try
     catch ( Throwable throwable ) {
       return false;
     } // catch
 
-  } // ExcuteCommWithoutput()
+  } // ExcuteComm()
 
-  private boolean IsFunCommand() throws Throwable {
+  private boolean IsFuncCommand() throws Throwable {
     try {
       if ( mStament.get( 0 ).GetType() == Global.s_T_ID &&
-           mStament.get( 1 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) {
-        if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) {
-          if ( IsFunInputOk( "Done" ) ) {
+           mStament.get( 1 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) { // 判斷是否為function執行
+        if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) { // 程式結束
+          if ( IsFuncInputOk( "Done" ) ) {
             System.out.println( "Our-C exited ..." );
             System.exit( 0 );
           } // if
         } // if
-        else if ( mStament.get( 0 ).GetToken().equals( "ListAllVariables" ) ) {
-          if ( IsFunInputOk( "ListAllVariables" ) ) {
+        else if ( mStament.get( 0 ).GetToken().equals( "ListAllVariables" ) ) { // 列出所有變數
+          if ( IsFuncInputOk( "ListAllVariables" ) ) {
             ListAllVariables();
+            return true;
+          } // if
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "ListVariable" ) ) { // 印出特定variable
+          if ( IsFuncInputOk( "ListVariable" ) ) {
+            ListVariable( mStament.get( 2 ).GetToken() );
             return true;
           } // if
         } // else if
@@ -3715,18 +3755,54 @@ class Excute {
     catch ( Throwable throwable ) {
       throw new Throwable();
     } // catch
-  } // IsFunCommand()
+  } // IsFuncCommand()
 
   private void ListAllVariables() throws Throwable {
+    Vector<String> varList = new Vector<String>();
     for ( int i = 0 ; i < Global.s_Variables.size() ; i++ ) {
       for ( int j = 0 ; j < Global.s_Variables.get( i ).m_Var.size() ; j++ ) {
-        System.out.println( Global.s_Variables.get( i ).m_Var.get( j ).GetName() );
+        varList.add( Global.s_Variables.get( i ).m_Var.get( j ).GetName() );
       } // for
+    } // for
+
+    // Sort
+    String temp = "";
+    for ( int i = 0 ; i < varList.size() ; i++ ) {
+      for ( int j = i + 1 ; j < varList.size() ; j++ ) {
+        if ( varList.get( i ).compareTo( varList.get( j ) ) > 0 ) { // if i > j
+          temp = varList.get( i );
+          varList.setElementAt( varList.get( j ), i );
+          varList.setElementAt( temp, j );
+        } // if
+      } // for
+    } // for
+
+    for ( int i = 0 ; i < varList.size() ; i++ ) {
+      System.out.println( varList.get( i ) );
     } // for
 
   } // ListAllVariables()
 
-  private void VarDefin( boolean isprint ) throws Throwable {
+  private void ListVariable( String varName ) throws Throwable {
+    varName = varName.substring( 1, varName.length() - 1 ); // 刪除頭尾的'"'
+    boolean stop = false;
+    for ( int i = 0 ; i < Global.s_Variables.size() && ! stop ; i++ ) {
+      for ( int j = 0 ; j < Global.s_Variables.get( i ).m_Var.size() && ! stop ; j++ ) {
+        if ( Global.s_Variables.get( i ).m_Var.get( j ).GetName().equals( varName ) ) {
+          System.out.print( Global.s_Variables.get( i ).m_Var.get( j ).GetTypeName() + " " +
+                            Global.s_Variables.get( i ).m_Var.get( j ).GetName() );
+          if ( ! Global.s_Variables.get( i ).m_Var.get( j ).IsArray() ) {
+            System.out.println( " ;" );
+          } // if
+          else {
+            System.out.println( "[ " + Global.s_Variables.get( i ).m_Var.get( j ).GetArraySize() + " ] ;" );
+          } // else
+        } // if
+      } // for
+    } // for
+  } // ListVariable()
+
+  private void IsVarDefinOK( boolean isprint ) throws Throwable {
 
     boolean isRedef = false;
     boolean isStop = false;
@@ -3735,7 +3811,7 @@ class Excute {
       while ( ! isStop ) {
         Variable var = Global.G_FindVariable( Global.s_Variables, mStament.get( step ).GetToken() );
         String defname = new String( mStament.get( step ).GetToken() );
-        if ( var == null ) { // 因為沒被defin所以這邊要defin
+        if ( var == null ) { // 因為沒被define所以這邊要define
           if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
             var = new VarINT( Global.s_V_INT, mStament.get( step ).GetToken() );
           } // if
@@ -3778,7 +3854,8 @@ class Excute {
         } // if
         else if ( mStament.get( step ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
           step++;
-          var.SetArraySize( Integer.valueOf( mStament.get( step ).GetToken() ) );
+          int arrsize = Integer.valueOf( mStament.get( step ).GetToken() );
+          var.SetArraySize( arrsize );
           step++;
           if ( mStament.get( step ).GetType() == Global.s_T_MID_RIGHT_PAREN ) {
             Global.G_AddVariable( var );
@@ -3800,8 +3877,7 @@ class Excute {
           if ( ! isRedef )
             System.out.println( "Definition of " + var.GetName() + " entered ..." );
           else
-            System.out.println(
-                    "New definition of " + var.GetName() + " entered ..." );
+            System.out.println( "New definition of " + var.GetName() + " entered ..." );
         } // if
 
       } // while
@@ -3810,42 +3886,44 @@ class Excute {
     catch ( Throwable throwable ) {
       System.out.println( "define error!" );
       throw new Throwable();
-    }
+    } // catch()
 
-  } // VerDefinWithoutput()
+  } // IsVarDefinOK()
 
-  private boolean IsFunInputOk( String funname ) throws Throwable {
+  // 使用function時，判斷傳入的參數數量是否正確
+  private boolean IsFuncInputOk( String funcName ) throws Throwable {
     try {
-      Function fun = Global.G_FindFunction( Global.s_Functions, funname );
-      int funParameterCount = fun.LocalVarCount();
+      Function func = Global.G_FindFunction( Global.s_Functions, funcName );
+      int funcParameterSum = func.LocalVarSum();
       int step = 2;
-      for ( int i = 0 ; i < funParameterCount ; i++ ) {
-        if ( fun.GetVarCount( i ) != null && mStament.get( step ).GetType() == Global.s_T_CONSTANT ) {
+      for ( int i = 0 ; i < funcParameterSum ; i++ ) {
+        if ( func.GetVar( i ) != null && mStament.get( step ).GetType() == Global.s_T_CONSTANT ) {
           ; // 可能後面要判斷type
           step++;
           while ( mStament.get( step ).GetType() != Global.s_T_COMMA &&
-                  mStament.get( step ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ) {
+                  mStament.get( step ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ) { // 跳到','
             step++;
-          }
+          } // while
 
-          if ( mStament.get( step ).GetType() == Global.s_T_COMMA )
+          if ( mStament.get( step ).GetType() == Global.s_T_COMMA ) // 跳到下一個參數token
             step++;
-        }
+        } // if
         else
           throw new Throwable();
 
       } // for
+
       if ( mStament.get( step ).GetType() == Global.s_T_SMALL_RIGHT_PAREN )
         return true;
       else
         throw new Throwable();
     } // try
     catch ( Throwable throwable ) {
-      System.out.println( "請輸入正卻的參數" );
+      System.out.println( "請輸入正確的參數" );
       throw new Throwable();
     } // catch
 
-  } // IsFunInputOk()
+  } // IsFuncInputOk()
 
 } // class Excute
 
@@ -3853,7 +3931,7 @@ class Main {
 
   public static void main( String[] args ) throws Throwable {
     CutToken cutToken = new CutToken();
-    Vector<VarList> G = Global.s_Variables;
+    Vector<VarList> g = Global.s_Variables;
     Global.G_OurCInitialize();
     Global.sc.nextLine();
     System.out.println( "Our-C running ..." );
