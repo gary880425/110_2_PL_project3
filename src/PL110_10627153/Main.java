@@ -4148,6 +4148,7 @@ class Main {
         else
           System.out.println( "Parser Error!" );
       } // if
+      Global.s_Fundefin = null;
     } // while
 
   } // main()
