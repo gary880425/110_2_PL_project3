@@ -4319,7 +4319,7 @@ class Excute {
             if ( token.equals( "++" ) || token.equals( "--" ) || token.equals( "[" ) || k == 0 ||
                  ( token.equals( "(" ) && k > 0 &&
                    Global.G_FindFunction( Global.s_Functions, preT ) != null ) ) {
-              ;
+              ; // skip
             } // if
             else {
               System.out.print( " " );
