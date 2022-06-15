@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 14:34
+// 20220615 15:21
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -2143,6 +2143,9 @@ class Parser {
           i++;
         } // while
 
+        if ( m_statement.get( i ).GetType() == Global.s_T_COMMA )
+          i++;
+
         VarDefin( var );
       } // for
 
@@ -2585,8 +2588,10 @@ class Parser {
           Global.s_Variables.add( new VarList() );
           if ( excute.ExcuteComm( false ) ) {
             Global.s_Variables.remove( Global.s_Variables.size() - 1 );
+            /*
             if ( Global.s_Fundefin != null )
               Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
+            */
             return true;
           } // if
           else {
