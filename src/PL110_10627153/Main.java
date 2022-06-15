@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 14:27
+// 20220615 14:34
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -2577,8 +2577,7 @@ class Parser {
       } // else if
       else if ( m_statement.get( m_step ).GetToken().equals( "return" ) ) {
         m_step += 1;
-        if ( Expression() )
-          m_step += 1;
+        Expression();
         if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
              m_statement.get( m_step ).GetType() == 21 ) {
           m_step += 1;
