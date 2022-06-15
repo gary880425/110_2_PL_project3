@@ -2273,14 +2273,20 @@ class Parser {
 
         while ( isHave ) {
           boolean issucess = false;
-          if ( Declaration() || ConditionalExpressionsStatement() ) {
+          if ( ConditionalExpressionsStatement() || Declaration() ) {
             Excute excute = new Excute( m_statement );
             if ( excute.ExcuteComm( false ) ) {
-              if ( Global.s_Fundefin != null )
-                Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
+              if ( m_statement.get( 0 ).GetType() == Global.s_T_BIG_RIGHT_PAREN ) {
+                issucess = false;
+                isHave = false;
+              } // if
+              else {
+                if ( Global.s_Fundefin != null )
+                  Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
+                issucess = true;
+                isHave = false;
+              } // else
 
-              issucess = true;
-              isHave = false;
             } // if
             else {
               Global.s_Variables.remove( Global.s_Variables.size() - 1 );
@@ -2325,7 +2331,7 @@ class Parser {
   private boolean Declaration() throws Throwable {
     try {
       if ( Type_Specifier() ) {
-        m_step += 1;
+        // m_step += 1;
         if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
           m_step += 1;
           if ( Rest_of_Declarators() ) {
@@ -2660,6 +2666,12 @@ class Parser {
                       return false;
 
                   } // if
+                  /*
+                  else if ( isGetOK ) {
+                    m_cuttoken.ReturnmBuffer2( m_statement );
+                    m_statement = new Vector<TOKEN>();
+                  } // else if
+                   */
 
                   return true; // ?_?
                 } // if
