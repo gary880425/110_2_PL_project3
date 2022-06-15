@@ -4516,12 +4516,12 @@ class Main {
           // Function g = Global.s_Fundefin;
           Excute excute = new Excute( stament );
           excute.ExcuteComm( true );
+          Global.s_Fundefin = null;
         } // if
-        else
-          System.out.println( "Parser Error!" );
+        else {
+          Global.s_Fundefin = null;
+        }
       } // if
-
-      Global.s_Fundefin = null;
     } // while
 
   } // main()
