@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 23:00
+// 20220615 23:05
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -30,8 +30,6 @@ class Global {
   static final int s_T_COMMA = 22; // ,
   static final int s_T_TERNARYOPERATOR = 23; // ?:
   static final int s_T_OURCCOMMAND = 24;
-
-  static int s_fundefing = 0;
 
   // Blow is Variable Type
   static final int s_V_INT = 1;
@@ -155,7 +153,7 @@ class Global {
   } // G_AddVariable()
 
   public static Variable G_FindVariable( Vector<VarList> vList, String vName ) throws Throwable {
-    for ( int r = vList.size() - 1 ; r >= 0 + s_fundefing ; r-- ) {
+    for ( int r = vList.size() - 1 ; r >= 0 ; r-- ) {
       for ( int i = 0 ; i < vList.get( r ).m_Var.size() ; i++ ) {
         if ( vList.get( r ).m_Var.get( i ).GetName().equals( vName ) )
           return vList.get( r ).m_Var.get( i );
@@ -597,6 +595,8 @@ class CutToken {
 
   public boolean Cutting( Vector<TOKEN> stament ) throws Throwable {
     boolean notGetSEMICOLON = true;
+    if ( mnowLine.length() == 0 || mnowLine == null )
+      mLineCount = 0;
 
     System.out.print( "> " );
 
@@ -605,13 +605,12 @@ class CutToken {
         return true;
       } // if
 
-    if ( mnowLine.length() == 0 || mnowLine == null || mnowLine.isEmpty() ) {
-      mLineCount = 0;
+    if ( mnowLine.isEmpty() ) {
       InputNextLineTomNowLine();
     } // if
 
     while ( notGetSEMICOLON ) {
-      if ( mnowLine.isEmpty() || mnowLine.length() == 0 || mnowLine == null ) {
+      if ( mnowLine.isEmpty() ) {
         InputNextLineTomNowLine();
       } // if
 
@@ -1702,7 +1701,7 @@ class CutToken {
     RemoveHeadWhiteCherFormNowLine();
     RemoveTailWhiteCherFormNowLine();
 
-    while ( mnowLine.isEmpty() || mnowLine.length() == 0 || mnowLine == null ) {
+    while ( mnowLine.isEmpty() ) {
       while ( ! msc.hasNext() ) {
         Global.sc = new Scanner( System.in );
         msc = Global.sc;
@@ -2166,7 +2165,6 @@ class Parser {
       m_statement = new Vector<TOKEN>();
       m_step = 0;
       if ( m_cuttoken.GetStament( m_statement ) ) {
-        Global.s_fundefing = 1;
         if ( Compound_Statement() ) {
           if ( Global.s_Fundefin != null ) {
             int i = Global.s_Fundefin.m_commLine.size();
@@ -2175,18 +2173,15 @@ class Parser {
           } // if
 
           Global.s_Variables.remove( Global.s_Variables.size() - 1 );
-          Global.s_fundefing = 0;
           return true;
         } // if
         else {
           Global.s_Variables.remove( Global.s_Variables.size() - 1 );
-          Global.s_fundefing = 0;
           return false;
         } // else
       } // if
       else {
         Global.s_Variables.remove( Global.s_Variables.size() - 1 );
-        Global.s_fundefing = 0;
         return false;
       } // else
     } // try
@@ -2584,6 +2579,7 @@ class Parser {
              m_statement.get( m_step ).GetType() == 21 ) {
           m_step += 1;
           Excute excute = new Excute( m_statement );
+          Global.s_Variables.add( new VarList() );
           if ( excute.ExcuteComm( false ) ) {
             Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             return true;
@@ -2604,6 +2600,7 @@ class Parser {
              m_statement.get( m_step ).GetType() == 21 ) {
           m_step += 1;
           Excute excute = new Excute( m_statement );
+          Global.s_Variables.add( new VarList() );
           if ( excute.ExcuteComm( false ) ) {
             Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             /*
@@ -4317,10 +4314,10 @@ class Excute {
 
         // 印出function內容物
         Vector<Stament> temp = Global.s_Functions.get( i ).m_commLine;
-        boolean oneComm = false;
-        boolean isDo = false;
-        boolean isDoWhile = false;
-        int doWhiteSpace = 0;
+        boolean oneComm = false ;
+        boolean isDo = false ;
+        boolean isDoWhile = false ;
+        int doWhiteSpace = 0 ;
         for ( int j = 1 ; j < temp.size() ; j++ ) { // 行數
           for ( int k = 0 ; k < temp.get( j ).m_Line.size() ; k++ ) { // Statement
             String token = temp.get( j ).m_Line.get( k ).GetToken();
@@ -4349,18 +4346,18 @@ class Excute {
 
             // 遇到以下這幾個要縮排
             if ( ( token.equals( "while" ) || token.equals( "do" ) || token.equals( "if" ) ||
-                   token.equals( "else" ) ) && ! isDoWhile ) {
+                   token.equals( "else" ) ) && !isDoWhile ) {
               whiteSpace += 2;
 
               if ( token.equals( "do" ) ) {
-                isDo = true;
-                doWhiteSpace = whiteSpace - 2;
+                isDo = true ;
+                doWhiteSpace = whiteSpace - 2 ;
               } // if
 
               // 下一行不為 {
               if ( j + 1 < temp.size() - 1 && temp.get( j + 1 ).m_Line.size() > 1 &&
-                   ! temp.get( j ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
-                oneComm = true;
+                   !temp.get( j ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
+                oneComm = true ;
               } // if
 
             } // if
@@ -4386,8 +4383,8 @@ class Excute {
                  temp.get( j + 1 ).m_Line.size() == 1 &&
                  temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( ";" ) && isDoWhile ) {
               System.out.print( " ;" );
-              isDoWhile = false;
-              j += 1;
+              isDoWhile = false ;
+              j += 1 ;
             } // if
 
             // 如果下一行token為 } , white space - 2
@@ -4402,9 +4399,9 @@ class Excute {
                Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.size() == 1 &&
                Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.get( 0 ).GetToken().equals( "}" )
                && isDo ) {
-            System.out.print( " " );
-            isDo = false;
-            isDoWhile = true;
+            System.out.print( " " ) ;
+            isDo = false ;
+            isDoWhile = true ;
           } // if
           else {
             System.out.println(); // 換行
@@ -4414,8 +4411,8 @@ class Excute {
           } // else
 
           if ( oneComm ) {
-            whiteSpace -= 2;
-            oneComm = false;
+            whiteSpace -= 2 ;
+            oneComm = false ;
           } // if
 
 
@@ -4572,7 +4569,6 @@ class Excute {
 
 } // class Excute
 
-
 class Main {
 
   public static void main( String[] args ) throws Throwable {
@@ -4597,11 +4593,9 @@ class Main {
             Excute excute = new Excute( stament );
             excute.ExcuteComm( true );
             Global.s_Fundefin = null;
-            Global.s_fundefing = 0;
           } // if
           else {
             Global.s_Fundefin = null;
-            Global.s_fundefing = 0;
           } // else
         } // if
       } // try
