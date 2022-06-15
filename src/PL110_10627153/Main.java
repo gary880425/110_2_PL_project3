@@ -169,7 +169,6 @@ class Global {
     for ( int i = 0 ; i < fList.size() ; i++ ) {
       if ( fList.get( i ).GetName().equals( fName ) )
         return fList.get( i );
-
     } // for
 
     return null;
@@ -1864,7 +1863,7 @@ class CutToken {
     mnowLine = new String();
   } // ClaerNowLine()
 
-} // class CutToken change
+} // class CutToken
 
 class Parser {
   public Vector<TOKEN> m_statement;
@@ -4302,21 +4301,33 @@ class Excute {
         // 印出function內容物
         // 宣告的[]還沒處理
         Vector<Stament> temp = Global.s_Functions.get( i ).m_commLine;
+
         for ( int j = 1 ; j < temp.size() ; j++ ) { // 行數
-          for ( int k = 0 ; k < temp.get( j ).m_Line.size() ;
-                k++ ) { // Statement
+          for ( int k = 0 ; k < temp.get( j ).m_Line.size() ; k++ ) { // Statement
             String token = temp.get( j ).m_Line.get( k ).GetToken();
+            int tkType = temp.get( j ).m_Line.get( k ).GetType() ;
             int lineSize = temp.get( j ).m_Line.size();
+            String preT = "" ;
+
+            // 判斷是否要空格
+            // 下一個是 ++ -- [ 的後面不用空格
+            // function後面如果緊接著 ( 不用空格
+            if ( k > 0 ) {
+              preT = temp.get( j ).m_Line.get( k - 1 ).GetToken() ;
+            } // if
+
+            if ( token.equals( "++" ) || token.equals( "--" ) || token.equals( "[" ) || k == 0 ||
+                 ( token.equals( "(" ) && k > 0 &&
+                   Global.G_FindFunction( Global.s_Functions, preT ) != null ) ) {
+              ;
+            } // if
+            else {
+              System.out.print( " " );
+            } // else
+
             System.out.print( token );
 
-            // 判斷下一個token是否要空格
-            if ( k < lineSize &&
-                 ( k + 1 < lineSize
-                   && ( ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "[" ) &&
-                        ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "++" ) &&
-                        ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "--" ) ) ) ) {
-              System.out.print( " " );
-            } // if
+
 
             // 遇到以下這幾個要縮排
             if ( token.equals( "while" ) || token.equals( "do" ) || token.equals( "if" ) ||
