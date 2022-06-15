@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 10:33
+// 20220615 12:41
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -1882,6 +1882,7 @@ class Parser {
         if ( ! m_statement.isEmpty() ) {
           System.out.println( "Line " + m_statement.get( m_step ).Getline() + " : " +
                               "unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+          // System.out.println( "Token " +  m_step );
         } // if
         // System.out.print( "> " );
         return false;
@@ -1892,6 +1893,7 @@ class Parser {
       if ( m_statement != null && ! m_statement.isEmpty() ) {
         System.out.println( "Line " + m_statement.get( m_step ).Getline() + " : " +
                             "unexpected token : '" + m_statement.get( m_step ).GetToken() + "'" );
+        // System.out.println( "Token " +  m_step );
       } // if
       // System.out.print( "> " );
       return false;
@@ -3445,7 +3447,7 @@ class Parser {
 
   private boolean Maybe_Equality_Exp() throws Throwable {
     try {
-      if ( Maybe_Equality_Exp() ) {
+      if ( Maybe_Relational_Exp() ) {
         // m_step += 1;
       } // if
       else {
