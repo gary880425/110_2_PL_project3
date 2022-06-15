@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 14:34
+// 20220615 19:19
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -310,19 +310,19 @@ abstract class Variable {
   } // GetType()
 
   public String GetTypeName() throws Throwable {
-    if ( GetType() == 1 ) {
+    if ( m_Type == Global.s_V_INT ) {
       return "int";
     } // if
-    else if ( GetType() == 2 ) {
-      return "String";
+    else if ( m_Type == Global.s_V_STRING ) {
+      return "string";
     } // else if
-    else if ( GetType() == 3 ) {
+    else if ( m_Type == Global.s_V_FLOAT ) {
       return "float";
     } // else if
-    else if ( GetType() == 4 ) {
+    else if ( m_Type == Global.s_V_CHAR ) {
       return "char";
     } // else if
-    else if ( GetType() == 5 ) {
+    else if ( m_Type == Global.s_V_BOOL ) {
       return "bool";
     } // else if
     else {
@@ -553,7 +553,7 @@ class Function {
       return "int";
     } // if
     else if ( m_type == 2 ) {
-      return "String";
+      return "string";
     } // else if
     else if ( m_type == 3 ) {
       return "float";
@@ -1690,6 +1690,11 @@ class CutToken {
 
   protected void InputNextLineTomNowLine() throws Throwable {
 
+    while ( ! msc.hasNext() ) {
+      Global.sc = new Scanner( System.in );
+      msc = Global.sc;
+    } // while
+
     mnowLine = msc.nextLine();
     mLineCount += 1;
     mnowLine = RemoveCommend( mnowLine );
@@ -1697,6 +1702,11 @@ class CutToken {
     RemoveTailWhiteCherFormNowLine();
 
     while ( mnowLine.isEmpty() ) {
+      while ( ! msc.hasNext() ) {
+        Global.sc = new Scanner( System.in );
+        msc = Global.sc;
+      } // while
+
       mnowLine = msc.nextLine();
       mLineCount += 1;
       mnowLine = RemoveCommend( mnowLine );
@@ -2071,7 +2081,7 @@ class Parser {
       } // while
 
       if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
-           m_statement.get( m_step ).GetType() == 21 ) {
+           m_statement.get( m_step ).GetType() == Global.s_T_SEMICOLON ) {
         m_step += 1;
         return true;
       } // if
@@ -2742,8 +2752,10 @@ class Parser {
                         if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
                              m_statement.get( m_step ).GetType() == 21 ) {
                           m_step += 1;
+                          /*
                           if ( Global.s_Fundefin != null )
                             Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
+                          */
                           return true;
                         } // if
                         else {
@@ -2827,7 +2839,7 @@ class Parser {
 
   private boolean Basic_Expression() throws Throwable {
     try {
-      if ( m_statement.get( m_step ).GetType() == 1 ) { // ID
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) { // ID
         m_step += 1;
         if ( Rest_of_Identifier_Started_Basic_Exp() ) {
           return true;
@@ -2836,12 +2848,10 @@ class Parser {
           return false;
         } // else
       } // if
-      else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) &&
-                  m_statement.get( m_step ).GetType() == 20 ) ||
-                ( m_statement.get( m_step ).GetToken().equals( "--" ) &&
-                  m_statement.get( m_step ).GetType() == 20 ) ) {
+      else if ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
+                m_statement.get( m_step ).GetToken().equals( "--" ) ) {
         m_step += 1;
-        if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+        if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) { // ID
           m_step += 1;
           if ( Rest_of_PPMM_Identifier_Started_Basic_Exp() ) {
             return true;
@@ -2873,7 +2883,7 @@ class Parser {
           return false;
         } // else
       } // else if
-      else if ( m_statement.get( m_step ).GetType() == 2 ) { // Constant
+      else if ( m_statement.get( m_step ).GetType() == Global.s_T_CONSTANT ) { // Constant
         m_step += 1;
         if ( Romce_and_Romloe() ) {
           return true;
@@ -2916,15 +2926,13 @@ class Parser {
 
   private boolean Rest_of_Identifier_Started_Basic_Exp() throws Throwable {
     try {
-      if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
-           m_statement.get( m_step ).GetType() == 5 ) {
+      if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
         m_step += 1;
         if ( ! Expression() ) {
           return false;
         } // if
 
-        if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
-             m_statement.get( m_step ).GetType() == 6 ) {
+        if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
           m_step += 1;
         } // if
         else
@@ -3219,8 +3227,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().equals( "&&" ) &&
-              m_statement.get( m_step ).GetType() == 19 ) { // maybe will out of range
+      while ( m_statement.get( m_step ).GetToken().equals( "&&" ) ) { // maybe will out of range
         m_step += 1;
 
         if ( Maybe_Bit_OR_Exp() ) {
@@ -3465,8 +3472,7 @@ class Parser {
       } // if
 
       while ( ( m_statement.get( m_step ).GetToken().equals( "==" ) ||
-                m_statement.get( m_step ).GetToken().equals( "!=" ) ) &&
-              m_statement.get( m_step ).GetType() == 17 ) {
+                m_statement.get( m_step ).GetToken().equals( "!=" ) ) ) {
         m_step += 1;
         if ( Maybe_Relational_Exp() ) {
           // m_step += 1;
@@ -3501,8 +3507,7 @@ class Parser {
       } // if
 
       while ( ( m_statement.get( m_step ).GetToken().equals( "==" ) ||
-                m_statement.get( m_step ).GetToken().equals( "!=" ) ) &&
-              m_statement.get( m_step ).GetType() == 17 ) {
+                m_statement.get( m_step ).GetToken().equals( "!=" ) ) ) {
         m_step += 1;
         if ( Maybe_Relational_Exp() ) {
           // m_step += 1;
@@ -3539,8 +3544,7 @@ class Parser {
       while ( ( m_statement.get( m_step ).GetToken().equals( "<" ) ||
                 m_statement.get( m_step ).GetToken().equals( ">" ) ||
                 m_statement.get( m_step ).GetToken().equals( "<=" ) ||
-                m_statement.get( m_step ).GetToken().equals( ">=" ) ) &&
-              m_statement.get( m_step ).GetType() == 17 ) {
+                m_statement.get( m_step ).GetToken().equals( ">=" ) ) ) {
         m_step += 1;
         if ( Maybe_Shift_Exp() ) {
           // m_step += 1;
@@ -3577,8 +3581,7 @@ class Parser {
       while ( ( m_statement.get( m_step ).GetToken().equals( "<" ) ||
                 m_statement.get( m_step ).GetToken().equals( ">" ) ||
                 m_statement.get( m_step ).GetToken().equals( "<=" ) ||
-                m_statement.get( m_step ).GetToken().equals( ">=" ) ) &&
-              m_statement.get( m_step ).GetType() == 17 ) {
+                m_statement.get( m_step ).GetToken().equals( ">=" ) ) ) {
         m_step += 1;
         if ( Maybe_Shift_Exp() ) {
           // m_step += 1;
@@ -3613,8 +3616,7 @@ class Parser {
       } // if
 
       while ( ( m_statement.get( m_step ).GetToken().equals( ">>" ) ||
-                m_statement.get( m_step ).GetToken().equals( "<<" ) ) &&
-              m_statement.get( m_step ).GetType() == 16 ) {
+                m_statement.get( m_step ).GetToken().equals( "<<" ) ) ) {
         m_step += 1;
         if ( Maybe_Additive_Exp() ) {
           // m_step += 1;
@@ -3649,8 +3651,7 @@ class Parser {
       } // if
 
       while ( ( m_statement.get( m_step ).GetToken().equals( ">>" ) ||
-                m_statement.get( m_step ).GetToken().equals( "<<" ) ) &&
-              m_statement.get( m_step ).GetType() == 16 ) {
+                m_statement.get( m_step ).GetToken().equals( "<<" ) ) ) {
         m_step += 1;
         if ( Maybe_Additive_Exp() ) {
           // m_step += 1;
@@ -3685,8 +3686,7 @@ class Parser {
       } // if
 
       while ( ( m_statement.get( m_step ).GetToken().equals( "+" ) ||
-                m_statement.get( m_step ).GetToken().equals( "-" ) ) &&
-              m_statement.get( m_step ).GetType() == 16 ) {
+                m_statement.get( m_step ).GetToken().equals( "-" ) ) ) {
         m_step += 1;
         if ( Maybe_Mult_Exp() ) {
           // m_step += 1;
@@ -3721,8 +3721,7 @@ class Parser {
       } // if
 
       while ( ( m_statement.get( m_step ).GetToken().equals( "+" ) ||
-                m_statement.get( m_step ).GetToken().equals( "-" ) ) &&
-              m_statement.get( m_step ).GetType() == 16 ) {
+                m_statement.get( m_step ).GetToken().equals( "-" ) ) ) {
         m_step += 1;
         if ( Maybe_Mult_Exp() ) {
           // m_step += 1;
@@ -3771,8 +3770,7 @@ class Parser {
 
       while ( ( m_statement.get( m_step ).GetToken().equals( "*" ) ||
                 m_statement.get( m_step ).GetToken().equals( "/" ) ||
-                m_statement.get( m_step ).GetToken().equals( "%" ) ) &&
-              m_statement.get( m_step ).GetType() == 16 ) {
+                m_statement.get( m_step ).GetToken().equals( "%" ) ) ) {
         m_step += 1;
         if ( Unary_Exp() ) {
           // m_step += 1;
@@ -3814,8 +3812,7 @@ class Parser {
         return true;
       } // else if
       else if ( ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
-                  m_statement.get( m_step ).GetToken().equals( "--" ) ) &&
-                m_statement.get( m_step ).GetType() == 20 ) {
+                  m_statement.get( m_step ).GetToken().equals( "--" ) ) ) {
         m_step += 1;
         if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
           m_step += 1;
@@ -3824,13 +3821,11 @@ class Parser {
             return true;
           } // if
 
-          if ( m_statement.get( m_step ).GetToken().equals( "[" ) &&
-               m_statement.get( m_step ).GetType() == 5 ) { // 可能會out of range
+          if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) { // 可能會out of range
             m_step += 1;
             if ( Expression() ) {
               // m_step += 1;
-              if ( m_statement.get( m_step ).GetToken().equals( "]" ) &&
-                   m_statement.get( m_step ).GetType() == 6 ) {
+              if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
                 m_step += 1;
                 return true;
               } // if
@@ -3867,16 +3862,14 @@ class Parser {
           return true;
         } // if
 
-        if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
-             m_statement.get( m_step ).GetType() == 3 ) {
+        if ( m_statement.get( m_step ).GetToken().equals( "(" ) ) {
           m_step += 1;
 
           if ( Actual_Parameter_List() ) {
             // m_step += 1;
           } // if
 
-          if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
-               m_statement.get( m_step ).GetType() == 4 ) {
+          if ( m_statement.get( m_step ).GetToken().equals( ")" ) ) {
             m_step += 1;
             return true;
           } // if
@@ -3995,7 +3988,7 @@ class Parser {
         return true;
       } // else if
       else if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
-                m_statement.get( m_step ).GetType() == 3 ) {
+                m_statement.get( m_step ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) {
         m_step += 1;
 
         if ( Expression() ) {
@@ -4088,6 +4081,8 @@ class Excute {
           System.out.println( "Statement executed ..." );
         return true;
       } // else
+
+      // return true;
 
     } // try
     catch ( Throwable throwable ) {
@@ -4204,12 +4199,14 @@ class Excute {
 
   } // ListAllVariables()
 
-  private void ListVariable( String varName ) throws Throwable {
+  private boolean ListVariable( String varName ) throws Throwable {
     varName = varName.substring( 1, varName.length() - 1 ); // 刪除頭尾的'"'
     boolean stop = false;
+    boolean isFind = false;
     for ( int i = 0 ; i < Global.s_Variables.size() && ! stop ; i++ ) {
       for ( int j = 0 ; j < Global.s_Variables.get( i ).m_Var.size() && ! stop ; j++ ) {
         if ( Global.s_Variables.get( i ).m_Var.get( j ).GetName().equals( varName ) ) {
+          isFind = true;
           System.out.print( Global.s_Variables.get( i ).m_Var.get( j ).GetTypeName() + " " +
                             Global.s_Variables.get( i ).m_Var.get( j ).GetName() );
           if ( ! Global.s_Variables.get( i ).m_Var.get( j ).IsArray() ) {
@@ -4222,6 +4219,13 @@ class Excute {
         } // if
       } // for
     } // for
+
+    if ( ! isFind ) {
+      System.out.println( "Undefined identifier : '" + varName + "'" );
+      return false;
+    } // if
+
+    return true;
   } // ListVariable()
 
   private void ListAllFunctions() throws Throwable {
@@ -4305,15 +4309,15 @@ class Excute {
         for ( int j = 1 ; j < temp.size() ; j++ ) { // 行數
           for ( int k = 0 ; k < temp.get( j ).m_Line.size() ; k++ ) { // Statement
             String token = temp.get( j ).m_Line.get( k ).GetToken();
-            int tkType = temp.get( j ).m_Line.get( k ).GetType() ;
+            int tkType = temp.get( j ).m_Line.get( k ).GetType();
             int lineSize = temp.get( j ).m_Line.size();
-            String preT = "" ;
+            String preT = "";
 
             // 判斷是否要空格
             // 下一個是 ++ -- [ 的後面不用空格
             // function後面如果緊接著 ( 不用空格
             if ( k > 0 ) {
-              preT = temp.get( j ).m_Line.get( k - 1 ).GetToken() ;
+              preT = temp.get( j ).m_Line.get( k - 1 ).GetToken();
             } // if
 
             if ( token.equals( "++" ) || token.equals( "--" ) || token.equals( "[" ) || k == 0 ||
@@ -4326,7 +4330,6 @@ class Excute {
             } // else
 
             System.out.print( token );
-
 
 
             // 遇到以下這幾個要縮排
@@ -4524,7 +4527,11 @@ class Main {
   public static void main( String[] args ) throws Throwable {
     CutToken cutToken = new CutToken();
     Global.G_OurCInitialize();
-    Global.sc.nextLine();
+
+    String tt = Global.sc.nextLine();
+    if ( tt.contains( "2" ) )
+      ; // System.exit( 0 );
+
     System.out.println( "Our-C running ..." );
     int isInIfWhileElse = 0;
     while ( true ) {
