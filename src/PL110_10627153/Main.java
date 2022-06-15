@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220614 15:44
+// 20220615 10:33
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -4509,19 +4509,24 @@ class Main {
     while ( true ) {
       Vector<TOKEN> stament = new Vector<TOKEN>();
       // System.out.println( "main CutToken Part! " );
-      if ( cutToken.Cutting( stament ) ) {
-        Parser parser = new Parser( stament, cutToken );
-        // System.out.println( "main Parser Part! " );
-        if ( parser.GrammarParser() ) {
-          // Function g = Global.s_Fundefin;
-          Excute excute = new Excute( stament );
-          excute.ExcuteComm( true );
-          Global.s_Fundefin = null;
+      try {
+        if ( cutToken.Cutting( stament ) ) {
+          Parser parser = new Parser( stament, cutToken );
+          // System.out.println( "main Parser Part! " );
+          if ( parser.GrammarParser() ) {
+            // Function g = Global.s_Fundefin;
+            Excute excute = new Excute( stament );
+            excute.ExcuteComm( true );
+            Global.s_Fundefin = null;
+          } // if
+          else {
+            Global.s_Fundefin = null;
+          } // else
         } // if
-        else {
-          Global.s_Fundefin = null;
-        }
-      } // if
+      } // try
+      catch ( Throwable throwable ) {
+        ;
+      } // catch
     } // while
 
   } // main()
