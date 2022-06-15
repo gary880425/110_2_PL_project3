@@ -2994,12 +2994,9 @@ class Parser {
 
   private boolean Sign() throws Throwable {
     try {
-      if ( ( m_statement.get( m_step ).GetToken().equals( "+" ) &&
-             m_statement.get( m_step ).GetType() == 16 ) ||
-           ( m_statement.get( m_step ).GetToken().equals( "-" ) &&
-             m_statement.get( m_step ).GetType() == 16 ) ||
-           ( m_statement.get( m_step ).GetToken().equals( "!" ) &&
-             m_statement.get( m_step ).GetType() == 19 ) ) {
+      if ( m_statement.get( m_step ).GetToken().equals( "+" ) ||
+           m_statement.get( m_step ).GetToken().equals( "-" ) ||
+           m_statement.get( m_step ).GetToken().equals( "!" ) ) {
         m_step += 1;
         return true;
       } // if
@@ -3854,7 +3851,7 @@ class Parser {
 
   private boolean Signed_Unary_Exp() throws Throwable {
     try {
-      if ( m_statement.get( m_step ).GetType() == 4 ) { // ID
+      if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) { // ID
         m_step += 1;
 
         if ( IsStepEnd() ) {
@@ -3885,7 +3882,7 @@ class Parser {
 
         return false;
       } // if
-      else if ( m_statement.get( m_step ).GetType() == 13 ) { // Constant
+      else if ( m_statement.get( m_step ).GetType() == Global.s_T_CONSTANT ) { // Constant
         m_step += 1;
         return true;
       } // else if
@@ -4304,9 +4301,10 @@ class Excute {
 
             // 判斷下一個token是否要空格
             if ( k < lineSize &&
-                 ( k + 1 < lineSize && ( !temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "[" ) &&
-                                         !temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "++" ) &&
-                                         !temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "--" ) ) ) ) {
+                 ( k + 1 < lineSize && ( ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "[" ) &&
+                                         ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "++" ) &&
+                                         ! temp.get( j ).m_Line.get( k + 1 ).GetToken()
+                                                               .equals( "--" ) ) ) ) {
               System.out.print( " " );
             } // if
 
