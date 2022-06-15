@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 12:41
+// 20220615 14:09
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -893,7 +893,7 @@ class CutToken {
 
         // System.out.print( "> " );
         mnowLine = new String();
-        throw new Throwable();
+        return false;
 
       } // catch
 
@@ -1091,7 +1091,7 @@ class CutToken {
 
   protected void HASOTHERTOKENISERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
-      System.out.println( "Line " + mLineCount + " : " + "undefined identifier : '"
+      System.out.println( "Line " + mLineCount + " : " + "unexpected identifier : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -1860,7 +1860,11 @@ class CutToken {
 
   } // IsWhitSpace()
 
-} // class CutToken
+  public void ClaerNowLine() throws Throwable {
+    mnowLine = new String();
+  } // ClaerNowLine()
+
+} // class CutToken change
 
 class Parser {
   public Vector<TOKEN> m_statement;
@@ -1885,6 +1889,7 @@ class Parser {
           // System.out.println( "Token " +  m_step );
         } // if
         // System.out.print( "> " );
+        m_cuttoken.ClaerNowLine();
         return false;
       } // else
 
@@ -1896,6 +1901,7 @@ class Parser {
         // System.out.println( "Token " +  m_step );
       } // if
       // System.out.print( "> " );
+      m_cuttoken.ClaerNowLine();
       return false;
     } // catch
   } // GrammarParser()
@@ -1919,10 +1925,12 @@ class Parser {
       int curStep = 0;
 
       if ( Statement() ) {
-        ;
+        int it = 0;
+        it++;
       } // if
       else if ( Definition() ) {
-        ;
+        int i = 0;
+        i++;
       } // else if
       else {
         return false;
@@ -1942,7 +1950,7 @@ class Parser {
       return true;
     } // try
     catch ( Throwable throwable ) {
-      throw new Throwable();
+      return false;
     } // catch
   } // UserInput()
 
@@ -3140,8 +3148,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().equals( "||" ) &&
-              m_statement.get( m_step ).GetType() == 19 ) { // 可能會out of range
+      while ( m_statement.get( m_step ).GetToken().equals( "||" ) ) { // 可能會out of range
         m_step += 1;
         if ( Maybe_Logical_AND_Exp() ) {
           // m_step += 1;
@@ -3175,8 +3182,7 @@ class Parser {
         return true;
       } // if
 
-      while ( m_statement.get( m_step ).GetToken().equals( "&&" ) &&
-              m_statement.get( m_step ).GetType() == 19 ) { // maybe will out of range
+      while ( m_statement.get( m_step ).GetToken().equals( "&&" ) ) { // maybe will out of range
         m_step += 1;
         if ( Maybe_Bit_OR_Exp() ) {
           // m_step += 1;
@@ -4006,7 +4012,7 @@ class Parser {
         } // else
       } // else if
       else {
-        return true;
+        return false;
       } // else
     } // try
     catch ( Throwable throwable ) {
@@ -4048,7 +4054,7 @@ class Parser {
 
   } // VarDefin()
 
-} // class Parser
+} // class Parser change
 
 class Excute {
 
@@ -4301,10 +4307,10 @@ class Excute {
 
             // 判斷下一個token是否要空格
             if ( k < lineSize &&
-                 ( k + 1 < lineSize && ( ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "[" ) &&
-                                         ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "++" ) &&
-                                         ! temp.get( j ).m_Line.get( k + 1 ).GetToken()
-                                                               .equals( "--" ) ) ) ) {
+                 ( k + 1 < lineSize
+                   && ( ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "[" ) &&
+                        ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "++" ) &&
+                        ! temp.get( j ).m_Line.get( k + 1 ).GetToken().equals( "--" ) ) ) ) {
               System.out.print( " " );
             } // if
 
