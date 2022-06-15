@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 14:09
+// 20220615 14:27
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -750,7 +750,7 @@ class CutToken {
 
   } // Cutting()
 
-  public boolean GetStament( Vector<TOKEN> stament ) throws Throwable { // change
+  public boolean GetStament( Vector<TOKEN> stament ) throws Throwable {
 
     boolean notGetSEMICOLON = true;
     if ( mBuffer2 != null )
@@ -1091,7 +1091,7 @@ class CutToken {
 
   protected void HASOTHERTOKENISERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
-      System.out.println( "Line " + mLineCount + " : " + "unexpected identifier : '"
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       // System.out.print( "> " );
       mBuffer.clear();
@@ -4054,7 +4054,7 @@ class Parser {
 
   } // VarDefin()
 
-} // class Parser change
+} // class Parser
 
 class Excute {
 
@@ -4070,7 +4070,7 @@ class Excute {
       if ( IsFuncDefined() && isPrint ) {
         FuncDefined();
         return true;
-      } // if change
+      } // if
       else if ( IsFuncCommand() ) {
         if ( isPrint )
           System.out.println( "Statement executed ..." );
@@ -4112,7 +4112,7 @@ class Excute {
       return false;
     } // catch
 
-  } // IsFuncDefined() change
+  } // IsFuncDefined()
 
   private void FuncDefined() throws Throwable {
     Function fun = Global.G_FindFunction( Global.s_Functions, Global.s_Fundefin.m_name );
@@ -4130,7 +4130,7 @@ class Excute {
       Global.s_Fundefin = null;
     } // else
 
-  } // FuncDefined() change
+  } // FuncDefined()
 
   private boolean IsFuncCommand() throws Throwable {
     try {
@@ -4465,7 +4465,7 @@ class Excute {
       throw new Throwable();
     } // catch()
 
-  } // IsVarDefinOK()  change
+  } // IsVarDefinOK()
 
   // 使用function時，判斷傳入的參數數量是否正確
   private boolean IsFuncInputOk( String funcName ) throws Throwable {
