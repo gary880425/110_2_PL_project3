@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220615 21:22
+// 20220615 21:55
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -1458,7 +1458,7 @@ class CutToken {
 
   private boolean ReturnBuffer2Stament( Vector<TOKEN> buffer ) throws Throwable {
 
-    if ( mBuffer2.size() > 1 ) {
+    if ( mBuffer2.size() > 0 ) {
       buffer.clear();
       for ( int i = 0 ; i < mBuffer2.size() ; i++ )
         buffer.add( mBuffer2.get( i ) );
@@ -2275,23 +2275,23 @@ class Parser {
           boolean issucess = false;
           if ( ConditionalExpressionsStatement() || Declaration() ) {
             Excute excute = new Excute( m_statement );
-            if ( excute.ExcuteComm( false ) ) {
-              if ( m_statement.get( 0 ).GetType() == Global.s_T_BIG_RIGHT_PAREN ) {
-                issucess = false;
-                isHave = false;
-              } // if
-              else {
+            if ( ! m_statement.isEmpty() ) {
+              if ( excute.ExcuteComm( false ) ) {
                 if ( Global.s_Fundefin != null )
                   Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
                 issucess = true;
                 isHave = false;
+              } // if
+              else {
+                Global.s_Variables.remove( Global.s_Variables.size() - 1 );
+                throw new Throwable();
               } // else
-
             } // if
             else {
-              Global.s_Variables.remove( Global.s_Variables.size() - 1 );
-              throw new Throwable();
+              issucess = true;
+              isHave = false;
             } // else
+
           } // if
           else {
             issucess = false;
@@ -2666,12 +2666,10 @@ class Parser {
                       return false;
 
                   } // if
-                  /*
                   else if ( isGetOK ) {
                     m_cuttoken.ReturnmBuffer2( m_statement );
                     m_statement = new Vector<TOKEN>();
                   } // else if
-                  */
 
                   return true; // ?_?
                 } // if
