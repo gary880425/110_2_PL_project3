@@ -4248,7 +4248,7 @@ class Excute {
     } // for
 
     for ( int i = 0 ; i < funcList.size() ; i++ ) {
-      System.out.println( funcList.get( i ) + "() ;" );
+      System.out.println( funcList.get( i ) + "()" );
     } // for
   } // ListAllFunctions()
 
@@ -4349,7 +4349,7 @@ class Excute {
             System.out.print( " " );
           } // for
 
-          if ( j + 1 == temp.size() &&
+          if ( j + 1 == temp.size() - 1 &&
                temp.get( j + 1 ).m_Line.size() == 1 &&
                temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( "}" ) ) {
             System.out.println( "}" );
