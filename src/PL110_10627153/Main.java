@@ -155,7 +155,7 @@ class Global {
   } // G_AddVariable()
 
   public static Variable G_FindVariable( Vector<VarList> vList, String vName ) throws Throwable {
-    for ( int r = vList.size() - 1  ; r >= 0 + s_fundefing ; r-- ) {
+    for ( int r = vList.size() - 1 ; r >= 0 + s_fundefing ; r-- ) {
       for ( int i = 0 ; i < vList.get( r ).m_Var.size() ; i++ ) {
         if ( vList.get( r ).m_Var.get( i ).GetName().equals( vName ) )
           return vList.get( r ).m_Var.get( i );
@@ -1702,7 +1702,7 @@ class CutToken {
     RemoveHeadWhiteCherFormNowLine();
     RemoveTailWhiteCherFormNowLine();
 
-    while ( mnowLine.isEmpty() || mnowLine.length() == 0 || mnowLine == null) {
+    while ( mnowLine.isEmpty() || mnowLine.length() == 0 || mnowLine == null ) {
       while ( ! msc.hasNext() ) {
         Global.sc = new Scanner( System.in );
         msc = Global.sc;
@@ -4317,10 +4317,10 @@ class Excute {
 
         // 印出function內容物
         Vector<Stament> temp = Global.s_Functions.get( i ).m_commLine;
-        boolean oneComm = false ;
-        boolean isDo = false ;
-        boolean isDoWhile = false ;
-        int doWhiteSpace = 0 ;
+        boolean oneComm = false;
+        boolean isDo = false;
+        boolean isDoWhile = false;
+        int doWhiteSpace = 0;
         for ( int j = 1 ; j < temp.size() ; j++ ) { // 行數
           for ( int k = 0 ; k < temp.get( j ).m_Line.size() ; k++ ) { // Statement
             String token = temp.get( j ).m_Line.get( k ).GetToken();
@@ -4349,18 +4349,18 @@ class Excute {
 
             // 遇到以下這幾個要縮排
             if ( ( token.equals( "while" ) || token.equals( "do" ) || token.equals( "if" ) ||
-                   token.equals( "else" ) ) && !isDoWhile ) {
+                   token.equals( "else" ) ) && ! isDoWhile ) {
               whiteSpace += 2;
 
               if ( token.equals( "do" ) ) {
-                isDo = true ;
-                doWhiteSpace = whiteSpace - 2 ;
+                isDo = true;
+                doWhiteSpace = whiteSpace - 2;
               } // if
 
               // 下一行不為 {
               if ( j + 1 < temp.size() - 1 && temp.get( j + 1 ).m_Line.size() > 1 &&
-                   !temp.get( j ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
-                oneComm = true ;
+                   ! temp.get( j ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
+                oneComm = true;
               } // if
 
             } // if
@@ -4386,8 +4386,8 @@ class Excute {
                  temp.get( j + 1 ).m_Line.size() == 1 &&
                  temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( ";" ) && isDoWhile ) {
               System.out.print( " ;" );
-              isDoWhile = false ;
-              j += 1 ;
+              isDoWhile = false;
+              j += 1;
             } // if
 
             // 如果下一行token為 } , white space - 2
@@ -4402,9 +4402,9 @@ class Excute {
                Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.size() == 1 &&
                Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.get( 0 ).GetToken().equals( "}" )
                && isDo ) {
-            System.out.print( " " ) ;
-            isDo = false ;
-            isDoWhile = true ;
+            System.out.print( " " );
+            isDo = false;
+            isDoWhile = true;
           } // if
           else {
             System.out.println(); // 換行
@@ -4414,8 +4414,8 @@ class Excute {
           } // else
 
           if ( oneComm ) {
-            whiteSpace -= 2 ;
-            oneComm = false ;
+            whiteSpace -= 2;
+            oneComm = false;
           } // if
 
 
