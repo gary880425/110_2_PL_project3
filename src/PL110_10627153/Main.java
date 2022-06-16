@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220616 16:46
+// 20220616 20:41
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -3908,7 +3908,7 @@ class Excute {
 
     } // try
     catch ( Throwable throwable ) {
-      System.out.println( "Statement executed ..." );
+      // System.out.println( "Statement executed ..." );
       return false;
     } // catch
 
@@ -3971,6 +3971,11 @@ class Excute {
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListVariable" ) ) { // 印出特定variables
           if ( IsFuncInputOk( "ListVariable" ) ) {
+            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"') {
+              System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
+                                  "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
+              throw new Throwable();
+            } // if
             ListVariable( mStament.get( 2 ).GetToken() );
             return true;
           } // if
@@ -3983,6 +3988,11 @@ class Excute {
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListFunction" ) ) {
           if ( IsFuncInputOk( "ListFunction" ) ) {
+            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"') {
+              System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
+                                  "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
+              throw new Throwable();
+            } // if
             ListFunction( mStament.get( 2 ).GetToken() );
             return true;
           } // if
@@ -4366,7 +4376,7 @@ class Excute {
 
     } // try
     catch ( Throwable throwable ) {
-      System.out.println( "define error!" );
+      // System.out.println( "define error!" );
       throw new Throwable();
     } // catch()
 
