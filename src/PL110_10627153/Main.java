@@ -2361,11 +2361,11 @@ class Parser {
           Excute excute = new Excute( m_statement );
           // Global.s_Variables.add( new VarList() );
           if ( excute.ExcuteComm( false ) ) {
-            Global.s_Variables.remove( Global.s_Variables.size() - 1 );
+            // Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             return true;
           } // if
           else {
-            Global.s_Variables.remove( Global.s_Variables.size() - 1 );
+            // Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             throw new Throwable();
           } // else
         } // if
@@ -2382,7 +2382,7 @@ class Parser {
           Excute excute = new Excute( m_statement );
           Global.s_Variables.add( new VarList() );
           if ( excute.ExcuteComm( false ) ) {
-            Global.s_Variables.remove( Global.s_Variables.size() - 1 );
+            // Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             /*
             if ( Global.s_Fundefin != null )
               Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
@@ -2390,7 +2390,7 @@ class Parser {
             return true;
           } // if
           else {
-            Global.s_Variables.remove( Global.s_Variables.size() - 1 );
+            // Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             return false;
           } // else
         } // if
