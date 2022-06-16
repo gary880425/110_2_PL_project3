@@ -877,8 +877,11 @@ class CutToken {
   } // IDUUDEFINED()
 
   protected void VOIDTYPENOTONFIRST() throws Throwable {
-    if ( ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_TYPE ||
-           mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_VOID ) && mBuffer.size() != 1 ) {
+    if ( ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_VOID ||
+           mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_IF ||
+           mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_WHILE ||
+           mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_DO ||
+           mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_ELSE ) && mBuffer.size() != 1 ) {
       System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
                           + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
       mBuffer.clear();
