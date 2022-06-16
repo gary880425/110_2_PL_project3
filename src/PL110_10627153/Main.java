@@ -153,8 +153,9 @@ class Global {
   } // G_AddVariable()
 
   public static void G_ClearVars() throws Throwable {
-    while( s_Variables.size() > 1 )
+    while ( s_Variables.size() > 1 ) {
       s_Variables.remove( s_Variables.size() - 1 );
+    }
 
   } // G_ClearVars()
 
@@ -691,7 +692,7 @@ class CutToken {
           mBuffer.add( new TOKEN( gotOPERATOR, Global.s_T_OPERATOR, mLineCount ) );
           IsGotTokenProcessFormNowLine( gotOPERATOR.length() );
           OPERATORFINDERROR( gotOPERATOR );
-          IsReppet();
+          // IsReppet();
         } // else if
         else if ( IsBOOLEANRELATIONALInmNowLineFirst() ) {
           String gotBOOLEANRELATIONAL = GetBOOLEANRELATIONALToken();
@@ -723,13 +724,13 @@ class CutToken {
           gotID = GetIDTOETokenInmNowLine();
           DISTINGUISHANDPUSHTOKEN( gotID );
           IDUUDEFINED();
+          VOIDTYPENOTONFIRST();
           if ( gotID.equals( "do" ) || gotID.equals( "else" ) ) {
             HASOTHERTOKENISERROR();
             stament.add( mBuffer.get( 0 ) );
             mBuffer.clear();
             return true;
           } // if
-
         } // else if
         else {
           if ( ! mnowLine.isEmpty() ) {
@@ -871,6 +872,17 @@ class CutToken {
           throw new Throwable();
         } // else if
       } // else if
+    } // if
+
+  } // IDUUDEFINED()
+
+  protected void VOIDTYPENOTONFIRST() throws Throwable {
+    if ( ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_TYPE ||
+           mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_VOID ) && mBuffer.size() != 1 ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      mBuffer.clear();
+      throw new Throwable();
     } // if
 
   } // IDUUDEFINED()
