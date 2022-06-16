@@ -1132,8 +1132,7 @@ class CutToken {
         RemoveFirstCherFormNowLine();
       } // try
       catch ( Throwable throwable ) {
-        System.out.println( "String 要在同一行" );
-        // System.out.print( "> " );
+        System.out.println( "Line " + mLineCount + " : " + "unrecognized token with first char : '\"'" );
         mBuffer.clear();
         throw new Throwable();
       } // catch
@@ -1163,7 +1162,7 @@ class CutToken {
 
       } // try
       catch ( Throwable throwable ) {
-        System.out.println( "Char只能是一個charter" );
+        System.out.println( "Line " + mLineCount + " : " + "unrecognized token with first char : '''" );
         // System.out.print( "> " );
         mBuffer.clear();
         throw new Throwable();
@@ -4046,8 +4045,8 @@ class Excute {
     } // for
 
     if ( ! isFind ) {
-      System.out.println( "Undefined identifier : '" + varName + "'" );
-      return false;
+      // System.out.println( "Undefined identifier : '" + varName + "'" );
+      return true;
     } // if
 
     return true;
