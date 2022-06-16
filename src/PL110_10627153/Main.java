@@ -152,6 +152,12 @@ class Global {
     s_Variables.get( buttonList - 1 ).m_Var.add( var );
   } // G_AddVariable()
 
+  public static void G_ClearVars() throws Throwable {
+    while( s_Variables.size() > 1 )
+      s_Variables.remove( s_Variables.size() - 1 );
+
+  } // G_ClearVars()
+
   public static Variable G_FindVariable( Vector<VarList> vList, String vName ) throws Throwable {
     for ( int r = vList.size() - 1 ; r >= 0 ; r-- ) {
       for ( int i = 0 ; i < vList.get( r ).m_Var.size() ; i++ ) {
@@ -1959,6 +1965,7 @@ class Parser {
       } // else
     } // try
     catch ( Throwable throwable ) {
+      Global.G_ClearVars();
       throw new Throwable();
     } // catch
 
@@ -2352,7 +2359,7 @@ class Parser {
              m_statement.get( m_step ).GetType() == 21 ) {
           m_step += 1;
           Excute excute = new Excute( m_statement );
-          Global.s_Variables.add( new VarList() );
+          // Global.s_Variables.add( new VarList() );
           if ( excute.ExcuteComm( false ) ) {
             Global.s_Variables.remove( Global.s_Variables.size() - 1 );
             return true;
@@ -3947,6 +3954,28 @@ class Excute {
             return true;
           } // if
         } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "cin" ) ) {
+          if ( IsFuncInputOk( "cin" ) ) {
+            if ( ! mStament.get( 1 ).GetToken().equals( ">>" ) ) {
+              System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
+                                  + mStament.get( 1 ).GetToken() + "'" );
+              throw new Throwable();
+            } // if
+            else
+              return true;
+          } // if
+        } // else if
+        else if ( mStament.get( 0 ).GetToken().equals( "cout" ) ) {
+          if ( IsFuncInputOk( "cout" ) ) {
+            if ( ! mStament.get( 1 ).GetToken().equals( "<<" ) ) {
+              System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
+                                  + mStament.get( 1 ).GetToken() + "'" );
+              throw new Throwable();
+            } // if
+            else
+              return true;
+          } // if
+        } // else if
       } // if
 
       return false;
@@ -4305,6 +4334,8 @@ class Excute {
 
   // 使用function時，判斷傳入的參數數量是否正確
   private boolean IsFuncInputOk( String funcName ) throws Throwable {
+    return true;
+    /*
     try {
       Function func = Global.G_FindFunction( Global.s_Functions, funcName );
       int funcParameterSum = func.LocalVarSum();
@@ -4335,7 +4366,7 @@ class Excute {
       // System.out.println( "請輸入正確的參數" );
       throw new Throwable();
     } // catch
-
+    */
   } // IsFuncInputOk()
 
 } // class Excute
@@ -4363,15 +4394,17 @@ class Main {
             // Function g = Global.s_Fundefin;
             Excute excute = new Excute( stament );
             excute.ExcuteComm( true );
+            Global.G_ClearVars();
             Global.s_Fundefin = null;
           } // if
           else {
+            Global.G_ClearVars();
             Global.s_Fundefin = null;
           } // else
         } // if
       } // try
       catch ( Throwable throwable ) {
-        ;
+        Global.G_ClearVars();
       } // catch
     } // while
 
