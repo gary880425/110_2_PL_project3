@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220616 20:41
+// 20220616 20:4ㄉ
 
 import java.util.Scanner;
 import java.util.Vector;
