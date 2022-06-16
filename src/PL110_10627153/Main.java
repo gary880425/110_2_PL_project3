@@ -295,7 +295,7 @@ abstract class Variable {
   private String m_Name;
   private int m_Type;
   protected String m_arraySize;
-  public boolean m_isArray;
+  public boolean m_isArray = false;
 
   public Variable( int type, String name ) throws Throwable {
     this.m_Name = new String( name );
@@ -600,7 +600,8 @@ class CutToken {
 
   } // CutToken()
 
-  public boolean Cutting( Vector<TOKEN> stament, boolean isExctuting ) throws Throwable {
+  public boolean Cutting( Vector<TOKEN> stament, boolean isExctuting,
+                          boolean wontelse ) throws Throwable {
 
     if ( ( mnowLine.length() == 0 || mnowLine == null || mnowLine.isEmpty() ) && ! isExctuting )
       mLineCount = 0;
@@ -613,6 +614,22 @@ class CutToken {
 
     if ( mnowLine.isEmpty() ) {
       InputNextLineTomNowLine();
+    } // if
+
+    if ( wontelse ) {
+      if ( IsIDInmNowLineFirst() ) {
+        String gotID;
+        gotID = GetIDTOETokenInmNowLine();
+        if ( gotID.equals( "else" ) ) {
+          stament.add( new TOKEN( gotID, Global.s_T_ELSE, mLineCount ) );
+          return true;
+        } // if
+        else {
+          mnowLine = gotID + " " + mnowLine;
+        } // else
+      } // if
+      else
+        return false;
     } // if
 
     while ( true ) {
@@ -771,7 +788,7 @@ class CutToken {
     } // else
 
     return false;
-  } // OPERATORFINDERROR()
+  } // IsOurcComm()
 
   protected void OPERATORFINDERROR( String gotOPERATOR ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -1988,7 +2005,7 @@ class Parser {
 
       m_statement = new Vector<TOKEN>();
       m_step = 0;
-      if ( m_cuttoken.Cutting( m_statement, true ) ) {
+      if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
         if ( Compound_Statement() ) {
           if ( Global.s_Fundefin != null ) {
             int i = Global.s_Fundefin.m_commLine.size();
@@ -2092,7 +2109,7 @@ class Parser {
         m_statement = new Vector<TOKEN>();
         m_step = 0;
 
-        if ( m_cuttoken.Cutting( m_statement, true ) ) {
+        if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
           isHave = true;
         } // if
 
@@ -2126,7 +2143,7 @@ class Parser {
           if ( issucess ) {
             m_statement = new Vector<TOKEN>();
             m_step = 0;
-            if ( m_cuttoken.Cutting( m_statement, true ) )
+            if ( m_cuttoken.Cutting( m_statement, true, false ) )
               // 應該要簪測有沒有}
               isHave = true;
           } // if
@@ -2212,8 +2229,7 @@ class Parser {
       else if ( Compound_Statement() ) {
         return true;
       } // else if
-      else if ( m_statement.get( m_step ).GetToken().equals( "if" ) &&
-                m_statement.get( m_step ).GetType() == 11 ) {
+      else if ( m_statement.get( m_step ).GetType() == Global.s_T_IF ) {
         m_step += 1;
         if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
              m_statement.get( m_step ).GetType() == 3 ) {
@@ -2223,26 +2239,29 @@ class Parser {
             if ( m_statement.get( m_step ).GetToken().equals( ")" ) &&
                  m_statement.get( m_step ).GetType() == 4 ) {
               m_step += 1;
-
+              if ( Global.s_Fundefin != null )
+                Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
               m_statement = new Vector<TOKEN>();
               m_step = 0;
-              if ( m_cuttoken.Cutting( m_statement, true ) ) {
+              if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                 if ( ConditionalExpressionsStatement() ) {
                   // m_step += 1; // 可能會out of range
+                  if ( Global.s_Fundefin != null )
+                    Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
 
+                  Vector<TOKEN> pm_statement = m_statement;
+                  int pm_step = m_step;
                   m_statement = new Vector<TOKEN>();
                   m_step = 0;
-                  boolean isGetOK = false;
-                  if ( m_cuttoken.Cutting( m_statement, true ) )
-                    isGetOK = true;
 
-                  if ( isGetOK && m_statement.get( m_step ).GetToken().equals( "else" ) &&
-                       m_statement.get( m_step ).GetType() == 12 ) {
+                  if ( m_cuttoken.Cutting( m_statement, true, true ) ) { // else
                     m_step += 1;
 
+                    if ( Global.s_Fundefin != null )
+                      Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
                     m_statement = new Vector<TOKEN>();
                     m_step = 0;
-                    if ( m_cuttoken.Cutting( m_statement, true ) ) {
+                    if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                       if ( ConditionalExpressionsStatement() ) {
                         return true;
                       } // if
@@ -2254,10 +2273,10 @@ class Parser {
                       return false;
 
                   } // if
-                  else if ( isGetOK ) {
-                    m_cuttoken.ReturnmBuffer2( m_statement );
+                  else {
                     m_statement = new Vector<TOKEN>();
-                  } // else if
+                    m_step = 0;
+                  } // else
 
                   return true; // ?_?
                 } // if
@@ -2294,7 +2313,7 @@ class Parser {
 
               m_statement = new Vector<TOKEN>();
               m_step = 0;
-              if ( m_cuttoken.Cutting( m_statement, true ) ) {
+              if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                 if ( ConditionalExpressionsStatement() ) {
                   return true;
                 } // if
@@ -2322,12 +2341,12 @@ class Parser {
 
         m_statement = new Vector<TOKEN>();
         m_step = 0;
-        if ( m_cuttoken.Cutting( m_statement, true ) ) {
+        if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
           if ( ConditionalExpressionsStatement() ) {
             // m_step += 1;
             m_statement = new Vector<TOKEN>();
             m_step = 0;
-            if ( m_cuttoken.Cutting( m_statement, true ) ) {
+            if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
               if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
                 m_step += 1;
                 if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
@@ -2340,7 +2359,7 @@ class Parser {
                       m_step += 1;
                       m_statement = new Vector<TOKEN>();
                       m_step = 0;
-                      if ( m_cuttoken.Cutting( m_statement, true ) ) {
+                      if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                         if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
                              m_statement.get( m_step ).GetType() == 21 ) {
                           m_step += 1;
@@ -2460,26 +2479,25 @@ class Parser {
                 Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
               m_statement = new Vector<TOKEN>();
               m_step = 0;
-              if ( m_cuttoken.Cutting( m_statement, true ) ) {
+              if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                 if ( ConditionalExpressionsStatement() ) {
                   // m_step += 1; // 可能會out of range
                   if ( Global.s_Fundefin != null )
                     Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
+
+                  Vector<TOKEN> pm_statement = m_statement;
+                  int pm_step = m_step;
                   m_statement = new Vector<TOKEN>();
                   m_step = 0;
-                  boolean isGetOK = false;
-                  if ( m_cuttoken.Cutting( m_statement, true ) )
-                    isGetOK = true;
 
-                  if ( isGetOK && m_statement.get( m_step ).GetToken().equals( "else" ) &&
-                       m_statement.get( m_step ).GetType() == 12 ) {
+                  if ( m_cuttoken.Cutting( m_statement, true, true ) ) { // else
                     m_step += 1;
 
                     if ( Global.s_Fundefin != null )
                       Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
                     m_statement = new Vector<TOKEN>();
                     m_step = 0;
-                    if ( m_cuttoken.Cutting( m_statement, true ) ) {
+                    if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                       if ( ConditionalExpressionsStatement() ) {
                         return true;
                       } // if
@@ -2491,10 +2509,10 @@ class Parser {
                       return false;
 
                   } // if
-                  else if ( isGetOK ) {
-                    m_cuttoken.ReturnmBuffer2( m_statement );
+                  else {
                     m_statement = new Vector<TOKEN>();
-                  } // else if
+                    m_step = 0;
+                  } // else
 
                   return true; // ?_?
                 } // if
@@ -2532,7 +2550,7 @@ class Parser {
                 Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
               m_statement = new Vector<TOKEN>();
               m_step = 0;
-              if ( m_cuttoken.Cutting( m_statement, true ) ) {
+              if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                 if ( ConditionalExpressionsStatement() ) {
                   return true;
                 } // if
@@ -2561,14 +2579,14 @@ class Parser {
           Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
         m_statement = new Vector<TOKEN>();
         m_step = 0;
-        if ( m_cuttoken.Cutting( m_statement, true ) ) {
+        if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
           if ( ConditionalExpressionsStatement() ) {
             // m_step += 1;
             if ( Global.s_Fundefin != null )
               Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
             m_statement = new Vector<TOKEN>();
             m_step = 0;
-            if ( m_cuttoken.Cutting( m_statement, true ) ) {
+            if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
               if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
                 m_step += 1;
                 if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
@@ -2583,7 +2601,7 @@ class Parser {
                         Global.s_Fundefin.m_commLine.add( new Stament( m_statement ) );
                       m_statement = new Vector<TOKEN>();
                       m_step = 0;
-                      if ( m_cuttoken.Cutting( m_statement, true ) ) {
+                      if ( m_cuttoken.Cutting( m_statement, true, false ) ) {
                         if ( m_statement.get( m_step ).GetToken().equals( ";" ) &&
                              m_statement.get( m_step ).GetType() == 21 ) {
                           m_step += 1;
@@ -3873,12 +3891,8 @@ class Parser {
     } // else if
 
     if ( mStament.size() == 5 ) {
-      int arrsize = Integer.valueOf( mStament.get( 3 ).GetToken() );
-      if ( arrsize == 0 ) {
-        throw new Throwable();
-      } // if
-
-      var.SetArraySize( "" );
+      String arrsize = mStament.get( 3 ).GetToken();
+      var.SetArraySize( arrsize );
     } // if
 
     Global.s_Fundefin.m_localVarList.add( var );
@@ -3902,7 +3916,7 @@ class Excute {
         FuncDefined();
         return true;
       } // if
-      else if ( IsFuncCommand() ) {
+      else if ( IsFuncCommand( isPrint ) ) {
         if ( isPrint )
           System.out.println( "Statement executed ..." );
         return true;
@@ -3966,7 +3980,7 @@ class Excute {
 
   } // FuncDefined()
 
-  private boolean IsFuncCommand() throws Throwable {
+  private boolean IsFuncCommand( boolean isPrint ) throws Throwable {
     try {
       if ( mStament.get( 0 ).GetType() == Global.s_T_ID &&
            mStament.get( 1 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) { // 判斷是否為function執行
@@ -3978,7 +3992,8 @@ class Excute {
         } // if
         else if ( mStament.get( 0 ).GetToken().equals( "ListAllVariables" ) ) { // 列出所有變數
           if ( IsFuncInputOk( "ListAllVariables" ) ) {
-            ListAllVariables();
+            if ( isPrint )
+              ListAllVariables();
             return true;
           } // if
         } // else if
@@ -3990,7 +4005,8 @@ class Excute {
               throw new Throwable();
             } // if
 
-            ListVariable( mStament.get( 2 ).GetToken() );
+            if ( isPrint )
+              ListVariable( mStament.get( 2 ).GetToken() );
             return true;
           } // if
         } // else if
@@ -4008,7 +4024,8 @@ class Excute {
               throw new Throwable();
             } // if
 
-            ListFunction( mStament.get( 2 ).GetToken() );
+            if ( isPrint )
+              ListFunction( mStament.get( 2 ).GetToken() );
             return true;
           } // if
         } // else if
@@ -4081,8 +4098,7 @@ class Excute {
             System.out.println( " ;" );
           } // if
           else {
-            System.out.println( "[ " + Global.s_Variables.get( i ).m_Var.get( j ).GetArraySize() +
-                                " ] ;" );
+            System.out.println( Global.s_Variables.get( i ).m_Var.get( j ).GetArraySize() + " ;" );
           } // else
         } // if
       } // for
@@ -4490,7 +4506,7 @@ class Main {
       Vector<TOKEN> stament = new Vector<TOKEN>();
       // System.out.println( "main CutToken Part! " );
       try {
-        if ( cutToken.Cutting( stament, false ) ) {
+        if ( cutToken.Cutting( stament, false, false ) ) {
           Parser parser = new Parser( stament, cutToken );
           // System.out.println( "main Parser Part! " );
           if ( parser.GrammarParser() ) {
