@@ -155,7 +155,7 @@ class Global {
   public static void G_ClearVars() throws Throwable {
     while ( s_Variables.size() > 1 ) {
       s_Variables.remove( s_Variables.size() - 1 );
-    }
+    } // while
 
   } // G_ClearVars()
 
@@ -444,7 +444,7 @@ class VarSTRING extends Variable {
 class VarCHAR extends Variable {
   private String m_value;
 
-  public VarCHAR( int type, String name, boolean isNull ) throws Throwable {
+  public VarCHAR( int type, String name ) throws Throwable {
     super( type, name );
   } // VarCHAR()
 
@@ -499,7 +499,7 @@ class VarBOOL extends Variable {
 
   private Boolean m_value;
 
-  public VarBOOL( int type, String name, boolean isNull ) throws Throwable {
+  public VarBOOL( int type, String name ) throws Throwable {
     super( type, name );
   } // VarBOOL()
 
@@ -888,7 +888,7 @@ class CutToken {
       throw new Throwable();
     } // if
 
-  } // IDUUDEFINED()
+  } // VOIDTYPENOTONFIRST()
 
   protected void HASOTHERTOKENISERROR() throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -4348,39 +4348,75 @@ class Excute {
 
   // 使用function時，判斷傳入的參數數量是否正確
   private boolean IsFuncInputOk( String funcName ) throws Throwable {
-    return true;
-    /*
     try {
-      Function func = Global.G_FindFunction( Global.s_Functions, funcName );
-      int funcParameterSum = func.LocalVarSum();
-      int step = 2;
-      for ( int i = 0 ; i < funcParameterSum ; i++ ) {
-        if ( func.GetVar( i ) != null && mStament.get( step ).GetType() == Global.s_T_CONSTANT ) {
-          ; // 可能後面要判斷type
-          step++;
-          while ( mStament.get( step ).GetType() != Global.s_T_COMMA &&
-                  mStament.get( step ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ) { // 跳到','
-            step++;
-          } // while
+      int funLocalVarSum = Global.G_FindFunction( Global.s_Functions, funcName ).LocalVarSum();
+      int inputVarSum = 0;
+      Vector<Variable> inputVar = new Vector<Variable>();
+      int errortoken = 2;
 
-          if ( mStament.get( step ).GetType() == Global.s_T_COMMA ) // 跳到下一個參數token
-            step++;
+      for ( int i = 2 ; mStament.get( i ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ; i++ ) {
+        errortoken = i;
+        if ( mStament.get( i ).GetType() == Global.s_T_ID ) {
+          inputVar.add( Global.G_FindVariable( Global.s_Variables, mStament.get( i ).GetToken() ) );
+          i++;
         } // if
-        else
-          throw new Throwable();
+        else if ( mStament.get( i ).GetType() == Global.s_T_CONSTANT ) {
+          Variable nVar = null;
+          if ( mStament.get( i ).GetToken().contains( "\"" ) ||
+               mStament.get( i ).GetToken().contains( "'" ) ) {
+            if ( mStament.get( i ).GetToken().charAt( 0 ) == '\'' ) {
+              nVar = new VarCHAR( Global.s_V_CHAR, Integer.toString( i ) );
+            } // if
+            else if ( mStament.get( i ).GetToken().charAt( 0 ) == '"' ) {
+              nVar = new VarSTRING( Global.s_V_STRING, Integer.toString( i ) );
+            } // else if
+          } // if
+          else if ( mStament.get( i ).GetToken().equals( "true" ) ||
+                    mStament.get( i ).GetToken().contains( "false" ) ) {
+            nVar = new VarBOOL( Global.s_V_CHAR, Integer.toString( i ) );
+          } // else if
+          else
+            nVar = new VarINT( Global.s_V_CHAR, Integer.toString( i ) );
 
+          if ( ( mStament.get( i + 1 ).GetType() != Global.s_T_COMMA &&
+                 mStament.get( i + 1 ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ) &&
+               mStament.get( i + 1 ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
+            i++;
+            int arrInt = Integer.parseInt( mStament.get( i + 1 ).GetToken() );
+            nVar.SetArraySize( arrInt );
+            i++;
+            i++;
+          } // if
+
+          inputVar.add( nVar );
+          inputVarSum++;
+
+          if ( inputVarSum > funLocalVarSum ) {
+            System.out.println( "Line " + mStament.get( errortoken ).Getline() +
+                                " : " + "unexpected token : '" + mStament.get( errortoken ).GetToken() +
+                                "'" );
+            throw new Throwable();
+          } // if
+
+        } // else if
       } // for
 
-      if ( mStament.get( step ).GetType() == Global.s_T_SMALL_RIGHT_PAREN )
-        return true;
-      else
+      if ( inputVarSum < funLocalVarSum ) {
+        System.out.println( "Line " + mStament.get( errortoken ).Getline() +
+                            " : " + "unexpected token : '" + mStament.get( errortoken ).GetToken() +
+                            "'" );
         throw new Throwable();
+      } // if
+
+      return true;
+
     } // try
     catch ( Throwable throwable ) {
       // System.out.println( "請輸入正確的參數" );
       throw new Throwable();
+      // return false;
     } // catch
-    */
+
   } // IsFuncInputOk()
 
 } // class Excute
