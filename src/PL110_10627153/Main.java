@@ -636,7 +636,7 @@ class CutToken {
         else if ( mnowLine.charAt( 0 ) == '[' ) {
           mBuffer.add( new TOKEN( "[", Global.s_T_MID_LEFT_PAREN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
-          // MIDLEFTPARENFINDERROR();
+          MIDLEFTPARENFINDERROR();
         } // else if
         else if ( mnowLine.charAt( 0 ) == ']' ) {
           mBuffer.add( new TOKEN( "]", Global.s_T_MID_RIGHT_PAREN, mLineCount ) );
@@ -1019,6 +1019,24 @@ class CutToken {
     } // if
 
   } // CONSTANTFINDERROR()
+
+  protected void MIDLEFTPARENFINDERROR() throws Throwable {
+    if ( mBuffer.size() == 1 ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+    } // if
+    else if ( mBuffer.get( mBuffer.size() - 2 ).GetType() != Global.s_T_ID ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+    } // else if
+
+  } // MIDLEFTPARENFINDERROR()
 
   protected void MIDRIGHTPARENFINDERROR() throws Throwable {
     int count = 0;
@@ -3890,6 +3908,7 @@ class Excute {
 
     } // try
     catch ( Throwable throwable ) {
+      System.out.println( "Statement executed ..." );
       return false;
     } // catch
 
@@ -4085,6 +4104,13 @@ class Excute {
   } // ListAllFunctions()
 
   private void ListFunction( String funcName ) throws Throwable {
+
+    for ( int i = 0 ; i < 7 ; i++ ) {
+      if ( Global.s_Functions.get( i ).GetName().equals( funcName.substring( 1, funcName.length() - 1 ) )
+           && Global.s_Functions.get( i ).m_commLine.size() == 0 )
+        return;
+    } // for
+
     funcName = funcName.substring( 1, funcName.length() - 1 ); // 刪除頭尾的'"'
     int whiteSpace = 0; // 縮排的空白格數
 
@@ -4346,8 +4372,10 @@ class Excute {
 
   } // IsVarDefinOK()
 
-  // 使用function時，判斷傳入的參數數量是否正確
+
   private boolean IsFuncInputOk( String funcName ) throws Throwable {
+    // return true;
+
     try {
       int funLocalVarSum = Global.G_FindFunction( Global.s_Functions, funcName ).LocalVarSum();
       int inputVarSum = 0;
@@ -4356,12 +4384,16 @@ class Excute {
 
       for ( int i = 2 ; mStament.get( i ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ; i++ ) {
         errortoken = i;
+        Variable nVar = null;
+        while ( mStament.get( i ).GetType() != Global.s_T_ID &&
+                mStament.get( i ).GetType() != Global.s_T_CONSTANT ) {
+          i++;
+        } // while
+
         if ( mStament.get( i ).GetType() == Global.s_T_ID ) {
           inputVar.add( Global.G_FindVariable( Global.s_Variables, mStament.get( i ).GetToken() ) );
-          i++;
         } // if
         else if ( mStament.get( i ).GetType() == Global.s_T_CONSTANT ) {
-          Variable nVar = null;
           if ( mStament.get( i ).GetToken().contains( "\"" ) ||
                mStament.get( i ).GetToken().contains( "'" ) ) {
             if ( mStament.get( i ).GetToken().charAt( 0 ) == '\'' ) {
@@ -4382,23 +4414,23 @@ class Excute {
                  mStament.get( i + 1 ).GetType() != Global.s_T_SMALL_RIGHT_PAREN ) &&
                mStament.get( i + 1 ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
             i++;
+            i++;
             int arrInt = Integer.parseInt( mStament.get( i + 1 ).GetToken() );
             nVar.SetArraySize( arrInt );
             i++;
-            i++;
           } // if
-
-          inputVar.add( nVar );
-          inputVarSum++;
-
-          if ( inputVarSum > funLocalVarSum ) {
-            System.out.println( "Line " + mStament.get( errortoken ).Getline() +
-                                " : " + "unexpected token : '" + mStament.get( errortoken ).GetToken() +
-                                "'" );
-            throw new Throwable();
-          } // if
-
         } // else if
+
+        inputVar.add( nVar );
+        inputVarSum++;
+
+        if ( inputVarSum > funLocalVarSum ) {
+          System.out.println( "Line " + mStament.get( errortoken ).Getline() +
+                              " : " + "unexpected token : '" + mStament.get( errortoken ).GetToken() +
+                              "'" );
+          throw new Throwable();
+        } // if
+
       } // for
 
       if ( inputVarSum < funLocalVarSum ) {
