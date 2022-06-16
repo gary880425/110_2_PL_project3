@@ -294,13 +294,13 @@ abstract class Variable {
 
   private String m_Name;
   private int m_Type;
-  protected int m_arraySize = 1;
+  protected String m_arraySize;
   public boolean m_isArray;
 
   public Variable( int type, String name ) throws Throwable {
     this.m_Name = new String( name );
     this.m_Type = type;
-    m_arraySize = 1;
+    m_arraySize = new String();
     m_isArray = false;
   } // Variable()
 
@@ -341,11 +341,11 @@ abstract class Variable {
     return m_isArray;
   } // IsArray()
 
-  public int GetArraySize() throws Throwable {
+  public String GetArraySize() throws Throwable {
     return m_arraySize;
   } // GetArraySize()
 
-  public void SetArraySize( int size ) throws Throwable {
+  public void SetArraySize( String size ) throws Throwable {
     m_isArray = true;
     m_arraySize = size;
   } // SetArraySize()
@@ -459,7 +459,7 @@ class VarCHAR extends Variable {
     if ( m_value == null )
       throw new Throwable();
     else {
-      if ( index + 1 > m_arraySize ) {
+      if ( index + 1 > 0 ) {
         System.out.println( "needmodi Stack over full." );
         throw new Throwable();
       } // if
@@ -478,7 +478,7 @@ class VarCHAR extends Variable {
     if ( m_value == null )
       throw new Throwable();
     else {
-      if ( index + 1 > m_arraySize ) {
+      if ( index + 1 > 0 ) {
         System.out.println( "needmodi Stack over full." );
         throw new Throwable();
       } // if
@@ -725,6 +725,7 @@ class CutToken {
           DISTINGUISHANDPUSHTOKEN( gotID );
           IDUUDEFINED();
           VOIDTYPENOTONFIRST();
+          // thisfun
           if ( gotID.equals( "do" ) || gotID.equals( "else" ) ) {
             HASOTHERTOKENISERROR();
             stament.add( mBuffer.get( 0 ) );
@@ -759,6 +760,18 @@ class CutToken {
       mBuffer2.add( stament.get( i ) );
 
   } // ReturnmBuffer2()
+
+  protected boolean IsOurcComm() throws Throwable {
+    if ( mBuffer.size() > 1 || mBuffer.get( 0 ).GetType() != Global.s_T_ID )
+      return false;
+    else {
+      String funname = mBuffer.get( 0 ).GetToken();
+      // if( funname.equals( "ListVariable" ) )
+
+    } // else
+
+    return false;
+  } // OPERATORFINDERROR()
 
   protected void OPERATORFINDERROR( String gotOPERATOR ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -3865,7 +3878,7 @@ class Parser {
         throw new Throwable();
       } // if
 
-      var.SetArraySize( arrsize );
+      var.SetArraySize( "" );
     } // if
 
     Global.s_Fundefin.m_localVarList.add( var );
@@ -3971,11 +3984,12 @@ class Excute {
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListVariable" ) ) { // 印出特定variables
           if ( IsFuncInputOk( "ListVariable" ) ) {
-            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"') {
+            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
               System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
                                   "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
               throw new Throwable();
             } // if
+
             ListVariable( mStament.get( 2 ).GetToken() );
             return true;
           } // if
@@ -3988,11 +4002,12 @@ class Excute {
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListFunction" ) ) {
           if ( IsFuncInputOk( "ListFunction" ) ) {
-            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"') {
+            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
               System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
                                   "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
               throw new Throwable();
             } // if
+
             ListFunction( mStament.get( 2 ).GetToken() );
             return true;
           } // if
@@ -4308,27 +4323,27 @@ class Excute {
           if ( mStament.get( 0 ).GetToken().equals( "int" ) ) {
             var.SetType( Global.s_V_INT );
             var.m_isArray = false;
-            var.m_arraySize = 1;
+            var.m_arraySize = "";
           } // if
           else if ( mStament.get( 0 ).GetToken().equals( "string" ) ) {
             var.SetType( Global.s_V_STRING );
             var.m_isArray = false;
-            var.m_arraySize = 1;
+            var.m_arraySize = "";
           } // else if
           else if ( mStament.get( 0 ).GetToken().equals( "float" ) ) {
             var.SetType( Global.s_V_FLOAT );
             var.m_isArray = false;
-            var.m_arraySize = 1;
+            var.m_arraySize = "";
           } // else if
           else if ( mStament.get( 0 ).GetToken().equals( "char" ) ) {
             var.SetType( Global.s_V_CHAR );
             var.m_isArray = false;
-            var.m_arraySize = 1;
+            var.m_arraySize = "";
           } // else if
           else if ( mStament.get( 0 ).GetToken().equals( "bool" ) ) {
             var.SetType( Global.s_V_BOOL );
             var.m_isArray = false;
-            var.m_arraySize = 1;
+            var.m_arraySize = "";
           } // else if
         } // else
 
@@ -4339,12 +4354,9 @@ class Excute {
         } // if
         else if ( mStament.get( step ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
           step++;
-          int arrsize = Integer.valueOf( mStament.get( step ).GetToken() );
-          if ( arrsize == 0 ) {
-            throw new Throwable();
-          } // if
 
-          var.SetArraySize( arrsize );
+          var.SetArraySize( mStament.get( step - 1 ).GetToken() + " " + mStament.get( step ).GetToken() +
+                            " " + mStament.get( step + 1 ).GetToken() );
           step++;
           if ( mStament.get( step ).GetType() == Global.s_T_MID_RIGHT_PAREN ) {
             if ( ! isRedef )
@@ -4425,8 +4437,7 @@ class Excute {
                mStament.get( i + 1 ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
             i++;
             i++;
-            int arrInt = Integer.parseInt( mStament.get( i + 1 ).GetToken() );
-            nVar.SetArraySize( arrInt );
+            nVar.SetArraySize( "[ " + mStament.get( i + 1 ).GetToken() + " ]" );
             i++;
           } // if
         } // else if
