@@ -195,6 +195,7 @@ class Global {
     Variable var = null;
     VarSTRING varSTRING = null;
     VarINT varINT = null;
+    /*
     // Done()
     s_Functions.add( new Function( "Done", new Vector<Variable>(), new Vector<Stament>() ) );
 
@@ -228,7 +229,7 @@ class Global {
     var = null;
     varSTRING = null;
     varINT = null;
-
+    */
     // Variable
     s_Variables.add( new VarList() );
     s_Functions.add( new Function( "cout", new Vector<Variable>(), new Vector<Stament>() ) );
@@ -741,6 +742,10 @@ class CutToken {
           String gotID;
           gotID = GetIDTOETokenInmNowLine();
           DISTINGUISHANDPUSHTOKEN( gotID );
+          // ----------
+          if ( IsOurcComm() )
+            return Buffer1HasFullCommend( stament );
+          // ----------
           IDUUDEFINED();
           VOIDTYPENOTONFIRST();
           // thisfun
@@ -750,6 +755,8 @@ class CutToken {
             mBuffer.clear();
             return true;
           } // if
+
+
         } // else if
         else {
           if ( ! mnowLine.isEmpty() ) {
@@ -779,17 +786,336 @@ class CutToken {
 
   } // ReturnmBuffer2()
 
-  protected boolean IsOurcComm() throws Throwable {
+  private boolean IsOurcComm() throws Throwable {
     if ( mBuffer.size() > 1 || mBuffer.get( 0 ).GetType() != Global.s_T_ID )
       return false;
     else {
       String funname = mBuffer.get( 0 ).GetToken();
-      // if( funname.equals( "ListVariable" ) )
+      if ( funname.equals( "Done" ) ) {
+        DoneFirst();
+        return true;
+      } // if
+      else if ( funname.equals( "ListAllVariables" ) ) {
+        ListAllVariablesFirst();
+        return true;
+      } // else if
+      else if ( funname.equals( "ListAllFunctions" ) ) {
+        ListAllFunctionsFirst();
+        return true;
+      } // else if
+      else if ( funname.equals( "ListVariable" ) ) {
+        ListVariableFirst();
+        return true;
+      } // else if
+      else if ( funname.equals( "ListFunction" ) ) {
+        ListFunctionFirst();
+        return true;
+      } // else if
 
     } // else
 
     return false;
   } // IsOurcComm()
+
+  private void GetToken() throws Throwable {
+    if ( mnowLine.isEmpty() ) {
+      InputNextLineTomNowLine();
+    } // if
+
+    if ( mnowLine.charAt( 0 ) == '(' ) {
+      mBuffer.add( new TOKEN( "(", Global.s_T_SMALL_LEFT_PAREN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      // SMALLLEFTPARENFINDERROR();
+    } // if
+    else if ( mnowLine.charAt( 0 ) == ')' ) {
+      mBuffer.add( new TOKEN( ")", Global.s_T_SMALL_RIGHT_PAREN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      SMALLRIGHTPARENFINDERROR();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == '[' ) {
+      mBuffer.add( new TOKEN( "[", Global.s_T_MID_LEFT_PAREN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      MIDLEFTPARENFINDERROR();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == ']' ) {
+      mBuffer.add( new TOKEN( "]", Global.s_T_MID_RIGHT_PAREN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      MIDRIGHTPARENFINDERROR();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == '{' ) {
+      mBuffer.add( new TOKEN( "{", Global.s_T_BIG_LEFT_PAREN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      HASOTHERTOKENISERROR();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == '}' ) {
+      mBuffer.add( new TOKEN( "}", Global.s_T_BIG_RIGHT_PAREN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      HASOTHERTOKENISERROR();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == ',' ) {
+      mBuffer.add( new TOKEN( ",", Global.s_T_COMMA, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      IsReppet();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == '?' || mnowLine.charAt( 0 ) == ':' ) {
+      mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_TERNARYOPERATOR, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      TERNARYOPERATORFINDERROR();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == ';' ) {
+      mBuffer.add( new TOKEN( ";", Global.s_T_SEMICOLON, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+    } // else if
+    else if ( IsBOOLEANCONDITION1InmNowLineFirst() ) {
+      String gotBOOLEANCONDITION;
+      gotBOOLEANCONDITION = mnowLine.substring( 0, 2 );
+      mBuffer.add( new TOKEN( gotBOOLEANCONDITION, Global.s_T_BOOLEANCONDITION, mLineCount ) );
+      IsGotTokenProcessFormNowLine( gotBOOLEANCONDITION.length() );
+      IsReppet();
+    } // else if
+    else if ( IsASSISNOPERATORInmNowLineFirst() ) {
+      String gotASSISNOPERATOR = mnowLine.substring( 0, 2 );
+      mBuffer.add( new TOKEN( gotASSISNOPERATOR, Global.s_T_ASSIGNOPERATOR, mLineCount ) );
+      IsGotTokenProcessFormNowLine( gotASSISNOPERATOR.length() );
+      IsReppet();
+    } // else if
+    else if ( IsOPERATORInmNowLineFirst() ) {
+      String gotOPERATOR = GetOPERATORToken();
+      mBuffer.add( new TOKEN( gotOPERATOR, Global.s_T_OPERATOR, mLineCount ) );
+      IsGotTokenProcessFormNowLine( gotOPERATOR.length() );
+      OPERATORFINDERROR( gotOPERATOR );
+      // IsReppet();
+    } // else if
+    else if ( IsBOOLEANRELATIONALInmNowLineFirst() ) {
+      String gotBOOLEANRELATIONAL = GetBOOLEANRELATIONALToken();
+      mBuffer.add( new TOKEN( gotBOOLEANRELATIONAL, Global.s_T_BOOLEANRELATIONAL, mLineCount ) );
+      IsGotTokenProcessFormNowLine( gotBOOLEANRELATIONAL.length() );
+      OPERATORFINDERROR( gotBOOLEANRELATIONAL );
+      IsReppet();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == '!' ) {
+      mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ),
+                              Global.s_T_BOOLEANCONDITION, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      IsReppet();
+    } // else if
+    else if ( mnowLine.charAt( 0 ) == '=' ) {
+      mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_ASSIGN, mLineCount ) );
+      IsGotTokenProcessFormNowLine( 1 );
+      IsReppet();
+    } // else if
+    else if ( IsCONSTANTInmNowLineFirst() ) {
+      String gotCONSTANT;
+      gotCONSTANT = GetCONSTANTTokenInmNowLine();
+      mBuffer.add( new TOKEN( gotCONSTANT, Global.s_T_CONSTANT, mLineCount ) );
+      CONSTANTFINDERROR( gotCONSTANT );
+      IsReppet();
+    } // else if
+    else if ( IsIDInmNowLineFirst() ) {
+      String gotID;
+      gotID = GetIDTOETokenInmNowLine();
+      DISTINGUISHANDPUSHTOKEN( gotID );
+      IDUUDEFINED();
+      VOIDTYPENOTONFIRST();
+    } // else if
+    else {
+      if ( ! mnowLine.isEmpty() ) {
+        System.out.println( "Line " + mLineCount + " : " + "unrecognized token with first char : '" +
+                            mnowLine.charAt( 0 ) + "'" );
+        // mBuffer.clear();
+        throw new Throwable();
+      } // if
+
+    } // else
+
+  } // GetToken()
+
+  private void DoneFirst() throws Throwable {
+    try {
+      GetToken();
+      if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "(" ) ) {
+        GetToken();
+        if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ")" ) ) {
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ";" ) ) {
+            ;
+          } // if
+          else {
+            throw new Throwable();
+          } // else
+        } // if
+        else {
+          throw new Throwable();
+        } // else
+      } // if
+      else {
+        throw new Throwable();
+      } // else
+
+    } // try
+    catch ( Throwable throwable ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+
+    } // catch
+
+  } // DoneFirst()
+
+  private void ListAllVariablesFirst() throws Throwable {
+    try {
+      GetToken();
+      if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "(" ) ) {
+        GetToken();
+        if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ")" ) ) {
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ";" ) ) {
+            ;
+          } // if
+          else {
+            throw new Throwable();
+          } // else
+        } // if
+        else {
+          throw new Throwable();
+        } // else
+      } // if
+      else {
+        throw new Throwable();
+      } // else
+
+    } // try
+    catch ( Throwable throwable ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+
+    } // catch
+
+  } // ListAllVariablesFirst()
+
+  private void ListAllFunctionsFirst() throws Throwable {
+    try {
+      GetToken();
+      if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "(" ) ) {
+        GetToken();
+        if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ")" ) ) {
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ";" ) ) {
+            ;
+          } // if
+          else {
+            throw new Throwable();
+          } // else
+        } // if
+        else {
+          throw new Throwable();
+        } // else
+      } // if
+      else {
+        throw new Throwable();
+      } // else
+
+    } // try
+    catch ( Throwable throwable ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+
+    } // catch
+
+  } // ListAllFunctionsFirst()
+
+  private void ListVariableFirst() throws Throwable {
+    try {
+      GetToken();
+      if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "(" ) ) {
+        GetToken();
+        if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_CONSTANT ) {
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().charAt( 0 ) != '"' )
+            throw new Throwable();
+
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ")" ) ) {
+            GetToken();
+            if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ";" ) ) {
+              ;
+            } // if
+            else {
+              throw new Throwable();
+            } // else
+          } // if
+          else {
+            throw new Throwable();
+          } // else
+        } // if
+        else {
+          throw new Throwable();
+        } // else
+      } // if
+      else {
+        throw new Throwable();
+      } // else
+
+    } // try
+    catch ( Throwable throwable ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+
+    } // catch
+
+  } // ListVariableFirst()
+
+  private void ListFunctionFirst() throws Throwable {
+    try {
+      GetToken();
+      if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "(" ) ) {
+        GetToken();
+        if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_CONSTANT ) {
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().charAt( 0 ) != '"' )
+            throw new Throwable();
+
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ")" ) ) {
+            GetToken();
+            if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ";" ) ) {
+              ;
+            } // if
+            else {
+              throw new Throwable();
+            } // else
+          } // if
+          else {
+            throw new Throwable();
+          } // else
+        } // if
+        else {
+          throw new Throwable();
+        } // else
+      } // if
+      else {
+        throw new Throwable();
+      } // else
+
+    } // try
+    catch ( Throwable throwable ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      // System.out.print( "> " );
+      mBuffer.clear();
+      throw new Throwable();
+    } // catch
+
+  } // ListFunctionFirst()
 
   protected void OPERATORFINDERROR( String gotOPERATOR ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -3986,47 +4312,29 @@ class Excute {
       if ( mStament.get( 0 ).GetType() == Global.s_T_ID &&
            mStament.get( 1 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) { // 判斷是否為function執行
         if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) { // 程式結束
-          if ( IsFuncInputOk( "Done" ) ) {
-            System.out.println( "Our-C exited ..." );
-            System.exit( 0 );
-          } // if
+
+          System.out.println( "Our-C exited ..." );
+          System.exit( 0 );
         } // if
         else if ( mStament.get( 0 ).GetToken().equals( "ListAllVariables" ) ) { // 列出所有變數
-          if ( IsFuncInputOk( "ListAllVariables" ) ) {
-            if ( isPrint )
-              ListAllVariables();
-            return true;
-          } // if
+          if ( isPrint )
+            ListAllVariables();
+          return true;
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListVariable" ) ) { // 印出特定variables
-          if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
-            System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
-                                "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
-            throw new Throwable();
-          } // if
-          if ( IsFuncInputOk( "ListVariable" ) ) {
-            if ( isPrint )
-              ListVariable( mStament.get( 2 ).GetToken() );
-            return true;
-          } // if
+          if ( isPrint )
+            ListVariable( mStament.get( 2 ).GetToken() );
+          return true;
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListAllFunctions" ) ) { // 印出所有functions
-          if ( IsFuncInputOk( "ListAllFunctions" ) ) {
+          if ( isPrint )
             ListAllFunctions();
-            return true;
-          } // if
+          return true;
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListFunction" ) ) {
-          if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
-            System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
-                                "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
-            throw new Throwable();
-          } // if
-          if ( IsFuncInputOk( "ListFunction" ) ) {
-            if ( isPrint )
-              ListFunction( mStament.get( 2 ).GetToken() );
-            return true;
-          } // if
+          if ( isPrint )
+            ListFunction( mStament.get( 2 ).GetToken() );
+          return true;
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cin" ) ) {
           if ( IsFuncInputOk( "cin" ) ) {
@@ -4144,13 +4452,6 @@ class Excute {
   } // ListAllFunctions()
 
   private void ListFunction( String funcName ) throws Throwable {
-
-    for ( int i = 0 ; i < 7 ; i++ ) {
-      if ( Global.s_Functions.get( i ).GetName().equals( funcName.substring( 1, funcName.length() - 1 ) )
-           && Global.s_Functions.get( i ).m_commLine.size() == 0 )
-        return;
-    } // for
-
     funcName = funcName.substring( 1, funcName.length() - 1 ); // 刪除頭尾的'"'
     int whiteSpace = 0; // 縮排的空白格數
 
@@ -4223,23 +4524,22 @@ class Excute {
 
             System.out.print( token );
 
+            if ( token.equals( "while" ) )
+              System.out.print( "" );
 
             // 遇到以下這幾個要縮排
-            if ( ( token.equals( "while" ) || token.equals( "do" ) || token.equals( "if" ) ||
-                   token.equals( "else" ) ) && ! isDoWhile ) {
-              whiteSpace += 2;
+            if ( k == 0 && ( token.equals( "while" ) || token.equals( "do" ) || token.equals( "if" ) ||
+                             token.equals( "else" ) ) && ( j + 1 < temp.size() &&
+                                                           j + 1 < temp.size() ) ) {
+              if ( ! temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( ";" ) ) {
+                whiteSpace += 2;
 
-              if ( token.equals( "do" ) ) {
-                isDo = true;
-                doWhiteSpace = whiteSpace - 2;
+                // 下一行不為 {
+                if ( j + 1 < temp.size() && temp.get( j + 1 ).m_Line.size() > 1 &&
+                     ! temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
+                  oneComm = true;
+                } // if
               } // if
-
-              // 下一行不為 {
-              if ( j + 1 < temp.size() - 1 && temp.get( j + 1 ).m_Line.size() > 1 &&
-                   ! temp.get( j ).m_Line.get( 0 ).GetToken().equals( "{" ) ) {
-                oneComm = true;
-              } // if
-
             } // if
 
             // 判斷此行第一個token是否為while do if else
@@ -4259,11 +4559,10 @@ class Excute {
               } // if
             } // if
 
-            if ( k == lineSize - 1 && j + 1 < temp.size() &&
-                 temp.get( j + 1 ).m_Line.size() == 1 &&
-                 temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( ";" ) && isDoWhile ) {
+            if ( k == lineSize - 1 && j + 1 < temp.size() - 1 && temp.get( j + 1 ).m_Line.size() == 1 &&
+                 temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( ";" ) &&
+                 temp.get( j ).m_Line.get( 0 ).GetToken().equals( "while" ) ) {
               System.out.print( " ;" );
-              isDoWhile = false;
               j += 1;
             } // if
 
@@ -4275,31 +4574,22 @@ class Excute {
             } // if
           } // for
 
-          if ( j + 1 < Global.s_Functions.get( i ).m_commLine.size() &&
-               Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.size() == 1 &&
-               Global.s_Functions.get( i ).m_commLine.get( j ).m_Line.get( 0 ).GetToken().equals( "}" )
-               && isDo ) {
-            System.out.print( " " );
-            isDo = false;
-            isDoWhile = true;
-          } // if
-          else {
-            System.out.println(); // 換行
-            for ( int b = 0 ; b < whiteSpace && j + 1 < temp.size() - 1 ; b++ ) { // 縮排用
+          if ( j + 1 < temp.size() - 1 ) {
+            System.out.println();
+            for ( int b = 0 ; b < whiteSpace ; b++ ) { // 縮排用
               System.out.print( " " );
             } // for
-          } // else
 
-          if ( oneComm ) {
-            whiteSpace -= 2;
-            oneComm = false;
+            if ( oneComm ) {
+              oneComm = false;
+              whiteSpace -= 2;
+            } // if
           } // if
-
 
           if ( j + 1 == temp.size() - 1 &&
                temp.get( j + 1 ).m_Line.size() == 1 &&
                temp.get( j + 1 ).m_Line.get( 0 ).GetToken().equals( "}" ) ) {
-            System.out.println( "}" );
+            System.out.println( "\n}" );
             j += 1;
           } // if
         } // for
@@ -4408,7 +4698,6 @@ class Excute {
     } // catch()
 
   } // IsVarDefinOK()
-
 
   private boolean IsFuncInputOk( String funcName ) throws Throwable {
     // return true;
