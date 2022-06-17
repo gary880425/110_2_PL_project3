@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220617 20:01
+// 20220617 23:13
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -747,7 +747,7 @@ class CutToken {
             return Buffer1HasFullCommend( stament );
           // ----------
           IDUUDEFINED();
-          VOIDTYPENOTONFIRST();
+          // VOIDTYPENOTONFIRST();
           // thisfun
           if ( gotID.equals( "do" ) || gotID.equals( "else" ) ) {
             HASOTHERTOKENISERROR();
@@ -915,8 +915,8 @@ class CutToken {
       String gotID;
       gotID = GetIDTOETokenInmNowLine();
       DISTINGUISHANDPUSHTOKEN( gotID );
-      IDUUDEFINED();
-      VOIDTYPENOTONFIRST();
+      // IDUUDEFINED();
+      // VOIDTYPENOTONFIRST();
     } // else if
     else {
       if ( ! mnowLine.isEmpty() ) {
@@ -1495,14 +1495,21 @@ class CutToken {
 
   protected String GetCONSTANTTokenInmNowLine() throws Throwable {
     String gotCONSTANT = new String();
+    int gotPoint = 0;
 
-    if ( mnowLine.charAt( 0 ) == '.' )
-      gotCONSTANT = gotCONSTANT + "0";
-
-    if ( IsNumberAndNumberLegalWordInmNowLineFirstChar() ) {
-      while ( IsNumberAndNumberLegalWordInmNowLineFirstChar() ) {
-        gotCONSTANT = gotCONSTANT + mnowLine.substring( 0, 1 );
-        RemoveFirstCherFormNowLine();
+    if ( IsNumberAndNumberLegalWordInmNowLineFirstChar() || mnowLine.charAt( 0 ) == '.' ) {
+      while ( gotPoint < 2 &&
+              ( IsNumberAndNumberLegalWordInmNowLineFirstChar() || mnowLine.charAt( 0 ) == '.' ) ) {
+        if ( mnowLine.charAt( 0 ) == '.' && gotPoint == 1 )
+          gotPoint++;
+        else {
+          if ( mnowLine.charAt( 0 ) == '.' )
+            gotPoint++;
+          gotCONSTANT = gotCONSTANT + mnowLine.substring( 0, 1 );
+          RemoveFirstCherFormNowLine();
+          if ( mnowLine.length() == 0 )
+            gotPoint = 2;
+        } // else
       } // while
     } // if
     else if ( mnowLine.charAt( 0 ) == '"' ) {
@@ -1559,6 +1566,13 @@ class CutToken {
     RemoveHeadWhiteCherFormNowLine();
 
     if ( gotCONSTANT.length() > 0 ) {
+      if ( gotCONSTANT.charAt( 0 ) == '.' ) {
+        System.out.println( "Line " + mLineCount + " : " + "unexpected token : '" + gotCONSTANT + "'" );
+        // System.out.print( "> " );
+        mBuffer.clear();
+        throw new Throwable();
+      } // if
+
       return gotCONSTANT;
     } // if
     else {
@@ -1713,8 +1727,6 @@ class CutToken {
       char firstChar = mnowLine.charAt( 0 );
       if ( firstChar >= '0' && firstChar <= '9' )
         return true;
-      else if ( firstChar == '.' )
-        return true;
       else
         return false;
 
@@ -1842,7 +1854,7 @@ class CutToken {
         return true;
 
       if ( charStr == '.' )
-        return false;
+        return true;
 
       else
         return false;
