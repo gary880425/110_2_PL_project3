@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220617 00:48
+// 20220617 17:03
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -626,6 +626,7 @@ class CutToken {
         } // if
         else {
           mnowLine = gotID + " " + mnowLine;
+          return false;
         } // else
       } // if
       else
@@ -3998,13 +3999,12 @@ class Excute {
           } // if
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListVariable" ) ) { // 印出特定variables
+          if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
+            System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
+                                "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
+            throw new Throwable();
+          } // if
           if ( IsFuncInputOk( "ListVariable" ) ) {
-            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
-              System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
-                                  "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
-              throw new Throwable();
-            } // if
-
             if ( isPrint )
               ListVariable( mStament.get( 2 ).GetToken() );
             return true;
@@ -4017,13 +4017,12 @@ class Excute {
           } // if
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "ListFunction" ) ) {
+          if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
+            System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
+                                "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
+            throw new Throwable();
+          } // if
           if ( IsFuncInputOk( "ListFunction" ) ) {
-            if ( mStament.get( 2 ).GetToken().charAt( 0 ) != '"' ) {
-              System.out.println( "Line " + mStament.get( 2 ).Getline() + " : " +
-                                  "unexpected token : '" + mStament.get( 2 ).GetToken() + "'" );
-              throw new Throwable();
-            } // if
-
             if ( isPrint )
               ListFunction( mStament.get( 2 ).GetToken() );
             return true;
