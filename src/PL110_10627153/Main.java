@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220617 23:13
+// 20220618 01:37
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -232,8 +232,8 @@ class Global {
     */
     // Variable
     s_Variables.add( new VarList() );
-    s_Functions.add( new Function( "cout", new Vector<Variable>(), new Vector<Stament>() ) );
-    s_Functions.add( new Function( "cin", new Vector<Variable>(), new Vector<Stament>() ) );
+    // s_Functions.add( new Function( "cout", new Vector<Variable>(), new Vector<Stament>() ) );
+    // s_Functions.add( new Function( "cin", new Vector<Variable>(), new Vector<Stament>() ) );
 
   } // G_OurCInitialize()
 
@@ -746,7 +746,8 @@ class CutToken {
           if ( IsOurcComm() )
             return Buffer1HasFullCommend( stament );
           // ----------
-          IDUUDEFINED();
+          if ( ! CinCoutFirst() )
+            IDUUDEFINED();
           // VOIDTYPENOTONFIRST();
           // thisfun
           if ( gotID.equals( "do" ) || gotID.equals( "else" ) ) {
@@ -1116,6 +1117,42 @@ class CutToken {
     } // catch
 
   } // ListFunctionFirst()
+
+  private boolean CinCoutFirst() throws Throwable {
+    if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cin" ) ) {
+      GetToken();
+      if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ">>" ) ) {
+        if ( Global.G_FindVariable( Global.s_Variables, "cin" ) == null ) {
+          System.out.println( "Line " + mBuffer.get( 0 ).Getline() + " : " + "undefined identifier : '"
+                              + mBuffer.get( 0 ).GetToken() + "'" );
+          throw new Throwable();
+        } // if
+
+        return true;
+      } // if
+      else {
+        return true;
+      } // else
+    } // if
+    else if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cout" ) ) {
+      GetToken();
+      if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "<<" ) ) {
+        if ( Global.G_FindVariable( Global.s_Variables, "cout" ) == null ) {
+          System.out.println( "Line " + mBuffer.get( 0 ).Getline() + " : " + "undefined identifier : '"
+                              + mBuffer.get( 0 ).GetToken() + "'" );
+          throw new Throwable();
+        } // if
+
+        return true;
+      } // if
+      else {
+        return true;
+      } // else
+    } // else if
+    else
+      return false;
+
+  } // CinCoutFirst()
 
   protected void OPERATORFINDERROR( String gotOPERATOR ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
@@ -2124,11 +2161,11 @@ class Parser {
     try {
       int curStep = 0;
 
-      if ( Definition() ) {
+      if ( Statement() ) {
         int it = 0;
         it++;
       } // if
-      else if ( Statement() ) {
+      else if ( Definition() ) {
         int i = 0;
         i++;
       } // else if
@@ -2140,7 +2177,7 @@ class Parser {
         return true;
       } // if
 
-      while ( Definition() || Statement() ) {
+      while ( Statement() || Definition() ) {
         // m_step += 1;
         if ( IsStepEnd() ) {
           return true;
@@ -4276,6 +4313,18 @@ class Excute {
           System.out.println( "Statement executed ..." );
         return true;
       } // else if
+      else if ( mStament.get( 0 ).GetType() == Global.s_T_ID &&
+                mStament.get( 0 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) {
+        if ( Global.G_FindFunction( Global.s_Functions, mStament.get( 0 ).GetToken() ) == null ) {
+          System.out.println( "Line " + mStament.get( 0 ).Getline() + " : " + "undefined identifier : '"
+                              + mStament.get( 0 ).GetToken() + "'" );
+          throw new Throwable();
+        } // if
+
+        if ( isPrint )
+          System.out.println( "Statement executed ..." );
+        return true;
+      } // else if
       else if ( mStament.get( 0 ).GetType() == Global.s_T_TYPE ) {
         IsVarDefinOK( isPrint );
         return true;
@@ -4423,20 +4472,18 @@ class Excute {
     varName = varName.substring( 1, varName.length() - 1 ); // 刪除頭尾的'"'
     boolean stop = false;
     boolean isFind = false;
-    for ( int i = 0 ; i < Global.s_Variables.size() && ! stop ; i++ ) {
-      for ( int j = 0 ; j < Global.s_Variables.get( i ).m_Var.size() && ! stop ; j++ ) {
-        if ( Global.s_Variables.get( i ).m_Var.get( j ).GetName().equals( varName ) ) {
-          isFind = true;
-          System.out.print( Global.s_Variables.get( i ).m_Var.get( j ).GetTypeName() + " " +
-                            Global.s_Variables.get( i ).m_Var.get( j ).GetName() );
-          if ( ! Global.s_Variables.get( i ).m_Var.get( j ).IsArray() ) {
-            System.out.println( " ;" );
-          } // if
-          else {
-            System.out.println( Global.s_Variables.get( i ).m_Var.get( j ).GetArraySize() + " ;" );
-          } // else
+    for ( int j = 0 ; j < Global.s_Variables.get( 0 ).m_Var.size() && ! stop ; j++ ) {
+      if ( Global.s_Variables.get( 0 ).m_Var.get( j ).GetName().equals( varName ) ) {
+        isFind = true;
+        System.out.print( Global.s_Variables.get( 0 ).m_Var.get( j ).GetTypeName() + " " +
+                          Global.s_Variables.get( 0 ).m_Var.get( j ).GetName() );
+        if ( ! Global.s_Variables.get( 0 ).m_Var.get( j ).IsArray() ) {
+          System.out.println( " ;" );
         } // if
-      } // for
+        else {
+          System.out.println( Global.s_Variables.get( 0 ).m_Var.get( j ).GetArraySize() + " ;" );
+        } // else
+      } // if
     } // for
 
     if ( ! isFind ) {
