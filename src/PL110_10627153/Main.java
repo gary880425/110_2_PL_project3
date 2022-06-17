@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220617 18:06
+// 20220617 20:01
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -1289,14 +1289,23 @@ class CutToken {
     } // for
 
     if ( count == 0 ) {
-      if ( mBuffer.get( 0 ).GetType() == Global.s_T_IF ||
-           mBuffer.get( 0 ).GetType() == Global.s_T_WHILE ) {
-        return true;
+      if ( mBuffer.size() > 3 ) {
+        if ( mBuffer.get( 2 ).GetType() == Global.s_T_SMALL_LEFT_PAREN &&
+             mBuffer.get( 1 ).GetType() == Global.s_T_ID &&
+             ( mBuffer.get( 0 ).GetType() == Global.s_T_TYPE ||
+               mBuffer.get( 0 ).GetType() == Global.s_T_VOID ) ) {
+          return true;
+        } // if
       } // if
-      else if ( mBuffer.get( 0 ).GetType() == Global.s_T_TYPE ||
-                mBuffer.get( 0 ).GetType() == Global.s_T_VOID ) {
-        return true;
-      } // else if
+
+      if ( mBuffer.size() > 2 ) {
+        if ( mBuffer.get( 1 ).GetType() == Global.s_T_SMALL_LEFT_PAREN &&
+             ( mBuffer.get( 0 ).GetType() == Global.s_T_IF ||
+               mBuffer.get( 0 ).GetType() == Global.s_T_WHILE ) ) {
+          return true;
+        } // if
+      } // if
+
     } // if
 
     return false;
@@ -1364,12 +1373,14 @@ class CutToken {
 
         } // for
 
+        /*
         if ( ! isnnotAll0orp ) {
           System.out.println( "Error" );
           // System.out.print( "> " );
           mBuffer.clear();
           throw new Throwable();
         } // if
+        */
 
       } // if
 
@@ -2101,11 +2112,11 @@ class Parser {
     try {
       int curStep = 0;
 
-      if ( Statement() ) {
+      if ( Definition() ) {
         int it = 0;
         it++;
       } // if
-      else if ( Definition() ) {
+      else if ( Statement() ) {
         int i = 0;
         i++;
       } // else if
@@ -2117,7 +2128,7 @@ class Parser {
         return true;
       } // if
 
-      while ( Statement() || Definition() ) {
+      while ( Definition() || Statement() ) {
         // m_step += 1;
         if ( IsStepEnd() ) {
           return true;
@@ -2463,9 +2474,14 @@ class Parser {
 
           } // if
           else {
+            if ( m_statement.get( 0 ).GetType() != Global.s_T_BIG_RIGHT_PAREN ) {
+              Global.G_ClearVars();
+              throw new Throwable();
+            } // if
+
             issucess = false;
             isHave = false;
-          } // else
+          } // elseå
 
           if ( issucess ) {
             m_statement = new Vector<TOKEN>();
