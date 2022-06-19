@@ -4460,6 +4460,20 @@ class Excute {
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cin" ) ) {
           if ( IsFuncInputOk( "cin" ) ) {
+            for ( int i = 1 ; i < mStament.size() ; i += 2 ) {
+              if ( ! mStament.get( i ).GetToken().equals( ">>" ) ) {
+                System.out.println( "Line " + mStament.get( i ).Getline() + " : "
+                                    + "unexpected token : '" + mStament.get( i ).GetToken() + "'" );
+                throw new Throwable();
+              } // if
+              if ( mStament.get( i + 1 ).GetType() != Global.s_T_ID ) {
+                System.out.println( "Line " + mStament.get( i + 1 ).Getline() + " : "
+                                    + "unexpected token : '" + mStament.get( i + 1 ).GetToken() + "'" );
+                throw new Throwable();
+              } // if
+            } // for
+            return true ;
+            /*
             if ( ! mStament.get( 1 ).GetToken().equals( ">>" ) ) {
               System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
                                   + mStament.get( 1 ).GetToken() + "'" );
@@ -4467,10 +4481,12 @@ class Excute {
             } // if
             else
               return true;
+            */
           } // if
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cout" ) ) {
           if ( IsFuncInputOk( "cout" ) ) {
+
             if ( ! mStament.get( 1 ).GetToken().equals( "<<" ) ) {
               System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
                                   + mStament.get( 1 ).GetToken() + "'" );
@@ -4479,6 +4495,7 @@ class Excute {
             else
               return true;
           } // if
+
         } // else if
       } // if
 
