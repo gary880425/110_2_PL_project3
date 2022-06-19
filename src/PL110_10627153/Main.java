@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220619 16:09
+// 20220619 18:47
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -589,7 +589,7 @@ class CutToken {
   protected int mLineCount;
   protected String mnowLine;
   protected Scanner msc;
-  private boolean m_preelse = false;
+  private String m_preelseString = new String();
   private int m_preelseLine = 0;
 
   public CutToken() throws Throwable {
@@ -615,7 +615,7 @@ class CutToken {
     if ( mBuffer2 != null )
       return ReturnBuffer2Stament( stament );
 
-    int p = mLineCount;
+    int preLineCount = mLineCount;
     if ( mnowLine.isEmpty() ) {
       InputNextLineTomNowLine();
     } // if
@@ -629,19 +629,15 @@ class CutToken {
           return true;
         } // if
         else {
-          mnowLine = gotID + " " + mnowLine;
-          m_preelse = true;
-          m_preelseLine = mLineCount -p ;
+          m_preelseLine = mLineCount - preLineCount;
+          mLineCount = preLineCount;
+          m_preelseString = gotID + " " + mnowLine;
+          mnowLine = new String();
           return false;
         } // else
       } // if
       else
         return false;
-    } // if
-
-    if ( m_preelse ) {
-      m_preelse = false;
-      mLineCount = m_preelseLine;
     } // if
 
     while ( true ) {
@@ -1961,8 +1957,19 @@ class CutToken {
       msc = Global.sc;
     } // while
 
-    mnowLine = msc.nextLine();
-    mLineCount += 1;
+    if ( !m_preelseString.isEmpty() ) {
+      mnowLine = m_preelseString;
+      mLineCount = mLineCount + m_preelseLine;
+      m_preelseString = new String();
+      m_preelseLine = 0;
+      if ( mLineCount == 0 )
+        mLineCount++;
+    } // if
+    else {
+      mnowLine = msc.nextLine();
+      mLineCount += 1;
+    } // else
+
     mnowLine = RemoveCommend( mnowLine );
     RemoveHeadWhiteCherFormNowLine();
     RemoveTailWhiteCherFormNowLine();
