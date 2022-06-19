@@ -627,6 +627,7 @@ class CutToken {
         } // if
         else {
           mnowLine = gotID + " " + mnowLine;
+          mLineCount = 1;
           return false;
         } // else
       } // if
@@ -676,12 +677,13 @@ class CutToken {
           HASOTHERTOKENISERROR();
           stament.add( mBuffer.get( 0 ) );
           mBuffer.clear();
+          mLineCount = 1;
           return true;
         } // else if
         else if ( mnowLine.charAt( 0 ) == ',' ) {
           mBuffer.add( new TOKEN( ",", Global.s_T_COMMA, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
-          IsReppet();
+          // IsReppet();
         } // else if
         else if ( mnowLine.charAt( 0 ) == '?' || mnowLine.charAt( 0 ) == ':' ) {
           mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_TERNARYOPERATOR, mLineCount ) );
@@ -729,7 +731,7 @@ class CutToken {
         else if ( mnowLine.charAt( 0 ) == '=' ) {
           mBuffer.add( new TOKEN( mnowLine.substring( 0, 1 ), Global.s_T_ASSIGN, mLineCount ) );
           IsGotTokenProcessFormNowLine( 1 );
-          IsReppet();
+          // AssignFindError();
         } // else if
         else if ( IsCONSTANTInmNowLineFirst() ) {
           String gotCONSTANT;
@@ -1127,8 +1129,8 @@ class CutToken {
         throw new Throwable();
         /*
         if ( Global.G_FindVariable( Global.s_Variables, "cin" ) == null ) {
-          System.out.println( "Line " + mBuffer.get( 0 ).Getline() + " : " + "undefined identifier : '"
-                              + mBuffer.get( 0 ).GetToken() + "'" );
+          System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
+                              + mBuffer.get( 1 ).GetToken() + "'" );
           throw new Throwable();
         } // if
 
@@ -1147,8 +1149,8 @@ class CutToken {
         throw new Throwable();
         /*
         if ( Global.G_FindVariable( Global.s_Variables, "cout" ) == null ) {
-          System.out.println( "Line " + mBuffer.get( 0 ).Getline() + " : " + "undefined identifier : '"
-                              + mBuffer.get( 0 ).GetToken() + "'" );
+          System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
+                              + mBuffer.get( 1 ).GetToken() + "'" );
           throw new Throwable();
         } // if
 
@@ -1163,6 +1165,23 @@ class CutToken {
       return false;
 
   } // CinCoutFirst()
+
+  private void AssignFindError() throws Throwable {
+    if ( mBuffer.size() > 2 || mBuffer.size() == 1 ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      mBuffer.clear();
+      throw new Throwable();
+    } // if
+
+    if ( mBuffer.get( 0 ).GetType() != Global.s_T_ID ) {
+      System.out.println( "Line " + mLineCount + " : " + "unexpected token : '"
+                          + mBuffer.get( mBuffer.size() - 1 ).GetToken() + "'" );
+      mBuffer.clear();
+      throw new Throwable();
+    } // if
+
+  } // AssignFindError()
 
   protected void OPERATORFINDERROR( String gotOPERATOR ) throws Throwable {
     if ( mBuffer.size() > 1 ) {
