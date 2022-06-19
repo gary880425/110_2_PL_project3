@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220619 18:53
+// 20220619 20:16
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -4465,12 +4465,16 @@ class Excute {
                                     + "unexpected token : '" + mStament.get( i ).GetToken() + "'" );
                 throw new Throwable();
               } // if
+
               if ( mStament.get( i + 1 ).GetType() != Global.s_T_ID ) {
                 System.out.println( "Line " + mStament.get( i + 1 ).Getline() + " : "
                                     + "unexpected token : '" + mStament.get( i + 1 ).GetToken() + "'" );
                 throw new Throwable();
               } // if
-            }
+
+              if ( mStament.get( i + 2 ).GetType() == Global.s_T_MID_LEFT_PAREN )
+                i += 3;
+            } // if
           } // for
 
           return true;
@@ -4485,15 +4489,11 @@ class Excute {
           */
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cout" ) ) {
-          for ( int i = 1 ; i < mStament.size() ; i += 2 ) {
-            if ( ! mStament.get( i ).GetToken().equals( ";" ) ) {
-              if ( ! mStament.get( i ).GetToken().equals( "<<" ) ) {
-                System.out.println( "Line " + mStament.get( i ).Getline() + " : "
-                                    + "unexpected token : '" + mStament.get( i ).GetToken() + "'" );
-                throw new Throwable();
-              } // if
-            } // if
-          } // for
+          if ( ! mStament.get( 1 ).GetToken().equals( "<<" ) ) {
+            System.out.println( "Line " + mStament.get( 1 ).Getline() + " : "
+                                + "unexpected token : '" + mStament.get( 1 ).GetToken() + "'" );
+            throw new Throwable();
+          } // if
 
           /*
           if ( ! mStament.get( 1 ).GetToken().equals( "<<" ) ) {
