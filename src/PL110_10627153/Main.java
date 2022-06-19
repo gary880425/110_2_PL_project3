@@ -627,7 +627,6 @@ class CutToken {
         } // if
         else {
           mnowLine = gotID + " " + mnowLine;
-          mLineCount = 1;
           return false;
         } // else
       } // if
@@ -677,7 +676,7 @@ class CutToken {
           HASOTHERTOKENISERROR();
           stament.add( mBuffer.get( 0 ) );
           mBuffer.clear();
-          mLineCount = 1;
+          // mLineCount = 1;
           return true;
         } // else if
         else if ( mnowLine.charAt( 0 ) == ',' ) {
@@ -4896,9 +4895,11 @@ class Main {
     int isInIfWhileElse = 0;
     while ( true ) {
       Vector<TOKEN> stament = new Vector<TOKEN>();
+      cutToken.mLineCount = 1;
       // System.out.println( "main CutToken Part! " );
       try {
         if ( cutToken.Cutting( stament, false, false ) ) {
+
           Parser parser = new Parser( stament, cutToken );
           // System.out.println( "main Parser Part! " );
           if ( parser.GrammarParser() ) {
