@@ -753,7 +753,10 @@ class CutToken {
           if ( IsOurcComm() )
             return Buffer1HasFullCommend( stament );
           // ----------
-          if ( ! CinCoutFirst() )
+          if ( CinFirst() )
+            return Buffer1HasFullCommend( stament );
+
+          if ( ! CoutFirst() )
             IDUUDEFINED();
           // VOIDTYPENOTONFIRST();
           // thisfun
@@ -923,7 +926,7 @@ class CutToken {
       String gotID;
       gotID = GetIDTOETokenInmNowLine();
       DISTINGUISHANDPUSHTOKEN( gotID );
-      // IDUUDEFINED();
+      IDUUDEFINED();
       // VOIDTYPENOTONFIRST();
     } // else if
     else {
@@ -1125,28 +1128,8 @@ class CutToken {
 
   } // ListFunctionFirst()
 
-  private boolean CinCoutFirst() throws Throwable {
-    if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cin" ) ) {
-      GetToken();
-      if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ">>" ) ) {
-        System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
-                            + mBuffer.get( 1 ).GetToken() + "'" );
-        throw new Throwable();
-        /*
-        if ( Global.G_FindVariable( Global.s_Variables, "cin" ) == null ) {
-          System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
-                              + mBuffer.get( 1 ).GetToken() + "'" );
-          throw new Throwable();
-        } // if
-
-        return true;
-        */
-      } // if
-      else {
-        return true;
-      } // else
-    } // if
-    else if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cout" ) ) {
+  private boolean CoutFirst() throws Throwable {
+    if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cout" ) ) {
       GetToken();
       if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "<<" ) ) {
         System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
@@ -1165,11 +1148,64 @@ class CutToken {
       else {
         return true;
       } // else
-    } // else if
+    } // if
     else
       return false;
 
-  } // CinCoutFirst()
+  } // CoutFirst()
+
+  private boolean CinFirst() throws Throwable {
+    if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cin" ) ) {
+      GetToken();
+      while ( true ) {
+        if ( mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ";" ) ) {
+          return true;
+        } // if
+        else {
+          if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ">>" ) ) {
+            System.out.println( "Line " + mBuffer.get( mBuffer.size() - 1 ).Getline() + " : " +
+                                "unexpected token : '" + mBuffer.get( mBuffer.size() - 1 ).GetToken() +
+                                "'" );
+            throw new Throwable();
+          } // if
+
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetType() != Global.s_T_ID ) {
+            System.out.println( "Line " + mBuffer.get( mBuffer.size() - 1 ).Getline() + " : "
+                                + "unexpected token : '" + mBuffer.get( mBuffer.size() - 1 ).GetToken()
+                                + "'" );
+            throw new Throwable();
+          } // if
+
+          GetToken();
+          if ( mBuffer.get( mBuffer.size() - 1 ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
+            GetToken();
+            if ( mBuffer.get( mBuffer.size() - 1 ).GetType() != Global.s_T_CONSTANT &&
+                 mBuffer.get( mBuffer.size() - 1 ).GetType() != Global.s_T_ID ) {
+              System.out.println( "Line " + mBuffer.get( mBuffer.size() - 1 ).Getline() + " : "
+                                  + "unexpected token : '" + mBuffer.get( mBuffer.size() - 1 ).GetToken()
+                                  + "'" );
+              throw new Throwable();
+            } // if
+
+            GetToken();
+            if ( mBuffer.get( mBuffer.size() - 1 ).GetType() != Global.s_T_MID_RIGHT_PAREN ) {
+              System.out.println( "Line " + mBuffer.get( mBuffer.size() - 1 ).Getline() + " : "
+                                  + "unexpected token : '" + mBuffer.get( mBuffer.size() - 1 ).GetToken()
+                                  + "'" );
+              throw new Throwable();
+            } // if
+
+            GetToken();
+          } // if
+
+        } // else
+      } // while
+    } // if
+    else
+      return false;
+
+  } // CinFirst()
 
   private void AssignFindError() throws Throwable {
     if ( mBuffer.size() > 2 || mBuffer.size() == 1 ) {
@@ -2246,11 +2282,11 @@ class Parser {
           if ( Function_Definition_Without_ID() )
             return true;
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // if
       else if ( Type_Specifier() ) {
@@ -2261,11 +2297,11 @@ class Parser {
             return true;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else {
@@ -2320,11 +2356,11 @@ class Parser {
             m_step += 1;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // if
 
@@ -2340,16 +2376,16 @@ class Parser {
                 m_step += 1;
               } // if
               else {
-                return false;
+                throw new Throwable() ;
               } // else
             } // if
             else {
-              return false;
+              throw new Throwable() ;
             } // else
           } // if
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // while
 
@@ -2359,7 +2395,7 @@ class Parser {
         return true;
       } // if
       else {
-        return false;
+        throw new Throwable() ;
       } // else
     } // try
     catch ( Throwable throwable ) {
@@ -2383,7 +2419,7 @@ class Parser {
         } // else if
 
         if ( ! ( m_statement.get( m_step ).GetType() == Global.s_T_SMALL_RIGHT_PAREN ) )
-          return false;
+          throw new Throwable() ;
         else
           m_step++;
 
@@ -2474,7 +2510,7 @@ class Parser {
       if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) // ID
         m_step += 1;
       else
-        return false;
+        throw new Throwable() ;
 
       if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
         m_step += 1;
@@ -2482,24 +2518,24 @@ class Parser {
           m_step += 1;
         } // if
         else
-          return false;
+          throw new Throwable() ;
         if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_RIGHT_PAREN ) {
           m_step += 1;
         } // if
         else
-          return false;
+          throw new Throwable() ;
       } // if
 
       while ( m_statement.get( m_step ).GetType() == Global.s_T_COMMA ) {
         m_step += 1;
         if ( ! Type_Specifier() )
-          return false;
+          throw new Throwable() ;
         if ( m_statement.get( m_step ).GetToken().equals( "&" ) )
           m_step += 1;
         if ( m_statement.get( m_step ).GetType() == Global.s_T_ID ) // ID
           m_step += 1;
         else
-          return false;
+          throw new Throwable() ;
 
         if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_LEFT_PAREN ) {
           m_step += 1;
@@ -2507,12 +2543,12 @@ class Parser {
             m_step += 1;
           } // if
           else
-            return false;
+            throw new Throwable() ;
           if ( m_statement.get( m_step ).GetType() == Global.s_T_MID_RIGHT_PAREN ) {
             m_step += 1;
           } // if
           else
-            return false;
+            throw new Throwable() ;
         } // if
       } // while
 
@@ -2595,7 +2631,7 @@ class Parser {
         } // if
         else {
           Global.s_Variables.remove( Global.s_Variables.size() - 1 );
-          return false;
+          throw new Throwable() ;
         } // else
       } // if
       else {
@@ -2617,11 +2653,11 @@ class Parser {
             return true;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // if
       else {
@@ -2648,7 +2684,7 @@ class Parser {
           return true;
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).GetToken().equals( "return" ) ) {
@@ -2660,7 +2696,7 @@ class Parser {
           return true;
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( Compound_Statement() ) {
@@ -2727,15 +2763,15 @@ class Parser {
               } // else
             } // if
             else {
-              return false;
+              throw new Throwable() ;
             } // else
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).GetType() == Global.s_T_WHILE ) {
@@ -2755,22 +2791,22 @@ class Parser {
                   return true;
                 } // if
                 else {
-                  return false;
+                  throw new Throwable() ;
                 } // else
               } // if
               else
-                return false;
+                throw new Throwable() ;
             } // if
             else {
-              return false;
+              throw new Throwable() ;
             } // else
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).GetType() == Global.s_T_DO ) {
@@ -3112,7 +3148,7 @@ class Parser {
           ;
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
 
         if ( IsStepEnd() ) {
@@ -3135,7 +3171,7 @@ class Parser {
           return true;
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // if
       else if ( m_statement.get( m_step ).GetToken().equals( "++" ) ||
@@ -3147,11 +3183,11 @@ class Parser {
             return true;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( Sign() ) {
@@ -3166,11 +3202,11 @@ class Parser {
             return true;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).GetType() == Global.s_T_CONSTANT ) { // Constant
@@ -3179,7 +3215,7 @@ class Parser {
           return true;
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else if ( m_statement.get( m_step ).GetToken().equals( "(" ) &&
@@ -3194,15 +3230,15 @@ class Parser {
               return true;
             } // if
             else {
-              return false;
+              throw new Throwable() ;
             } // else
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // else if
       else {
@@ -3219,19 +3255,19 @@ class Parser {
       if ( m_statement.get( m_step ).GetToken().equals( "[" ) ) {
         m_step += 1;
         if ( ! Expression() ) {
-          return false;
+          throw new Throwable() ;
         } // if
 
         if ( m_statement.get( m_step ).GetToken().equals( "]" ) ) {
           m_step += 1;
         } // if
         else
-          return false;
+          throw new Throwable() ;
       } // if
 
       if ( Assignment_Operator() ) {
         if ( ! Basic_Expression() )
-          return false;
+          throw new Throwable() ;
         else
           return true;
       } // if
@@ -3239,7 +3275,7 @@ class Parser {
                 m_statement.get( m_step ).GetToken().equals( "--" ) ) {
         m_step += 1;
         if ( ! Romce_and_Romloe() )
-          return false; // print error
+          throw new Throwable() ; // print error
         else
           return true;
       } // else if
@@ -3247,21 +3283,21 @@ class Parser {
         m_step += 1;
         Actual_Parameter_List();
         if ( ! m_statement.get( m_step ).GetToken().equals( ")" ) )
-          return false;
+          throw new Throwable() ;
         else
           m_step += 1;
 
         if ( Romce_and_Romloe() )
           return true;
         else
-          return false;
+          throw new Throwable() ;
 
       } // else if
       else if ( Romce_and_Romloe() ) {
         return true;
       } // else if
       else
-        return false;
+        throw new Throwable() ;
 
     } // try
     catch ( Throwable throwable ) {
@@ -3281,11 +3317,11 @@ class Parser {
             m_step += 1;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
         } // if
         else {
-          return false;
+          throw new Throwable() ;
         } // else
       } // if
 
@@ -3330,7 +3366,7 @@ class Parser {
             // m_step += 1;
           } // if
           else {
-            return false;
+            throw new Throwable() ;
           } // else
 
           if ( IsStepEnd() ) {
@@ -4253,7 +4289,7 @@ class Parser {
                 return true;
               } // if
 
-              return false;
+              return true;
             } // if
             else {
               return false;
@@ -4458,6 +4494,7 @@ class Excute {
           return true;
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cin" ) ) {
+          /*
           for ( int i = 1 ; i < mStament.size() ; i += 2 ) {
             if ( ! mStament.get( i ).GetToken().equals( ";" ) ) {
               if ( ! mStament.get( i ).GetToken().equals( ">>" ) ) {
@@ -4476,6 +4513,8 @@ class Excute {
                 i += 3;
             } // if
           } // for
+
+          */
 
           return true;
           /*
