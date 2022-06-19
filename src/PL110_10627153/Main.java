@@ -1,5 +1,5 @@
 package PL110_10627153;
-// 20220618 01:37
+// 20220619 16:09
 
 import java.util.Scanner;
 import java.util.Vector;
@@ -589,6 +589,8 @@ class CutToken {
   protected int mLineCount;
   protected String mnowLine;
   protected Scanner msc;
+  private boolean m_preelse = false;
+  private int m_preelseLine = 0;
 
   public CutToken() throws Throwable {
 
@@ -613,10 +615,6 @@ class CutToken {
     if ( mBuffer2 != null )
       return ReturnBuffer2Stament( stament );
 
-    if ( mnowLine.isEmpty() ) {
-      InputNextLineTomNowLine();
-    } // if
-
     if ( wontelse ) {
       if ( IsIDInmNowLineFirst() ) {
         String gotID;
@@ -627,11 +625,22 @@ class CutToken {
         } // if
         else {
           mnowLine = gotID + " " + mnowLine;
+          m_preelse = true;
+          m_preelseLine = mLineCount;
           return false;
         } // else
       } // if
       else
         return false;
+    } // if
+
+    if ( mnowLine.isEmpty() ) {
+      InputNextLineTomNowLine();
+    } // if
+
+    if ( m_preelse ) {
+      m_preelse = false;
+      mLineCount = m_preelseLine;
     } // if
 
     while ( true ) {
