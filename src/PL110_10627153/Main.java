@@ -615,6 +615,11 @@ class CutToken {
     if ( mBuffer2 != null )
       return ReturnBuffer2Stament( stament );
 
+    int p = mLineCount;
+    if ( mnowLine.isEmpty() ) {
+      InputNextLineTomNowLine();
+    } // if
+
     if ( wontelse ) {
       if ( IsIDInmNowLineFirst() ) {
         String gotID;
@@ -626,16 +631,12 @@ class CutToken {
         else {
           mnowLine = gotID + " " + mnowLine;
           m_preelse = true;
-          m_preelseLine = mLineCount;
+          m_preelseLine = mLineCount -p ;
           return false;
         } // else
       } // if
       else
         return false;
-    } // if
-
-    if ( mnowLine.isEmpty() ) {
-      InputNextLineTomNowLine();
     } // if
 
     if ( m_preelse ) {
