@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="HsiaNB50Lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/HsiaNB50Lib.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
