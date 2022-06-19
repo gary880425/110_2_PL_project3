@@ -1122,6 +1122,10 @@ class CutToken {
     if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cin" ) ) {
       GetToken();
       if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( ">>" ) ) {
+        System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
+                            + mBuffer.get( 1 ).GetToken() + "'" );
+        throw new Throwable();
+        /*
         if ( Global.G_FindVariable( Global.s_Variables, "cin" ) == null ) {
           System.out.println( "Line " + mBuffer.get( 0 ).Getline() + " : " + "undefined identifier : '"
                               + mBuffer.get( 0 ).GetToken() + "'" );
@@ -1129,6 +1133,7 @@ class CutToken {
         } // if
 
         return true;
+        */
       } // if
       else {
         return true;
@@ -1137,6 +1142,10 @@ class CutToken {
     else if ( mBuffer.size() == 1 && mBuffer.get( 0 ).GetToken().equals( "cout" ) ) {
       GetToken();
       if ( ! mBuffer.get( mBuffer.size() - 1 ).GetToken().equals( "<<" ) ) {
+        System.out.println( "Line " + mBuffer.get( 1 ).Getline() + " : " + "unexpected token : '"
+                            + mBuffer.get( 1 ).GetToken() + "'" );
+        throw new Throwable();
+        /*
         if ( Global.G_FindVariable( Global.s_Variables, "cout" ) == null ) {
           System.out.println( "Line " + mBuffer.get( 0 ).Getline() + " : " + "undefined identifier : '"
                               + mBuffer.get( 0 ).GetToken() + "'" );
@@ -1144,6 +1153,7 @@ class CutToken {
         } // if
 
         return true;
+        */
       } // if
       else {
         return true;
