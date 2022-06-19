@@ -1957,7 +1957,7 @@ class CutToken {
       msc = Global.sc;
     } // while
 
-    if ( !m_preelseString.isEmpty() ) {
+    if ( ! m_preelseString.isEmpty() ) {
       mnowLine = m_preelseString;
       mLineCount = mLineCount + m_preelseLine;
       m_preelseString = new String();
@@ -4431,8 +4431,7 @@ class Excute {
 
   private boolean IsFuncCommand( boolean isPrint ) throws Throwable {
     try {
-      if ( mStament.get( 0 ).GetType() == Global.s_T_ID &&
-           mStament.get( 1 ).GetType() == Global.s_T_SMALL_LEFT_PAREN ) { // 判斷是否為function執行
+      if ( mStament.get( 0 ).GetType() == Global.s_T_ID ) { // 判斷是否為function執行
         if ( mStament.get( 0 ).GetToken().equals( "Done" ) ) { // 程式結束
 
           System.out.println( "Our-C exited ..." );
@@ -4459,42 +4458,37 @@ class Excute {
           return true;
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cin" ) ) {
-          if ( IsFuncInputOk( "cin" ) ) {
-            for ( int i = 1 ; i < mStament.size() ; i += 2 ) {
-              if ( ! mStament.get( i ).GetToken().equals( ">>" ) ) {
-                System.out.println( "Line " + mStament.get( i ).Getline() + " : "
-                                    + "unexpected token : '" + mStament.get( i ).GetToken() + "'" );
-                throw new Throwable();
-              } // if
-              if ( mStament.get( i + 1 ).GetType() != Global.s_T_ID ) {
-                System.out.println( "Line " + mStament.get( i + 1 ).Getline() + " : "
-                                    + "unexpected token : '" + mStament.get( i + 1 ).GetToken() + "'" );
-                throw new Throwable();
-              } // if
-            } // for
-            return true ;
-            /*
-            if ( ! mStament.get( 1 ).GetToken().equals( ">>" ) ) {
-              System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
-                                  + mStament.get( 1 ).GetToken() + "'" );
+          for ( int i = 1 ; i < mStament.size() ; i += 2 ) {
+            if ( ! mStament.get( i ).GetToken().equals( ">>" ) ) {
+              System.out.println( "Line " + mStament.get( i ).Getline() + " : "
+                                  + "unexpected token : '" + mStament.get( i ).GetToken() + "'" );
               throw new Throwable();
             } // if
-            else
-              return true;
-            */
+            if ( mStament.get( i + 1 ).GetType() != Global.s_T_ID ) {
+              System.out.println( "Line " + mStament.get( i + 1 ).Getline() + " : "
+                                  + "unexpected token : '" + mStament.get( i + 1 ).GetToken() + "'" );
+              throw new Throwable();
+            } // if
+          } // for
+          return true;
+          /*
+          if ( ! mStament.get( 1 ).GetToken().equals( ">>" ) ) {
+            System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
+                                + mStament.get( 1 ).GetToken() + "'" );
+            throw new Throwable();
           } // if
+          else
+            return true;
+          */
         } // else if
         else if ( mStament.get( 0 ).GetToken().equals( "cout" ) ) {
-          if ( IsFuncInputOk( "cout" ) ) {
-
-            if ( ! mStament.get( 1 ).GetToken().equals( "<<" ) ) {
-              System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
-                                  + mStament.get( 1 ).GetToken() + "'" );
-              throw new Throwable();
-            } // if
-            else
-              return true;
+          if ( ! mStament.get( 1 ).GetToken().equals( "<<" ) ) {
+            System.out.println( "Line " + mStament.get( 1 ).Getline() + " : " + "unexpected token : '"
+                                + mStament.get( 1 ).GetToken() + "'" );
+            throw new Throwable();
           } // if
+          else
+            return true;
 
         } // else if
       } // if
